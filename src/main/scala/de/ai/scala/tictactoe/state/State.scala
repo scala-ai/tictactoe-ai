@@ -1,5 +1,7 @@
 package de.ai.scala.tictactoe.state
 
-trait State {
+import org.nd4j.linalg.api.ndarray.INDArray
 
+trait State {
+  def getStateAsVector: INDArray
 }
