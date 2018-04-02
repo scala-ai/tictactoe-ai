@@ -1,6 +1,9 @@
 package de.ai.scala.tictactoe.learning.state
 
-import de.ai.scala.tictactoe.model.TicTacToePlayground
+import de.ai.scala.tictactoe.model.CircleField
+import de.ai.scala.tictactoe.model.CrossField
+import de.ai.scala.tictactoe.model.EmptyField
+import de.ai.scala.tictactoe.model.Playground
 import org.nd4j.linalg.factory.Nd4j
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers
@@ -10,13 +13,13 @@ class TicTacToeStateTest extends FreeSpec with Matchers {
   "A state" - {
     "should return an n-dimensional array" - {
       "for a two-dimensional 5x5 playground" in {
-        val playground = TicTacToePlayground(
+        val playground = Playground(
           Vector(
-            1.0, 0.0, -1.0, 1.0, -1.0,
-            1.0, 0.0, -1.0, 0.0, -1.0,
-            1.0, 0.0, 0.0, 0.0, -1.0,
-            1.0, 0.0, -1.0, 0.0, -1.0,
-            1.0, 1.0, -1.0, 1.0, -1.0
+            CrossField(), EmptyField(), CircleField(), CrossField(), CircleField(),
+            CrossField(), EmptyField(), CircleField(), EmptyField(), CircleField(),
+            CrossField(), EmptyField(), EmptyField(), EmptyField(), CircleField(),
+            CrossField(), EmptyField(), CircleField(), EmptyField(), CircleField(),
+            CrossField(), CrossField(), CircleField(), CrossField(), CircleField()
           ),
           (5, 5)
         )
