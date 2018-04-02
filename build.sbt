@@ -12,3 +12,5 @@ libraryDependencies += "org.deeplearning4j" % "rl4j-core" % "0.9.1"
 // ND4J backend. You need one in every DL4J project. Normally define artifactId as
 // either "nd4j-native-platform" or "nd4j-cuda-7.5-platform"
 libraryDependencies += "org.nd4j" % "nd4j-native-platform" % "0.9.1"
+
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % "test"
