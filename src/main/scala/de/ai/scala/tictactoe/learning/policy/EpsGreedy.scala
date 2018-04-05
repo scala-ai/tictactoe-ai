@@ -2,9 +2,11 @@ package de.ai.scala.tictactoe.learning.policy
 
 import scala.util.Random
 
+import de.ai.scala.tictactoe.learning.action.Action
 import de.ai.scala.tictactoe.learning.action.ActionSpace
+import de.ai.scala.tictactoe.learning.state.State
 
-case class EpsGreedy[S, A](
+case class EpsGreedy[S <: State, A <: Action](
     epoch: Long,
     random: Random,
     minEpsilon: Float,
