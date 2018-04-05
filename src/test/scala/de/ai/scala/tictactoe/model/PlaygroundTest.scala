@@ -18,10 +18,10 @@ class PlaygroundTest extends FreeSpec with Matchers {
         println(mapToCoordinate)
 
         mapToCoordinate.size shouldBe 4
-        mapToCoordinate should contain(((0, 0), EmptyField()))
-        mapToCoordinate should contain(((0, 1), CircleField()))
-        mapToCoordinate should contain(((1, 0), CrossField()))
-        mapToCoordinate should contain(((1, 1), EmptyField()))
+        mapToCoordinate should contain((Coordinate(0, 0), EmptyField()))
+        mapToCoordinate should contain((Coordinate(1, 0), CircleField()))
+        mapToCoordinate should contain((Coordinate(0, 1), CrossField()))
+        mapToCoordinate should contain((Coordinate(1, 1), EmptyField()))
       }
     }
   }

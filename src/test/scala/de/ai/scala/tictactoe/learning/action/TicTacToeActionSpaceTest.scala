@@ -2,6 +2,7 @@ package de.ai.scala.tictactoe.learning.action
 
 import de.ai.scala.tictactoe.learning.state.TicTacToeState
 import de.ai.scala.tictactoe.model.CircleField
+import de.ai.scala.tictactoe.model.Coordinate
 import de.ai.scala.tictactoe.model.CrossField
 import de.ai.scala.tictactoe.model.EmptyField
 import de.ai.scala.tictactoe.model.Playground
@@ -25,14 +26,14 @@ class TicTacToeActionSpaceTest extends FreeSpec with Matchers {
       val ticTacToeState = TicTacToeState(playground)
       val possibleActions = TicTacToeActionSpace().getPossibleActions(ticTacToeState)
       possibleActions.size shouldBe 8
-      possibleActions should contain(TicTacToeAction((0, 1)))
-      possibleActions should contain(TicTacToeAction((1, 1)))
-      possibleActions should contain(TicTacToeAction((1, 3)))
-      possibleActions should contain(TicTacToeAction((2, 1)))
-      possibleActions should contain(TicTacToeAction((2, 2)))
-      possibleActions should contain(TicTacToeAction((2, 3)))
-      possibleActions should contain(TicTacToeAction((3, 1)))
-      possibleActions should contain(TicTacToeAction((3, 3)))
+      possibleActions should contain(TicTacToeAction(Coordinate(1, 0)))
+      possibleActions should contain(TicTacToeAction(Coordinate(1, 1)))
+      possibleActions should contain(TicTacToeAction(Coordinate(3, 1)))
+      possibleActions should contain(TicTacToeAction(Coordinate(1, 2)))
+      possibleActions should contain(TicTacToeAction(Coordinate(2, 2)))
+      possibleActions should contain(TicTacToeAction(Coordinate(3, 2)))
+      possibleActions should contain(TicTacToeAction(Coordinate(1, 3)))
+      possibleActions should contain(TicTacToeAction(Coordinate(3, 3)))
     }
   }
 
