@@ -13,4 +13,8 @@ libraryDependencies += "org.deeplearning4j" % "rl4j-core" % "0.9.1"
 // either "nd4j-native-platform" or "nd4j-cuda-7.5-platform"
 libraryDependencies += "org.nd4j" % "nd4j-native-platform" % "0.9.1"
 
+// json formatting
+libraryDependencies +=  "com.typesafe.play" %% "play-json" % "2.6.8"
+
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % "test"
+
