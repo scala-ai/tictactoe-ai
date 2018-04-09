@@ -1,9 +1,7 @@
 package de.ai.scala.tictactoe.learning.state
 
-import de.ai.scala.tictactoe.model.CircleField
-import de.ai.scala.tictactoe.model.CrossField
-import de.ai.scala.tictactoe.model.EmptyField
 import de.ai.scala.tictactoe.model.Playground
+import de.ai.scala.tictactoe.model.Field
 import org.nd4j.linalg.factory.Nd4j
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers
@@ -15,11 +13,11 @@ class TicTacToeStateTest extends FreeSpec with Matchers {
       "for a two-dimensional 5x5 playground" in {
         val playground = Playground(
           Vector(
-            CrossField(), EmptyField(), CircleField(), CrossField(), CircleField(),
-            CrossField(), EmptyField(), CircleField(), EmptyField(), CircleField(),
-            CrossField(), EmptyField(), EmptyField(), EmptyField(), CircleField(),
-            CrossField(), EmptyField(), CircleField(), EmptyField(), CircleField(),
-            CrossField(), CrossField(), CircleField(), CrossField(), CircleField()
+            Field.Cross(), Field.Empty(), Field.Circle(), Field.Cross(), Field.Circle(),
+            Field.Cross(), Field.Empty(), Field.Circle(), Field.Empty(), Field.Circle(),
+            Field.Cross(), Field.Empty(), Field.Empty(), Field.Empty(), Field.Circle(),
+            Field.Cross(), Field.Empty(), Field.Circle(), Field.Empty(), Field.Circle(),
+            Field.Cross(), Field.Cross(), Field.Circle(), Field.Cross(), Field.Circle()
           ),
           (5, 5)
         )
