@@ -9,7 +9,7 @@ case class TicTacToeState(
 ) extends State {
   override def getStateAsVector: INDArray = {
     val values = playground.values.toArray.map(_.asDoubleVal())
-    val shape = Array(playground.size._1, playground.size._2)
+    val shape = Array(playground.dimensions, playground.dimensions)
     val order = 'c'
     Nd4j.create(values, shape, order)
   }

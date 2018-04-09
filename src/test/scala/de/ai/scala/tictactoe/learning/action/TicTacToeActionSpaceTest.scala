@@ -1,8 +1,8 @@
 package de.ai.scala.tictactoe.learning.action
 
+import de.ai.scala.tictactoe.model
 import de.ai.scala.tictactoe.learning.state.TicTacToeState
 import de.ai.scala.tictactoe.model.Coordinate
-import de.ai.scala.tictactoe.model.Playground
 import de.ai.scala.tictactoe.model.Field
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers
@@ -11,14 +11,14 @@ class TicTacToeActionSpaceTest extends FreeSpec with Matchers {
 
   "An action space" - {
     "should list all empty fields in a given playground as action" in {
-      val playground = Playground(
+      val playground = model.Playground(
         Vector(
-          Field.Cross(), Field.Empty(), Field.Circle(), Field.Cross(), Field.Circle(),
-          Field.Cross(), Field.Empty(), Field.Circle(), Field.Empty(), Field.Circle(),
-          Field.Cross(), Field.Empty(), Field.Empty(), Field.Empty(), Field.Circle(),
-          Field.Cross(), Field.Empty(), Field.Circle(), Field.Empty(), Field.Circle()
+          Field.Cross, Field.Empty, Field.Circle, Field.Cross,
+          Field.Cross, Field.Empty, Field.Circle, Field.Empty,
+          Field.Cross, Field.Empty, Field.Empty, Field.Empty,
+          Field.Cross, Field.Empty, Field.Circle, Field.Empty,
         ),
-        (4, 5)
+        4
       )
 
       val ticTacToeState = TicTacToeState(playground)

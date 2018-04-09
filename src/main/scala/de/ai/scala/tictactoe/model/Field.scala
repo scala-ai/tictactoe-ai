@@ -5,15 +5,15 @@ sealed trait Field {
 }
 
 object Field {
-  case class Circle() extends Field {
+  case object Circle extends Field {
     override def asDoubleVal(): Double = -1.0
   }
 
-  case class Cross() extends Field {
+  case object Cross extends Field {
     override def asDoubleVal(): Double = 1.0
   }
 
-  case class Empty() extends Field {
+  case object Empty extends Field {
     override def asDoubleVal(): Double = 0.0
   }
 }

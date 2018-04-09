@@ -13,13 +13,13 @@ class TicTacToeStateTest extends FreeSpec with Matchers {
       "for a two-dimensional 5x5 playground" in {
         val playground = Playground(
           Vector(
-            Field.Cross(), Field.Empty(), Field.Circle(), Field.Cross(), Field.Circle(),
-            Field.Cross(), Field.Empty(), Field.Circle(), Field.Empty(), Field.Circle(),
-            Field.Cross(), Field.Empty(), Field.Empty(), Field.Empty(), Field.Circle(),
-            Field.Cross(), Field.Empty(), Field.Circle(), Field.Empty(), Field.Circle(),
-            Field.Cross(), Field.Cross(), Field.Circle(), Field.Cross(), Field.Circle()
+            Field.Cross, Field.Empty, Field.Circle, Field.Cross, Field.Circle,
+            Field.Cross, Field.Empty, Field.Circle, Field.Empty, Field.Circle,
+            Field.Cross, Field.Empty, Field.Empty, Field.Empty, Field.Circle,
+            Field.Cross, Field.Empty, Field.Circle, Field.Empty, Field.Circle,
+            Field.Cross, Field.Cross, Field.Circle, Field.Cross, Field.Circle,
           ),
-          (5, 5)
+          5
         )
         val state = TicTacToeState(playground)
         val stateAsVector = state.getStateAsVector

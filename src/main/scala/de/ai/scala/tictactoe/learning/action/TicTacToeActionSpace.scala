@@ -7,7 +7,7 @@ case class TicTacToeActionSpace() extends ActionSpace[TicTacToeState, TicTacToeA
   override def getPossibleActions(state: TicTacToeState): Set[TicTacToeAction] = {
     val allFields = state.playground.mapToCoordinate
     allFields.collect({
-      case (coordinate, Field.Empty()) => coordinate
+      case (coordinate, Field.Empty) => coordinate
     }).map(TicTacToeAction)
   }
 }
