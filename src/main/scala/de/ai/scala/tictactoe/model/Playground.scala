@@ -4,7 +4,7 @@ case class Playground(
     values: Vector[Field],
     dimensions: Int,
 ) {
-  def mapToCoordinate: Set[(Coordinate, Field)] = {
+  def mapToCoordinate: List[(Coordinate, Field)] = {
     (0 until dimensions).flatMap(row =>
       (0 until dimensions).map(col =>
         (Coordinate(col, row), values(row * dimensions + col))
