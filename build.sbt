@@ -14,7 +14,9 @@ libraryDependencies += "org.deeplearning4j" % "rl4j-core" % "0.9.1"
 libraryDependencies += "org.nd4j" % "nd4j-native-platform" % "0.9.1"
 
 // json formatting
-libraryDependencies +=  "com.typesafe.play" %% "play-json" % "2.6.8"
+libraryDependencies += "com.typesafe.play" %% "play-json" % "2.6.8"
 
-libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % "test"
+// testing
+libraryDependencies += "org.scalamock" %% "scalamock" % "4.1.0" % Test
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test
 
