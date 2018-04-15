@@ -14,22 +14,83 @@ import org.scalatest.Matchers
 
 class EpsGreedyTest extends FreeSpec with Matchers with MockFactory {
 
+  val playground = Playground(
+    Vector(Field.Empty, Field.Empty, Field.Cross, Field.Empty),
+    dimensions = 2
+  )
+  val actionSpace = TicTacToeActionSpace()
+
   "An eps greedy impl" - {
-    "in initial state should" - {
-      "return a random action" in {
+    "epoch 1 of 2 should" - {
+      "return a random action if rand = 0.5" in {
         val mockedRandom = mock[Random]
-        (mockedRandom.nextFloat _).expects().returns(1)
+        (mockedRandom.nextFloat _).expects().returns(0.5.toFloat)
         (mockedRandom.nextInt(_: Int)).expects(3).returns(2)
-        val playground = Playground(
-          Vector(Field.Empty, Field.Empty, Field.Cross, Field.Empty),
-          dimensions = 2
+
+        val greedy = EpsGreedy[TicTacToeState, TicTacToeAction](
+          epoch = 1,
+          random = mockedRandom,
+          minEpsilon = 0,
+          epsilonNbEpoch = 2,
+          actionSpace = actionSpace,
+          actionSupplier = (_, _) => {
+            fail("Action supplier should not be called!")
+          }
         )
-        val actionSpace = TicTacToeActionSpace()
+
+        val action = greedy.nextAction(TicTacToeState(playground))
+        action shouldBe TicTacToeAction(Coordinate(1, 1))
+      }
+      "return a best action if rand = 0.6" in {
+        val mockedRandom = mock[Random]
+        (mockedRandom.nextFloat _).expects().returns(0.6.toFloat)
+
+        val greedy = EpsGreedy[TicTacToeState, TicTacToeAction](
+          epoch = 1,
+          random = mockedRandom,
+          minEpsilon = 0,
+          epsilonNbEpoch = 2,
+          actionSpace = actionSpace,
+          actionSupplier = (_, _) => {
+            TicTacToeAction(Coordinate(0, 1))
+          }
+        )
+
+        val action = greedy.nextAction(TicTacToeState(playground))
+        action shouldBe TicTacToeAction(Coordinate(0, 1))
+      }
+    }
+    "epoch 2 of 2 should" - {
+      "return a best action in nearly every case even if rand = 0.99999" in {
+        val mockedRandom = mock[Random]
+        (mockedRandom.nextFloat _).expects().returns(0.99999.toFloat)
+
+        val greedy = EpsGreedy[TicTacToeState, TicTacToeAction](
+          epoch = 2,
+          random = mockedRandom,
+          minEpsilon = 0,
+          epsilonNbEpoch = 2,
+          actionSpace = actionSpace,
+          actionSupplier = (_, _) => {
+            TicTacToeAction(Coordinate(0, 1))
+          }
+        )
+
+        val action = greedy.nextAction(TicTacToeState(playground))
+        action shouldBe TicTacToeAction(Coordinate(0, 1))
+      }
+    }
+    "epoch 0 of 2 should" - {
+      "return a random action in every case even if rand = 0" in {
+        val mockedRandom = mock[Random]
+        (mockedRandom.nextFloat _).expects().returns(1.toFloat)
+        (mockedRandom.nextInt(_: Int)).expects(3).returns(2)
+
         val greedy = EpsGreedy[TicTacToeState, TicTacToeAction](
           epoch = 0,
           random = mockedRandom,
           minEpsilon = 0,
-          epsilonNbEpoch = 0,
+          epsilonNbEpoch = 2,
           actionSpace = actionSpace,
           actionSupplier = (_, _) => {
             fail("Action supplier should not be called!")
