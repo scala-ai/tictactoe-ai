@@ -1,7 +1,7 @@
-package de.gameLogic.model.format
+package de.ai.htwg.tictactoe.gameLogic.model.format
 
 
-import de.gameLogic.model.Player
+import de.ai.htwg.tictactoe.gameLogic.model.Player
 import play.api.libs.json.JsValue
 import play.api.libs.json.JsResult
 import play.api.libs.json.Format

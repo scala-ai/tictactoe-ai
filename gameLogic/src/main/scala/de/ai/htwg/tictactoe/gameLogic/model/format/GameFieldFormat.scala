@@ -1,8 +1,8 @@
-package de.gameLogic.model.format
+package de.ai.htwg.tictactoe.gameLogic.model.format
 
-import de.gameLogic.model.GameField
-import de.gameLogic.model.Player
-import de.gameLogic.model.GridPosition
+import de.ai.htwg.tictactoe.gameLogic.model.GameField
+import de.ai.htwg.tictactoe.gameLogic.model.Player
+import de.ai.htwg.tictactoe.gameLogic.model.GridPosition
 import play.api.libs.json.OFormat
 import play.api.libs.json.JsObject
 import play.api.libs.json.JsValue

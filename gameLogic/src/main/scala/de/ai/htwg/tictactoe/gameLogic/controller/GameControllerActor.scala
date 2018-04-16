@@ -1,16 +1,16 @@
-package de.gameLogic.controller
+package de.ai.htwg.tictactoe.gameLogic.controller
 
 import akka.actor.Actor
 import akka.actor.Props
-import de.gameLogic.model.SelectPosition
-import de.gameLogic.model.Player
-import de.gameLogic.model.GameField
-import de.gameLogic.model.SelectPositionAck
-import de.gameLogic.model.SelectPositionAck.SelectPositionReturnCode.NotThisPlayersTurn
-import de.gameLogic.model.SelectPositionAck.SelectPositionReturnCode.PositionAlreadySelected
-import de.gameLogic.model.SelectPositionAck.SelectPositionReturnCode.GameAlreadyFinished
-import de.gameLogic.model.SelectPositionAck.SelectPositionReturnCode.GameWon
-import de.gameLogic.model.SelectPositionAck.SelectPositionReturnCode.PositionSet
+import de.ai.htwg.tictactoe.gameLogic.model.SelectPosition
+import de.ai.htwg.tictactoe.gameLogic.model.Player
+import de.ai.htwg.tictactoe.gameLogic.model.GameField
+import de.ai.htwg.tictactoe.gameLogic.model.SelectPositionAck
+import de.ai.htwg.tictactoe.gameLogic.model.SelectPositionAck.SelectPositionReturnCode.NotThisPlayersTurn
+import de.ai.htwg.tictactoe.gameLogic.model.SelectPositionAck.SelectPositionReturnCode.PositionAlreadySelected
+import de.ai.htwg.tictactoe.gameLogic.model.SelectPositionAck.SelectPositionReturnCode.GameAlreadyFinished
+import de.ai.htwg.tictactoe.gameLogic.model.SelectPositionAck.SelectPositionReturnCode.GameWon
+import de.ai.htwg.tictactoe.gameLogic.model.SelectPositionAck.SelectPositionReturnCode.PositionSet
 
 class GameControllerActor private(startingPlayer: Player) extends Actor {
   var gameField: GameField = GameField(startingPlayer)

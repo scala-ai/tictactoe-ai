@@ -1,6 +1,6 @@
-package de.gameLogic.model
+package de.ai.htwg.tictactoe.gameLogic.model
 
-import de.gameLogic.model.SelectPositionAck.SelectPositionReturnCode
+import de.ai.htwg.tictactoe.gameLogic.model.SelectPositionAck.SelectPositionReturnCode
 
 case class SelectPositionAck(p: Player, pos: GridPosition, state: GameField, returnCode: SelectPositionReturnCode)
 
