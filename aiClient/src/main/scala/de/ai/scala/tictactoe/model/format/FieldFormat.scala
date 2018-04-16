@@ -18,6 +18,7 @@ object FieldFormat extends Format[Field] {
     o match {
       case Field.Cross => JsString(p1Lit)
       case Field.Circle => JsString(p2Lit)
+      case Field.Empty => throw new IllegalArgumentException("Empty fields should never be serialized.")
     }
   }
 
