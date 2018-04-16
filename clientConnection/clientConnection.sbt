@@ -1,0 +1,1 @@
+lazy val clientConnection = TicTacToeBuild.defaultProject(project)

@@ -20,3 +20,9 @@ libraryDependencies += "com.typesafe.play" %% "play-json" % "2.6.8"
 libraryDependencies += "org.scalamock" %% "scalamock" % "4.1.0" % Test
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test
 
+lazy val administration = TicTacToeBuild.administration
+lazy val aiClient = TicTacToeBuild.aiClient
+lazy val clientConnection = TicTacToeBuild.clientConnection
+lazy val gameLogic = TicTacToeBuild.gameLogic
+lazy val playerClient = TicTacToeBuild.playerClient
+
