@@ -6,4 +6,5 @@ import de.ai.scala.tictactoe.learning.state.State
 trait Transition[A <: Action, S <: State] {
   val observation: S
   val action: A
+  val reward: Double
 }

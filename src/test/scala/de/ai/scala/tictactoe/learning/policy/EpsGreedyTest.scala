@@ -33,7 +33,7 @@ class EpsGreedyTest extends FreeSpec with Matchers with MockFactory {
           minEpsilon = 0,
           epsilonNbEpoch = 2,
           actionSpace = actionSpace,
-          actionSupplier = (_, _) => {
+          decisionCalculator = (_, _) => {
             fail("Action supplier should not be called!")
           }
         )
@@ -51,7 +51,7 @@ class EpsGreedyTest extends FreeSpec with Matchers with MockFactory {
           minEpsilon = 0,
           epsilonNbEpoch = 2,
           actionSpace = actionSpace,
-          actionSupplier = (_, _) => {
+          decisionCalculator = (_, _) => {
             TicTacToeAction(Coordinate(0, 1))
           }
         )
@@ -71,7 +71,7 @@ class EpsGreedyTest extends FreeSpec with Matchers with MockFactory {
           minEpsilon = 0,
           epsilonNbEpoch = 2,
           actionSpace = actionSpace,
-          actionSupplier = (_, _) => {
+          decisionCalculator = (_, _) => {
             TicTacToeAction(Coordinate(0, 1))
           }
         )
@@ -92,7 +92,7 @@ class EpsGreedyTest extends FreeSpec with Matchers with MockFactory {
           minEpsilon = 0,
           epsilonNbEpoch = 2,
           actionSpace = actionSpace,
-          actionSupplier = (_, _) => {
+          decisionCalculator = (_, _) => {
             fail("Action supplier should not be called!")
           }
         )

@@ -12,14 +12,14 @@ case class EpsGreedy[S <: State, A <: Action](
     minEpsilon: Float,
     epsilonNbEpoch: Long,
     actionSpace: ActionSpace[S, A],
-    actionSupplier: ActionSupplier[S, A]
+    decisionCalculator: DecisionCalculator[S, A]
 ) extends Policy[S, A] {
 
   override def nextAction(input: S): A = {
     val ep = getEpsilon
     if (random.nextFloat > ep) {
       // get actual best action
-      actionSupplier.get(input, actionSpace)
+      decisionCalculator.calcDecision(input, actionSpace)
     } else {
       // get random action
       val possibleActions = actionSpace.getPossibleActions(input)

@@ -1,20 +1,21 @@
 package de.ai.scala.tictactoe.model.format
 
-import de.ai.scala.tictactoe.model.Playground
-import de.ai.scala.tictactoe.model.Field
 import de.ai.scala.tictactoe.model.Coordinate
-import play.api.libs.json.OFormat
+import de.ai.scala.tictactoe.model.Field
+import de.ai.scala.tictactoe.model.Playground
 import play.api.libs.json.JsObject
-import play.api.libs.json.Json
-import play.api.libs.json.Reads
-import play.api.libs.json.JsValue
 import play.api.libs.json.JsResult
+import play.api.libs.json.JsValue
+import play.api.libs.json.Json
+import play.api.libs.json.OFormat
+import play.api.libs.json.Reads
 
 
 object PlaygroundFormat extends OFormat[Playground] {
 
   private val posLit = "pos"
   private val playerLit = "player"
+
   private def writeGameFieldEntry(pair: (Coordinate, Field)): JsObject = {
     val (pos, p) = pair
     Json.obj(
@@ -37,11 +38,12 @@ object PlaygroundFormat extends OFormat[Playground] {
   private val currentPlayerLit = "currentPlayer"
   private val fieldLit = "field"
   private val dimensions = "dimensions"
+
   override def writes(o: Playground): JsObject = {
 
     Json.obj(
       finishedLit -> false,
-      fieldLit -> o.mapToCoordinate.toList.collect { case p @ (_, Field.Circle | Field.Cross) => writeGameFieldEntry(p) },
+      fieldLit -> o.mapToCoordinate.collect { case p @ (_, Field.Circle | Field.Cross) => writeGameFieldEntry(p) },
       dimensions -> o.dimensions,
     )
   }

@@ -1,5 +1,7 @@
 package de.ai.scala.tictactoe.learning.action
 
-trait Action {
+import org.nd4j.linalg.api.ndarray.INDArray
 
+trait Action {
+  def getStateAsVector: INDArray
 }
