@@ -1,6 +1,5 @@
 package de.ai.scala.tictactoe.learning.net
 
-import org.deeplearning4j.nn.conf.MultiLayerConfiguration
 import org.nd4j.linalg.api.ndarray.INDArray
 
 trait NeuralNet {
@@ -11,6 +10,4 @@ trait NeuralNet {
   def persist(): Unit
 
   def load(): Unit
-
-  def getConfiguration: MultiLayerConfiguration
 }
