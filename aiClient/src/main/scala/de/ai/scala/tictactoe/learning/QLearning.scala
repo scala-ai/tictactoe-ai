@@ -27,7 +27,7 @@ class QLearning[S <: State, A <: Action, R <: EpochResult](
     // Let's run our Q function on S to get Q values for all possible actions
     val action = policy.nextAction(state)
     val reward = rewardCalculator.getImmediateReward(action, state)
-    transitionHistory.addTransition(transitionFactory.create(state, action, reward))
+    transitionHistory.addTransition(transitionFactory(state, action, reward))
     action
   }
 
