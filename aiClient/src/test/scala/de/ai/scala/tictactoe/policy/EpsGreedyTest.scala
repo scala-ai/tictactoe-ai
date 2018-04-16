@@ -1,9 +1,10 @@
-package de.ai.scala.tictactoe.learning.policy
+package de.ai.scala.tictactoe.policy
 
 import scala.util.Random
 
 import de.ai.scala.tictactoe.learning.action.TicTacToeAction
 import de.ai.scala.tictactoe.learning.action.TicTacToeActionSpace
+import de.ai.scala.tictactoe.learning.policy.EpsGreedy
 import de.ai.scala.tictactoe.learning.state.TicTacToeState
 import de.ai.scala.tictactoe.model.Coordinate
 import de.ai.scala.tictactoe.model.Field

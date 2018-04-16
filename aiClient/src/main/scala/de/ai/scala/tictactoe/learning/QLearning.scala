@@ -55,6 +55,6 @@ class QLearning[S <: State, A <: Action, R <: EpochResult](
   }
 }
 object QLearning {
-  val gamma = 0.9
-  val alpha = 0.9999
+  val alpha = 0.9
+  val gamma = 0.999
 }
