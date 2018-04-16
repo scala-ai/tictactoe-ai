@@ -1,4 +1,4 @@
-package de.htwg.model
+package de.gameLogic.model
 
 class GameField private[model](
     private[model] val current: Player,

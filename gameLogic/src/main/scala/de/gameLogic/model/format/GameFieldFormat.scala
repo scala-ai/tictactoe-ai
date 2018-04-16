@@ -1,8 +1,8 @@
-package de.htwg.model.format
+package de.gameLogic.model.format
 
-import de.htwg.model.GameField
-import de.htwg.model.Player
-import de.htwg.model.GridPosition
+import de.gameLogic.model.GameField
+import de.gameLogic.model.Player
+import de.gameLogic.model.GridPosition
 import play.api.libs.json.OFormat
 import play.api.libs.json.JsObject
 import play.api.libs.json.JsValue

@@ -1,4 +1,4 @@
-package de.htwg.model
+package de.gameLogic.model
 
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer

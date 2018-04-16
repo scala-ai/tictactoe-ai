@@ -1,6 +1,6 @@
-package de.htwg.model.format
+package de.gameLogic.model.format
 
-import de.htwg.model.GridPosition
+import de.gameLogic.model.GridPosition
 import play.api.libs.json.Format
 import play.api.libs.json.JsValue
 import play.api.libs.json.JsResult

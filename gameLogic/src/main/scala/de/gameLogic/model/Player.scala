@@ -1,4 +1,4 @@
-package de.htwg.model
+package de.gameLogic.model
 
 sealed trait Player
 
