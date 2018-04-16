@@ -1,0 +1,1 @@
+lazy val gameLogic = TicTacToeBuild.defaultProject(project)

@@ -1,0 +1,1 @@
+lazy val playerClient = TicTacToeBuild.defaultProject(project)
