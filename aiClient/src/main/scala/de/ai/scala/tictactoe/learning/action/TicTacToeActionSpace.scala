@@ -8,6 +8,6 @@ case class TicTacToeActionSpace() extends ActionSpace[TicTacToeState, TicTacToeA
     val allFields = state.playground.mapToCoordinate
     allFields.collect({
       case (coordinate, Field.Empty) => coordinate
-    }).map(TicTacToeAction)
+    }).map(TicTacToeAction(_, state.playground.dimensions))
   }
 }
