@@ -7,4 +7,6 @@ lazy val gameLogic = TicTacToeBuild.defaultProject(project).settings(
     //akka test
     "com.typesafe.akka" %% "akka-testkit" % "2.5.8" % Test,
   )
+).dependsOn(
+  TicTacToeBuild.clientConnection,
 )

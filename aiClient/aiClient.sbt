@@ -17,4 +17,6 @@ lazy val aiClient = TicTacToeBuild.defaultProject(project).settings(
     // testing
     "org.scalamock" %% "scalamock" % "4.1.0" % Test,
   )
+).dependsOn(
+  TicTacToeBuild.clientConnection,
 )
