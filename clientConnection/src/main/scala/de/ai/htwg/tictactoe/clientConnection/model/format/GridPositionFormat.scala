@@ -1,6 +1,10 @@
-package de.ai.htwg.tictactoe.gameLogic.model.format
+package de.ai.htwg.tictactoe.clientConnection.model.format
 
-import de.ai.htwg.tictactoe.gameLogic.model.GridPosition
+import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
+import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
+import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
+import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
+import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
 import play.api.libs.json.Format
 import play.api.libs.json.JsValue
 import play.api.libs.json.JsResult

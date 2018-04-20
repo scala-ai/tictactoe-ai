@@ -11,9 +11,9 @@ import akka.actor.ActorRef
 import akka.pattern.ask
 import akka.pattern.gracefulStop
 import akka.util.Timeout
+import de.ai.htwg.tictactoe.clientConnection.model.Player
+import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
 import de.ai.htwg.tictactoe.gameLogic.controller.GameControllerActor
-import de.ai.htwg.tictactoe.gameLogic.model.Player
-import de.ai.htwg.tictactoe.gameLogic.model.GridPosition
 import de.ai.htwg.tictactoe.gameLogic.model.SelectPosition
 import de.ai.htwg.tictactoe.gameLogic.model.SelectPositionAck
 

@@ -2,9 +2,9 @@ package de.ai.htwg.tictactoe.gameLogic.controller
 
 import akka.actor.Actor
 import akka.actor.Props
+import de.ai.htwg.tictactoe.clientConnection.model.GameField
+import de.ai.htwg.tictactoe.clientConnection.model.Player
 import de.ai.htwg.tictactoe.gameLogic.model.SelectPosition
-import de.ai.htwg.tictactoe.gameLogic.model.Player
-import de.ai.htwg.tictactoe.gameLogic.model.GameField
 import de.ai.htwg.tictactoe.gameLogic.model.SelectPositionAck
 import de.ai.htwg.tictactoe.gameLogic.model.SelectPositionAck.SelectPositionReturnCode.NotThisPlayersTurn
 import de.ai.htwg.tictactoe.gameLogic.model.SelectPositionAck.SelectPositionReturnCode.PositionAlreadySelected

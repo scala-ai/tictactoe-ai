@@ -1,4 +1,4 @@
-package de.ai.htwg.tictactoe.gameLogic.model
+package de.ai.htwg.tictactoe.clientConnection.model
 
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer

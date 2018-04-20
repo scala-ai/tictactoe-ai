@@ -1,4 +1,4 @@
-package de.ai.htwg.tictactoe.gameLogic.model
+package de.ai.htwg.tictactoe.clientConnection.model
 
 class GameField private[model](
     private[model] val current: Player,
