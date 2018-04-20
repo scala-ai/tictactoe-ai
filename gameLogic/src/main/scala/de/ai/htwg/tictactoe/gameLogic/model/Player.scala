@@ -3,11 +3,11 @@ package de.ai.htwg.tictactoe.gameLogic.model
 sealed trait Player
 
 object Player {
-  case object One extends Player
-  case object Two extends Player
+  case object Cross extends Player
+  case object Circle extends Player
 
   def other(p: Player): Player = p match {
-    case One => Two
-    case Two => One
+    case Cross => Circle
+    case Circle => Cross
   }
 }

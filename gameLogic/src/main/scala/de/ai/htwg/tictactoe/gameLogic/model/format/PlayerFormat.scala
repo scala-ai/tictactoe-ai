@@ -12,19 +12,19 @@ import play.api.libs.json.JsonValidationError
 
 object PlayerFormat extends Format[Player] {
 
-  private val p1Lit = "X"
-  private val p2Lit = "O"
+  private val crossLit = "X"
+  private val circleLit = "O"
   override def writes(o: Player): JsValue = {
     o match {
-      case Player.One => JsString(p1Lit)
-      case Player.Two => JsString(p2Lit)
+      case Player.Cross => JsString(crossLit)
+      case Player.Circle => JsString(circleLit)
     }
   }
 
   override def reads(json: JsValue): JsResult[Player] = {
     json match {
-      case JsString(this.p1Lit) => JsSuccess(Player.One)
-      case JsString(this.p2Lit) => JsSuccess(Player.Two)
+      case JsString(this.crossLit) => JsSuccess(Player.Cross)
+      case JsString(this.circleLit) => JsSuccess(Player.Circle)
       case e => JsError(JsonValidationError(s"Not a valid player String: $e"))
     }
   }

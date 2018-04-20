@@ -23,14 +23,14 @@ class GameTest extends GameLogicTestSpec[ActorRef] {
   implicit val context: ExecutionContextExecutor = system.dispatcher
 
   override def setupFixture(): Future[ActorRef] = {
-    val controller: ActorRef = system.actorOf(GameControllerActor.props(Player.One))
+    val controller: ActorRef = system.actorOf(GameControllerActor.props(Player.Cross))
     for {
-      _ <- controller ? SelectPosition(Player.One, GridPosition(0, 0))
-      _ <- controller ? SelectPosition(Player.Two, GridPosition(1, 0))
-      _ <- controller ? SelectPosition(Player.One, GridPosition(0, 1))
-      _ <- controller ? SelectPosition(Player.Two, GridPosition(1, 1))
-      _ <- controller ? SelectPosition(Player.One, GridPosition(0, 2))
-      _ <- controller ? SelectPosition(Player.Two, GridPosition(1, 2))
+      _ <- controller ? SelectPosition(Player.Cross, GridPosition(0, 0))
+      _ <- controller ? SelectPosition(Player.Circle, GridPosition(1, 0))
+      _ <- controller ? SelectPosition(Player.Cross, GridPosition(0, 1))
+      _ <- controller ? SelectPosition(Player.Circle, GridPosition(1, 1))
+      _ <- controller ? SelectPosition(Player.Cross, GridPosition(0, 2))
+      _ <- controller ? SelectPosition(Player.Circle, GridPosition(1, 2))
     } yield {
       controller
     }
@@ -45,10 +45,10 @@ class GameTest extends GameLogicTestSpec[ActorRef] {
 
     "Player ONE winning" in { controller =>
       val pos = GridPosition(0, 3)
-      controller.tell(SelectPosition(Player.One, pos), testActor)
+      controller.tell(SelectPosition(Player.Cross, pos), testActor)
 
       expectMsgPF(duration) {
-        case SelectPositionAck(Player.One, `pos`, field, SelectPositionAck.SelectPositionReturnCode.GameWon) => field.isFinished shouldBe true
+        case SelectPositionAck(Player.Cross, `pos`, field, SelectPositionAck.SelectPositionReturnCode.GameWon) => field.isFinished shouldBe true
       }
     }
 
@@ -56,12 +56,12 @@ class GameTest extends GameLogicTestSpec[ActorRef] {
     "Player TWO winning" in { controller =>
       val pos1 = GridPosition(2, 0)
       val pos2 = GridPosition(1, 3)
-      controller.ask(SelectPosition(Player.One, pos1)).onComplete { _ =>
-        controller.tell(SelectPosition(Player.Two, pos2), testActor)
+      controller.ask(SelectPosition(Player.Cross, pos1)).onComplete { _ =>
+        controller.tell(SelectPosition(Player.Circle, pos2), testActor)
       }
 
       expectMsgPF(duration) {
-        case SelectPositionAck(Player.Two, `pos2`, field, SelectPositionAck.SelectPositionReturnCode.GameWon) => field.isFinished shouldBe true
+        case SelectPositionAck(Player.Circle, `pos2`, field, SelectPositionAck.SelectPositionReturnCode.GameWon) => field.isFinished shouldBe true
       }
 
     }
