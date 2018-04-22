@@ -3,8 +3,8 @@ package de.ai.htwg.tictactoe.aiClient
 import akka.actor.Actor
 import akka.actor.ActorRef
 import akka.actor.Props
-import de.ai.htwg.tictactoe.aiClient.learning.TTTLearningProcessor
-import de.ai.htwg.tictactoe.aiClient.learning.state.TTTState
+import de.ai.htwg.tictactoe.aiClient.learning.core.TTTLearningProcessor
+import de.ai.htwg.tictactoe.aiClient.learning.core.state.TTTState
 import de.ai.htwg.tictactoe.clientConnection.messages.GameControllerMessages
 import de.ai.htwg.tictactoe.clientConnection.model.GameField
 import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
