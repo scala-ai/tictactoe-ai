@@ -13,7 +13,7 @@ object Main extends App {
 
   val gameName = "game1"
   val clientMain = system.actorOf(ClientMainActor.props(dimensions), "clientMain")
-  val game = system.actorOf(GameControllerActor.props(dimensions), gameName)
+  val game = system.actorOf(GameControllerActor.props(dimensions, Player.Circle), gameName)
   val cross = system.actorOf(PlayerUiActor.props(Player.Cross, clientMain, game, gameName))
   val circle = system.actorOf(PlayerUiActor.props(Player.Circle, clientMain, game, gameName))
 
