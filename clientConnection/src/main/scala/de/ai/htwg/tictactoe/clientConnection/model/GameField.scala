@@ -5,7 +5,7 @@ import scala.annotation.tailrec
 class GameField private[model](
     private[model] val current: Player,
     val dimensions: Int,
-    val gameField: Map[GridPosition, Player] = Map.empty,
+    private[model] val gameField: Map[GridPosition, Player] = Map.empty,
     val isFinished: Boolean = false,
 ) {
 
@@ -51,6 +51,9 @@ class GameField private[model](
     positions.toList.filterNot(gameField.contains)
   }
 
+  def getPos(pos: GridPosition): Option[Player] = gameField.get(pos)
+
+  def foreach[U](func: ((GridPosition, Player)) => U): Unit = gameField.foreach(func)
 }
 
 object GameField {

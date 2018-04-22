@@ -10,7 +10,7 @@ object GameFieldToVectorConverter {
       x <- 0 until gameField.dimensions
       y <- 0 until gameField.dimensions
     } yield {
-      gameField.gameField.get(gameField.posBuilder(x, y))
+      gameField.getPos(gameField.posBuilder(x, y))
     }
     values.toVector.map(specificDoubleValueOfPlayer)
   }

@@ -36,7 +36,7 @@ private class GameUiActor(name: String, dimensions: Int) extends Actor {
 
 
   private def handleMouseEvent(pos: GridPosition): Unit = {
-    if (field.flatMap(_.gameField.get(pos)).isEmpty) {
+    if (field.flatMap(_.getPos(pos)).isEmpty) {
       listeners.foreach { sub =>
         sub.actorRef ! sub.msgFactory(pos)
       }
@@ -52,7 +52,7 @@ private class GameUiActor(name: String, dimensions: Int) extends Actor {
   private def printField(field: GameField): Unit = {
     clear()
     this.field = Some(field)
-    field.gameField.foreach {
+    field.foreach {
       case (pos, Player.Cross) => stage.cross(pos).set()
       case (pos, Player.Circle) => stage.circle(pos).set()
     }
