@@ -1,7 +1,7 @@
-package de.ai.htwg.tictactoe.aiClient.learning.core.transition
+package de.ai.htwg.tictactoe.aiClient.learning
 
-import de.ai.htwg.tictactoe.aiClient.learning.core.action.TTTAction
-import de.ai.htwg.tictactoe.aiClient.learning.core.state.TTTState
+import de.ai.htwg.tictactoe.aiClient.learning.core.transition.Transition
+import de.ai.htwg.tictactoe.aiClient.learning.core.transition.TransitionFactory
 
 case class TTTTransition(
     observation: TTTState,

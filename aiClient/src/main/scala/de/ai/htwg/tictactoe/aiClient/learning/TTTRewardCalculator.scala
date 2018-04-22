@@ -1,8 +1,6 @@
-package de.ai.htwg.tictactoe.aiClient.learning.core.reward
+package de.ai.htwg.tictactoe.aiClient.learning
 
-import de.ai.htwg.tictactoe.aiClient.learning.core.action.TTTAction
-import de.ai.htwg.tictactoe.aiClient.learning.core.state.TTTEpochResult
-import de.ai.htwg.tictactoe.aiClient.learning.core.state.TTTState
+import de.ai.htwg.tictactoe.aiClient.learning.core.reward.RewardCalculator
 
 case class TTTRewardCalculator() extends RewardCalculator[TTTAction, TTTState, TTTEpochResult] {
   override def getLongTermReward(runResult: TTTEpochResult): Double =

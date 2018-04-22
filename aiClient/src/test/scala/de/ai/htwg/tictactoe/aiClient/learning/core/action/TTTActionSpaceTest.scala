@@ -1,6 +1,8 @@
 package de.ai.htwg.tictactoe.aiClient.learning.core.action
 
-import de.ai.htwg.tictactoe.aiClient.learning.core.state
+import de.ai.htwg.tictactoe.aiClient.learning.TTTAction
+import de.ai.htwg.tictactoe.aiClient.learning.TTTActionSpace
+import de.ai.htwg.tictactoe.aiClient.learning.TTTState
 import de.ai.htwg.tictactoe.clientConnection.model.GameField
 import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
 import de.ai.htwg.tictactoe.clientConnection.model.Player
@@ -26,7 +28,7 @@ class TTTActionSpaceTest extends FreeSpec with Matchers {
       }
 
 
-      val ticTacToeState = state.TTTState(gameField)
+      val ticTacToeState = TTTState(gameField)
       val possibleActions = TTTActionSpace().getPossibleActions(ticTacToeState)
       possibleActions.size shouldBe 8
       possibleActions should contain(TTTAction(gameField.posBuilder(1, 0), gameField.dimensions))

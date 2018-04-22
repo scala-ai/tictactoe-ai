@@ -1,5 +1,6 @@
-package de.ai.htwg.tictactoe.aiClient.learning.core.net
+package de.ai.htwg.tictactoe.aiClient.learning
 
+import de.ai.htwg.tictactoe.aiClient.learning.core.net.NeuralNet
 import org.deeplearning4j.nn.api.OptimizationAlgorithm
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration
 import org.deeplearning4j.nn.conf.layers.DenseLayer

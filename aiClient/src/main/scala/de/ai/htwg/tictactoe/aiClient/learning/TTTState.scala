@@ -1,5 +1,6 @@
-package de.ai.htwg.tictactoe.aiClient.learning.core.state
+package de.ai.htwg.tictactoe.aiClient.learning
 
+import de.ai.htwg.tictactoe.aiClient.learning.core.state.State
 import de.ai.htwg.tictactoe.aiClient.model.GameFieldToVectorConverter
 import de.ai.htwg.tictactoe.clientConnection.model.GameField
 import org.nd4j.linalg.api.ndarray.INDArray

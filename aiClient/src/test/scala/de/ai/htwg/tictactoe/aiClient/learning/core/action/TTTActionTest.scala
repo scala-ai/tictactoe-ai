@@ -1,5 +1,6 @@
 package de.ai.htwg.tictactoe.aiClient.learning.core.action
 
+import de.ai.htwg.tictactoe.aiClient.learning.TTTAction
 import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
 import org.nd4j.linalg.factory.Nd4j
 import org.scalatest.FreeSpec

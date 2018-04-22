@@ -1,5 +1,6 @@
 package de.ai.htwg.tictactoe.aiClient.learning.core.state
 
+import de.ai.htwg.tictactoe.aiClient.learning.TTTState
 import de.ai.htwg.tictactoe.clientConnection.model.GameField
 import de.ai.htwg.tictactoe.clientConnection.model.Player
 import org.nd4j.linalg.factory.Nd4j

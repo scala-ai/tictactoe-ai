@@ -3,8 +3,8 @@ package de.ai.htwg.tictactoe.aiClient.learning.core.policy
 import scala.language.higherKinds
 import scala.util.Random
 
-import de.ai.htwg.tictactoe.aiClient.learning.core.action.TTTAction
-import de.ai.htwg.tictactoe.aiClient.learning.core.state.TTTState
+import de.ai.htwg.tictactoe.aiClient.learning.TTTAction
+import de.ai.htwg.tictactoe.aiClient.learning.TTTState
 import de.ai.htwg.tictactoe.clientConnection.model
 import de.ai.htwg.tictactoe.clientConnection.model.GameField
 import de.ai.htwg.tictactoe.clientConnection.model.Player
