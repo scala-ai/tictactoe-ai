@@ -14,23 +14,26 @@ import akka.util.Timeout
 import de.ai.htwg.tictactoe.clientConnection.model.Player
 import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
 import de.ai.htwg.tictactoe.gameLogic.controller.GameFieldControllerActor
-import de.ai.htwg.tictactoe.gameLogic.model.SelectPosition
-import de.ai.htwg.tictactoe.gameLogic.model.SelectPositionAck
+import de.ai.htwg.tictactoe.gameLogic.controller.GameFieldControllerActor.SelectPosition
+import de.ai.htwg.tictactoe.gameLogic.controller.GameFieldControllerActor.SelectPositionAck
+
 
 class GameTest extends GameLogicTestSpec[ActorRef] {
   implicit val duration: FiniteDuration = Duration(2, TimeUnit.SECONDS)
   implicit val timeout: Timeout = Timeout(duration)
   implicit val context: ExecutionContextExecutor = system.dispatcher
 
+  private val GFCA = GameFieldControllerActor
+
   override def setupFixture(): Future[ActorRef] = {
     val controller: ActorRef = system.actorOf(GameFieldControllerActor.props(Player.Cross))
     for {
-      _ <- controller ? SelectPosition(Player.Cross, GridPosition(0, 0))
-      _ <- controller ? SelectPosition(Player.Circle, GridPosition(1, 0))
-      _ <- controller ? SelectPosition(Player.Cross, GridPosition(0, 1))
-      _ <- controller ? SelectPosition(Player.Circle, GridPosition(1, 1))
-      _ <- controller ? SelectPosition(Player.Cross, GridPosition(0, 2))
-      _ <- controller ? SelectPosition(Player.Circle, GridPosition(1, 2))
+      _ <- controller ? GFCA.SelectPosition(Player.Cross, GridPosition(0, 0))
+      _ <- controller ? GFCA.SelectPosition(Player.Circle, GridPosition(1, 0))
+      _ <- controller ? GFCA.SelectPosition(Player.Cross, GridPosition(0, 1))
+      _ <- controller ? GFCA.SelectPosition(Player.Circle, GridPosition(1, 1))
+      _ <- controller ? GFCA.SelectPosition(Player.Cross, GridPosition(0, 2))
+      _ <- controller ? GFCA.SelectPosition(Player.Circle, GridPosition(1, 2))
     } yield {
       controller
     }
@@ -48,7 +51,7 @@ class GameTest extends GameLogicTestSpec[ActorRef] {
       controller.tell(SelectPosition(Player.Cross, pos), testActor)
 
       expectMsgPF(duration) {
-        case SelectPositionAck(Player.Cross, `pos`, field, SelectPositionAck.SelectPositionReturnCode.GameWon) => field.isFinished shouldBe true
+        case SelectPositionAck(Player.Cross, `pos`, field, GFCA.RetCode.GameWon) => field.isFinished shouldBe true
       }
     }
 
@@ -61,7 +64,7 @@ class GameTest extends GameLogicTestSpec[ActorRef] {
       }
 
       expectMsgPF(duration) {
-        case SelectPositionAck(Player.Circle, `pos2`, field, SelectPositionAck.SelectPositionReturnCode.GameWon) => field.isFinished shouldBe true
+        case SelectPositionAck(Player.Circle, `pos2`, field, GFCA.RetCode.GameWon) => field.isFinished shouldBe true
       }
 
     }
