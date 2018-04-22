@@ -35,13 +35,13 @@ object GameFieldFormat extends OFormat[GameField] {
   private val finishedLit = "isFinished"
   private val currentPlayerLit = "currentPlayer"
   private val fieldLit = "field"
-  private val dimensions = "dimensions"
+  private val dimensionsLit = "dimensions"
   override def writes(o: GameField): JsObject = {
     Json.obj(
       finishedLit -> o.isFinished,
       currentPlayerLit -> PlayerFormat.writes(o.current),
       fieldLit -> o.gameField.toList.map(writeGameFieldEntry),
-      dimensions -> 4,
+      dimensionsLit -> o.dimensions,
     )
   }
 
@@ -51,8 +51,9 @@ object GameFieldFormat extends OFormat[GameField] {
       finished <- json.\(finishedLit).validate[Boolean]
       currentPlayer <- json.\(currentPlayerLit).validate(PlayerFormat)
       field <- json.\(fieldLit).validate(Reads.list(readGameFieldEntry))
+      dimensions <- json.\(dimensionsLit).validate[Int]
     } yield {
-      new GameField(currentPlayer, field.toMap, finished)
+      new GameField(currentPlayer, dimensions, field.toMap, finished)
     }
   }
 }

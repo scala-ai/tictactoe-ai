@@ -9,10 +9,11 @@ import de.ai.htwg.tictactoe.playerClient.PlayerUiActor
 object Main extends App {
   val system = ActorSystem()
 
+  val dimensions = 4
 
   val gameName = "game1"
-  val clientMain = system.actorOf(ClientMainActor.props(4), "clientMain")
-  val game = system.actorOf(GameControllerActor.props(), gameName)
+  val clientMain = system.actorOf(ClientMainActor.props(dimensions), "clientMain")
+  val game = system.actorOf(GameControllerActor.props(dimensions), gameName)
   val cross = system.actorOf(PlayerUiActor.props(Player.Cross, clientMain, game, gameName))
   val circle = system.actorOf(PlayerUiActor.props(Player.Circle, clientMain, game, gameName))
 

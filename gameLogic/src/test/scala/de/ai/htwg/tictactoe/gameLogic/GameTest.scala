@@ -26,7 +26,7 @@ class GameTest extends GameLogicTestSpec[ActorRef] {
   private val GFCA = GameFieldControllerActor
 
   override def setupFixture(): Future[ActorRef] = {
-    val controller: ActorRef = system.actorOf(GameFieldControllerActor.props(Player.Cross))
+    val controller: ActorRef = system.actorOf(GameFieldControllerActor.props(Player.Cross, 4))
     for {
       _ <- controller ? GFCA.SelectPosition(Player.Cross, GridPosition(0, 0))
       _ <- controller ? GFCA.SelectPosition(Player.Circle, GridPosition(1, 0))

@@ -4,6 +4,7 @@ import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 
 case class GridPosition(x: Int, y: Int) {
+  // Fixme
   @inline private def inRange = GridPosition.inRange _
   def error(cord: Char, i: Int) = s"$cord coordinate must be between 0 and 3 (inclusive) but is: $i"
   require(inRange(x), error('X', x))

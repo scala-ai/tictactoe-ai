@@ -13,7 +13,7 @@ import de.ai.htwg.tictactoe.gameLogic.controller.GameFieldControllerActor.RetCod
 object GameFieldControllerActor {
 
 
-  def props(startingPlayer: Player) = Props(new GameFieldControllerActor(startingPlayer))
+  def props(startingPlayer: Player, dimensions: Int) = Props(new GameFieldControllerActor(startingPlayer, dimensions))
 
   case object GetGrid
   case class GetGridAck(gameField: GameField)
@@ -32,8 +32,8 @@ object GameFieldControllerActor {
 
 }
 
-class GameFieldControllerActor private(startingPlayer: Player) extends Actor {
-  var gameField: GameField = GameField(startingPlayer)
+class GameFieldControllerActor private(startingPlayer: Player, dimensions: Int) extends Actor {
+  var gameField: GameField = GameField(startingPlayer, dimensions)
   private val comp = GameFieldControllerActor
   override def receive: Receive = {
 
