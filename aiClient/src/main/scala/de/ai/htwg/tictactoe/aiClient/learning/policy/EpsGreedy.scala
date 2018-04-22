@@ -29,3 +29,11 @@ case class EpsGreedy[S <: State, A <: Action](
 
   private def getEpsilon: Float = math.min(1f, math.max(minEpsilon, 1f - epoch.toFloat / epsilonNbEpoch))
 }
+
+object EpsGreedy {
+  def apply[S <: State, A <: Action](
+      random: Random,
+      minEpsilon: Float,
+      epsilonNbEpoch: Long
+  ): EpsGreedy[S, A] = new EpsGreedy[S, A](0, random, minEpsilon, epsilonNbEpoch)
+}

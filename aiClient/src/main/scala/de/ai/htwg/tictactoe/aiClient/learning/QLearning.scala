@@ -18,7 +18,7 @@ case class QLearning[S <: State, A <: Action, R <: EpochResult](
     transitionHistory: TransitionHistory[A, S],
     transitionFactory: TransitionFactory[A, S],
     actionSpace: ActionSpace[S, A]
-) extends Learning[S, A] {
+) extends Learning[S, A, R] {
   override def getDecision(state: S): (QLearning[S, A, R], A) = {
     // We are in state S
     // Let's run our Q function on S to get Q values for all possible actions
@@ -29,12 +29,14 @@ case class QLearning[S <: State, A <: Action, R <: EpochResult](
     (copy(transitionHistory = updatedHistory), action)
   }
 
-  override def trainHistory(reward: Double): QLearning[S, A, R] = {
+  override def trainHistory(epochResult: R): QLearning[S, A, R] = {
     // last calculated q value (is the next value of actual state)
     // iterate over all transitions in history backwards
+    val epochReward = rewardCalculator.getLongTermReward(epochResult)
     transitionHistory
       .reverseTransitions()
-      .foldLeft(reward)((futureQVal, transition) => {
+      .foldLeft(epochReward)((futureQVal, transition) => {
+        // TODO use epochReward
         val state = transition.observation
         val action = transition.action
         val reward = transition.reward

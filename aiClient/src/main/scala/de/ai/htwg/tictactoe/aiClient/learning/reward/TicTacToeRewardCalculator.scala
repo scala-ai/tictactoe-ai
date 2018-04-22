@@ -4,7 +4,7 @@ import de.ai.htwg.tictactoe.aiClient.learning.action.TicTacToeAction
 import de.ai.htwg.tictactoe.aiClient.learning.state.TicTacToeEpochResult
 import de.ai.htwg.tictactoe.aiClient.learning.state.TicTacToeState
 
-class TicTacToeRewardCalculator extends RewardCalculator[TicTacToeAction, TicTacToeState, TicTacToeEpochResult] {
+case class TicTacToeRewardCalculator() extends RewardCalculator[TicTacToeAction, TicTacToeState, TicTacToeEpochResult] {
   override def getLongTermReward(runResult: TicTacToeEpochResult): Double =
     if (runResult.win) {
       100
