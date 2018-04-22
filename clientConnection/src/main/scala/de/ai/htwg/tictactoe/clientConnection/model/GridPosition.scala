@@ -4,7 +4,10 @@ import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 
 
-class GridPosition private[GridPosition](val x: Int, val y: Int, private val builder: GridPosition.Builder) {
+// abstract so the compiler does not generate apply and copy methods.
+// sealed so it can only be instantiated in this file
+// 2 param blocks as case class methods like equals ignore the 2nd block
+sealed abstract case class GridPosition private[GridPosition](x: Int, y: Int)(private val builder: GridPosition.Builder) extends {
   val dimensions: Int = builder.dimensions
 
   @inline private def inRange = builder.inRange _
@@ -15,9 +18,7 @@ class GridPosition private[GridPosition](val x: Int, val y: Int, private val bui
 
   def buildConnectedCombinations: List[List[GridPosition]] = GridPosition.buildConnectedCombinations(this)
 
-  private def copy(x: Int = this.x, y: Int = this.y) = new GridPosition(x, y, builder)
-
-  def unapply(pos: GridPosition): Option[(Int, Int)] = Some((pos.x, pos.y))
+  private def copy(x: Int = this.x, y: Int = this.y) = new GridPosition(x, y)(builder){}
 }
 
 object GridPosition {
@@ -28,7 +29,7 @@ object GridPosition {
       require(inRange(x), error('X', x))
       require(inRange(y), error('Y', y))
 
-      new GridPosition(x, y, this)
+      new GridPosition(x, y)(this) {}
     }
 
     def inRange(i: Int): Boolean = i >= 0 && i < dimensions
