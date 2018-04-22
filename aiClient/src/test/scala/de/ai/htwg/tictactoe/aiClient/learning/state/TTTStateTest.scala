@@ -33,7 +33,7 @@ class TTTStateTest extends FreeSpec with Matchers {
         }
 
         val state = TTTState(gameField)
-        val stateAsVector = state.getStateAsVector
+        val stateAsVector = state.asVector
         stateAsVector.rank() shouldBe 2
         stateAsVector.rows() shouldBe 5
         stateAsVector.columns() shouldBe 5

@@ -12,11 +12,11 @@ import org.nd4j.linalg.learning.config.Adam
 import org.nd4j.linalg.lossfunctions.LossFunctions
 
 case class TTTNeuralNet() extends NeuralNet {
-  private val dimensions = 3
+  private val dimensions = 4
   private val actions = dimensions * dimensions
   private val state = dimensions * dimensions
   private val inputNodes = actions + state
-  private val hiddenNodes1 = 18
+  private val hiddenNodes1 = 32
   private val hiddenNodes2 = 18
   private val hiddenNodes3 = 18
   private val outputNodes = 1 // q value
@@ -70,7 +70,7 @@ case class TTTNeuralNet() extends NeuralNet {
   override def calc(input: INDArray): INDArray = model.output(input, true)
 
   override def train(input: INDArray, output: INDArray): Unit = {
-    model.fit(input, output)
+    model.fit(input.reshape(1, input.length()), output.reshape(1, output.length()))
     model.finetune()
   }
 

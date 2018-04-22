@@ -8,7 +8,7 @@ case class TTTAction(
     coordinate: GridPosition,
     dimensions: Int
 ) extends Action {
-  override def getStateAsVector: INDArray =
+  override def asVector: INDArray =
     Nd4j.zeros(dimensions, dimensions)
       .putScalar(Array(coordinate.x, coordinate.y), 1)
 }

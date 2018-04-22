@@ -12,7 +12,7 @@ class TTTActionTest extends FreeSpec with Matchers {
       "for a coordinate (2,3) for a 4x4 field" in {
         val dimensions = 4
         val action = TTTAction(GridPosition(dimensions)(2, 3), dimensions)
-        val actionAsVector = action.getStateAsVector
+        val actionAsVector = action.asVector
         actionAsVector.rank() shouldBe 2
         actionAsVector.rows() shouldBe dimensions
         actionAsVector.columns() shouldBe dimensions

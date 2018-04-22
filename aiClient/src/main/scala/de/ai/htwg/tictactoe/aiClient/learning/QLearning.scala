@@ -40,9 +40,11 @@ case class QLearning[S <: State, A <: Action, R <: EpochResult](
         val action = transition.action
         val reward = transition.reward
 
+        val stateVector = state.asVector
+        val actionVector = action.asVector
         // calc old q value for this action in this state
-        val input = Nd4j.concat(1, state.getStateAsVector, action.getStateAsVector)
-        val oldQVal = neuralNet.calc(input).getDouble(0)
+        val input = Nd4j.concat(1, stateVector, actionVector)
+        val oldQVal = neuralNet.calc(input.reshape(1, input.length())).getDouble(0)
 
         // new q value Q(s, a)
         val newQVal = (1 - QLearning.alpha) * oldQVal + QLearning.alpha * (reward + QLearning.gamma * futureQVal)
@@ -58,7 +60,7 @@ case class QLearning[S <: State, A <: Action, R <: EpochResult](
   }
 
   private def calcBestAction(state: S, possibleActions: List[A]): A = possibleActions
-    .map(a => (a, neuralNet.calc(a.getStateAsVector).getDouble(0)))
+    .map(a => (a, neuralNet.calc(a.asVector).getDouble(0)))
     .maxBy(_._2)
     ._1
 

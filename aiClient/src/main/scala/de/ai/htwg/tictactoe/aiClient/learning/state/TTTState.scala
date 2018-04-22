@@ -8,7 +8,7 @@ import org.nd4j.linalg.factory.Nd4j
 case class TTTState(
     field: GameField
 ) extends State {
-  override def getStateAsVector: INDArray = {
+  override def asVector: INDArray = {
     val values = GameFieldToVectorConverter.convertToVector(field)
     val shape = Array(field.dimensions, field.dimensions)
     val order = 'c'
