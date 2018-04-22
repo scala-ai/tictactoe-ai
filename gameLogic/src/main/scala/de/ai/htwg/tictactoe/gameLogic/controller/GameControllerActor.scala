@@ -10,13 +10,13 @@ import de.ai.htwg.tictactoe.clientConnection.model.GameField
 
 object GameControllerActor {
 
-  def props(dimensions: Int) = Props(new GameControllerActor(dimensions))
+  def props(dimensions: Int, startingPlayer: Player) = Props(new GameControllerActor(dimensions, startingPlayer))
 
 }
 
 
-class GameControllerActor private(dimensions: Int) extends Actor {
-  private val gameFieldActor: ActorRef = context.actorOf(GameFieldControllerActor.props(startingPlayer = Player.Circle, dimensions))
+class GameControllerActor private(dimensions: Int, startingPlayer: Player) extends Actor {
+  private val gameFieldActor: ActorRef = context.actorOf(GameFieldControllerActor.props(startingPlayer = startingPlayer, dimensions))
   private var playerListCircle: List[ActorRef] = Nil
   private var playerListCross: List[ActorRef] = Nil
 
