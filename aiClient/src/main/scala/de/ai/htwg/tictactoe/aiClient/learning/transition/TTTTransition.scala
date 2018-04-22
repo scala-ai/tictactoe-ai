@@ -11,5 +11,5 @@ case class TTTTransition(
 
 object TTTTransition extends TransitionFactory[TTTAction, TTTState] {
   override def apply(state: TTTState, action: TTTAction, reward: Double): TTTTransition =
-    TTTTransition(state, action, reward)
+    new TTTTransition(state, action, reward)
 }
