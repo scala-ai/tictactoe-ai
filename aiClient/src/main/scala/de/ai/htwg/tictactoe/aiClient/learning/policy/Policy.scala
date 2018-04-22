@@ -5,7 +5,7 @@ import de.ai.htwg.tictactoe.aiClient.learning.action.ActionSpace
 import de.ai.htwg.tictactoe.aiClient.learning.state.State
 
 trait Policy[S <: State, A <: Action] {
-  def nextAction(state: S): A
+  def nextAction(state: S, bestAction: () => A, possibleActions: List[A]): A
 
   def incrementStep(): Policy[S, A]
 

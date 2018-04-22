@@ -3,7 +3,6 @@ package de.ai.htwg.tictactoe.aiClient.learning
 import de.ai.htwg.tictactoe.aiClient.learning.action.Action
 import de.ai.htwg.tictactoe.aiClient.learning.action.ActionSpace
 import de.ai.htwg.tictactoe.aiClient.learning.net.NeuralNet
-import de.ai.htwg.tictactoe.aiClient.learning.policy.DecisionCalculator
 import de.ai.htwg.tictactoe.aiClient.learning.policy.Policy
 import de.ai.htwg.tictactoe.aiClient.learning.reward.RewardCalculator
 import de.ai.htwg.tictactoe.aiClient.learning.state.EpochResult
@@ -15,16 +14,16 @@ import org.nd4j.linalg.factory.Nd4j
 case class QLearning[S <: State, A <: Action, R <: EpochResult](
     policy: Policy[S, A],
     rewardCalculator: RewardCalculator[A, S, R],
-    actionSpace: ActionSpace[S, A],
     neuralNet: NeuralNet,
     transitionHistory: TransitionHistory[A, S],
     transitionFactory: TransitionFactory[A, S],
-    decisionCalculator: DecisionCalculator[S, A]
+    actionSpace: ActionSpace[S, A]
 ) extends Learning[S, A] {
   override def getDecision(state: S): (QLearning[S, A, R], A) = {
     // We are in state S
     // Let's run our Q function on S to get Q values for all possible actions
-    val action = policy.nextAction(state)
+    val possibleActions = actionSpace.getPossibleActions(state)
+    val action = policy.nextAction(state, () => calcBestAction(state, possibleActions), possibleActions)
     val reward = rewardCalculator.getImmediateReward(action, state)
     val updatedHistory = transitionHistory.addTransition(transitionFactory(state, action, reward))
     (copy(transitionHistory = updatedHistory), action)
@@ -56,6 +55,12 @@ case class QLearning[S <: State, A <: Action, R <: EpochResult](
       transitionHistory = transitionHistory.truncate()
     )
   }
+
+  private def calcBestAction(state: S, possibleActions: List[A]): A = possibleActions
+    .map(a => (a, neuralNet.calc(a.getStateAsVector).getDouble(0)))
+    .maxBy(_._2)
+    ._1
+
 }
 object QLearning {
   val alpha = 0.9
