@@ -44,7 +44,7 @@ case class QLearning[S <: State, A <: Action, R <: EpochResult](
         val actionVector = action.asVector
         // calc old q value for this action in this state
         val input = Nd4j.concat(1, stateVector, actionVector)
-        val oldQVal = neuralNet.calc(input.reshape(1, input.length())).getDouble(0)
+        val oldQVal = neuralNet.calc(input).getDouble(0)
 
         // new q value Q(s, a)
         val newQVal = (1 - QLearning.alpha) * oldQVal + QLearning.alpha * (reward + QLearning.gamma * futureQVal)

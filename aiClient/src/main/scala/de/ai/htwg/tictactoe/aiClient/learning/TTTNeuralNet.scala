@@ -68,14 +68,16 @@ case class TTTNeuralNet() extends NeuralNet {
 
   model.init()
 
-  override def calc(input: INDArray): INDArray = model.output(input, true)
+  override def calc(input: INDArray): INDArray = model.output(reshapeInput(input), true)
 
   override def train(input: INDArray, output: INDArray): Unit = {
-    model.fit(input.reshape(1, input.length()), output.reshape(1, output.length()))
+    model.fit(reshapeInput(input), reshapeInput(output))
     model.finetune()
   }
 
   override def persist(): Unit = ???
 
   override def load(): Unit = ???
+
+  private def reshapeInput(input: INDArray) = input.reshape(1, input.length())
 }
