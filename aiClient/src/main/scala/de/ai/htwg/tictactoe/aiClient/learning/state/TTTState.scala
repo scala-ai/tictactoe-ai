@@ -5,7 +5,7 @@ import de.ai.htwg.tictactoe.clientConnection.model.GameField
 import org.nd4j.linalg.api.ndarray.INDArray
 import org.nd4j.linalg.factory.Nd4j
 
-case class TicTacToeState(
+case class TTTState(
     field: GameField
 ) extends State {
   override def getStateAsVector: INDArray = {

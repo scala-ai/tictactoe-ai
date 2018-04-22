@@ -1,5 +1,5 @@
 package de.ai.htwg.tictactoe.aiClient.learning.state
 
-case class TicTacToeEpochResult(
+case class TTTEpochResult(
     win: Boolean
 ) extends EpochResult

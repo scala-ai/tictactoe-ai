@@ -6,7 +6,7 @@ import org.nd4j.linalg.factory.Nd4j
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers
 
-class TicTacToeStateTest extends FreeSpec with Matchers {
+class TTTStateTest extends FreeSpec with Matchers {
 
   "A state" - {
     "should return an n-dimensional array" - {
@@ -32,7 +32,7 @@ class TicTacToeStateTest extends FreeSpec with Matchers {
             .setPos(2, 4) // circle
         }
 
-        val state = TicTacToeState(gameField)
+        val state = TTTState(gameField)
         val stateAsVector = state.getStateAsVector
         stateAsVector.rank() shouldBe 2
         stateAsVector.rows() shouldBe 5

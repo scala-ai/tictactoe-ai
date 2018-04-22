@@ -2,37 +2,37 @@ package de.ai.htwg.tictactoe.aiClient.learning
 
 import scala.util.Random
 
-import de.ai.htwg.tictactoe.aiClient.learning.action.TicTacToeAction
-import de.ai.htwg.tictactoe.aiClient.learning.action.TicTacToeActionSpace
-import de.ai.htwg.tictactoe.aiClient.learning.net.TicTacToeNeuralNet
+import de.ai.htwg.tictactoe.aiClient.learning.action.TTTAction
+import de.ai.htwg.tictactoe.aiClient.learning.action.TTTActionSpace
+import de.ai.htwg.tictactoe.aiClient.learning.net.TTTNeuralNet
 import de.ai.htwg.tictactoe.aiClient.learning.policy.EpsGreedy
-import de.ai.htwg.tictactoe.aiClient.learning.reward.TicTacToeRewardCalculator
-import de.ai.htwg.tictactoe.aiClient.learning.state.TicTacToeEpochResult
-import de.ai.htwg.tictactoe.aiClient.learning.state.TicTacToeState
-import de.ai.htwg.tictactoe.aiClient.learning.transition.TicTacToeTransition
+import de.ai.htwg.tictactoe.aiClient.learning.reward.TTTRewardCalculator
+import de.ai.htwg.tictactoe.aiClient.learning.state.TTTEpochResult
+import de.ai.htwg.tictactoe.aiClient.learning.state.TTTState
+import de.ai.htwg.tictactoe.aiClient.learning.transition.TTTTransition
 import de.ai.htwg.tictactoe.aiClient.learning.transition.TransitionHistoryImpl
 
 case class TTTLearningProcessor() {
-  private var learning = QLearning[TicTacToeState, TicTacToeAction, TicTacToeEpochResult](
-    policy = EpsGreedy[TicTacToeState, TicTacToeAction](
+  private var learning = QLearning[TTTState, TTTAction, TTTEpochResult](
+    policy = EpsGreedy[TTTState, TTTAction](
       random = Random,
       minEpsilon = 0.01f,
       epsilonNbEpoch = 100
     ),
-    rewardCalculator = TicTacToeRewardCalculator(),
-    neuralNet = TicTacToeNeuralNet(),
-    transitionHistory = TransitionHistoryImpl[TicTacToeAction, TicTacToeState](),
-    transitionFactory = TicTacToeTransition,
-    actionSpace = TicTacToeActionSpace()
+    rewardCalculator = TTTRewardCalculator(),
+    neuralNet = TTTNeuralNet(),
+    transitionHistory = TransitionHistoryImpl[TTTAction, TTTState](),
+    transitionFactory = TTTTransition,
+    actionSpace = TTTActionSpace()
   )
 
-  def getDecision(state: TicTacToeState): TicTacToeAction = {
+  def getDecision(state: TTTState): TTTAction = {
     val (newLearning, action) = learning.getDecision(state)
     learning = newLearning
     action
   }
 
   def trainResult(win: Boolean): Unit = {
-    learning = learning.trainHistory(TicTacToeEpochResult(win))
+    learning = learning.trainHistory(TTTEpochResult(win))
   }
 }

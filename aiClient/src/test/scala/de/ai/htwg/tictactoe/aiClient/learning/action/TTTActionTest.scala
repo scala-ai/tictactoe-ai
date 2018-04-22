@@ -5,13 +5,13 @@ import org.nd4j.linalg.factory.Nd4j
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers
 
-class TicTacToeActionTest extends FreeSpec with Matchers {
+class TTTActionTest extends FreeSpec with Matchers {
 
   "An action" - {
     "should return an n-dimensional array" - {
       "for a coordinate (2,3) for a 4x4 field" in {
         val dimensions = 4
-        val action = TicTacToeAction(GridPosition(dimensions)(2, 3), dimensions)
+        val action = TTTAction(GridPosition(dimensions)(2, 3), dimensions)
         val actionAsVector = action.getStateAsVector
         actionAsVector.rank() shouldBe 2
         actionAsVector.rows() shouldBe dimensions

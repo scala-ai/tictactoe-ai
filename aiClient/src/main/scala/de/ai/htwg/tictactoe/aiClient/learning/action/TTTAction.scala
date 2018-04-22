@@ -4,7 +4,7 @@ import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
 import org.nd4j.linalg.api.ndarray.INDArray
 import org.nd4j.linalg.factory.Nd4j
 
-case class TicTacToeAction(
+case class TTTAction(
     coordinate: GridPosition,
     dimensions: Int
 ) extends Action {

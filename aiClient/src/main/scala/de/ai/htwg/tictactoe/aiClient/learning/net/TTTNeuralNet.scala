@@ -11,7 +11,7 @@ import org.nd4j.linalg.api.ndarray.INDArray
 import org.nd4j.linalg.learning.config.Adam
 import org.nd4j.linalg.lossfunctions.LossFunctions
 
-case class TicTacToeNeuralNet() extends NeuralNet {
+case class TTTNeuralNet() extends NeuralNet {
   private val dimensions = 3
   private val actions = dimensions * dimensions
   private val state = dimensions * dimensions
