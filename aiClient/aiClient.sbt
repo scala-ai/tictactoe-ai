@@ -11,9 +11,6 @@ lazy val aiClient = TicTacToeBuild.defaultProject(project).settings(
     // either "nd4j-native-platform" or "nd4j-cuda-7.5-platform"
     "org.nd4j" % "nd4j-native-platform" % "0.9.1",
 
-    // json formatting
-    "com.typesafe.play" %% "play-json" % "2.6.8",
-
     // testing
     "org.scalamock" %% "scalamock" % "4.1.0" % Test,
   )

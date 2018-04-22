@@ -36,7 +36,6 @@ case class QLearning[S <: State, A <: Action, R <: EpochResult](
     transitionHistory
       .reverseTransitions()
       .foldLeft(epochReward)((futureQVal, transition) => {
-        // TODO use epochReward
         val state = transition.observation
         val action = transition.action
         val reward = transition.reward
