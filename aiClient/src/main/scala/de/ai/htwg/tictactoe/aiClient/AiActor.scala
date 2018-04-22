@@ -9,6 +9,7 @@ import de.ai.htwg.tictactoe.clientConnection.messages.GameControllerMessages
 import de.ai.htwg.tictactoe.clientConnection.model.GameField
 import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
 import de.ai.htwg.tictactoe.clientConnection.model.Player
+import grizzled.slf4j.Logging
 
 
 object AiActor {
@@ -16,7 +17,8 @@ object AiActor {
     Props(new AiActor(player, clientMainActor, gameControllerActor, gameName))
 }
 
-class AiActor private(player: Player, clientMainActor: ActorRef, gameControllerActor: ActorRef, gameName: String) extends Actor {
+class AiActor private(player: Player, clientMainActor: ActorRef, gameControllerActor: ActorRef, gameName: String)
+  extends Actor with Logging {
   player match {
     case Player.Circle => gameControllerActor ! GameControllerMessages.RegisterCircle
     case Player.Cross => gameControllerActor ! GameControllerMessages.RegisterCross
@@ -25,19 +27,18 @@ class AiActor private(player: Player, clientMainActor: ActorRef, gameControllerA
   val learningUnit = TTTLearningProcessor()
 
   override def receive: Receive = {
-    // TODO remove all println
-    case GameControllerMessages.PosAlreadySet(_: GridPosition) => println("Pos already set")
-    case GameControllerMessages.NotYourTurn(_: GridPosition) => println("Not your turn")
+    case GameControllerMessages.PosAlreadySet(_: GridPosition) => error("Pos already set")
+    case GameControllerMessages.NotYourTurn(_: GridPosition) => error("Not your turn")
     case GameControllerMessages.PositionSet(gf: GameField) =>
       if (gf.isCurrentPlayer(player)) {
-        println("It is your turn")
+        debug("It is your turn")
         val action = learningUnit.getDecision(TTTState(gf))
         gameControllerActor ! GameControllerMessages.SetPos(action.coordinate)
       } else {
-        println("Hmm not your turn")
+        debug("Hmm not your turn")
       }
     case GameControllerMessages.GameWon(winner: Player, _: GameField) =>
-      println(s"winner: $winner")
+      debug(s"winner: $winner")
       learningUnit.trainResult(winner == player)
   }
 }
