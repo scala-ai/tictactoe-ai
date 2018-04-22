@@ -2,7 +2,7 @@ package de.ai.htwg.tictactoe.clientConnection.model
 
 class GameField private[model](
     private[model] val current: Player,
-    private[model] val gameField: Map[GridPosition, Player] = Map.empty,
+    val gameField: Map[GridPosition, Player] = Map.empty,
     val isFinished: Boolean = false,
 ) {
 
@@ -14,7 +14,7 @@ class GameField private[model](
     val updatedGameField = this.gameField + (pos -> current)
     val finished = pos.buildCombinationsOf4.exists(GameField.isWinCondition(updatedGameField, current))
     new GameField(
-      Player.other(current),
+      if (finished) current else Player.other(current),
       updatedGameField,
       finished,
     )

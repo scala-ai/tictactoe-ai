@@ -13,7 +13,7 @@ import akka.pattern.gracefulStop
 import akka.util.Timeout
 import de.ai.htwg.tictactoe.clientConnection.model.Player
 import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
-import de.ai.htwg.tictactoe.gameLogic.controller.GameControllerActor
+import de.ai.htwg.tictactoe.gameLogic.controller.GameFieldControllerActor
 import de.ai.htwg.tictactoe.gameLogic.model.SelectPosition
 import de.ai.htwg.tictactoe.gameLogic.model.SelectPositionAck
 
@@ -23,7 +23,7 @@ class GameTest extends GameLogicTestSpec[ActorRef] {
   implicit val context: ExecutionContextExecutor = system.dispatcher
 
   override def setupFixture(): Future[ActorRef] = {
-    val controller: ActorRef = system.actorOf(GameControllerActor.props(Player.Cross))
+    val controller: ActorRef = system.actorOf(GameFieldControllerActor.props(Player.Cross))
     for {
       _ <- controller ? SelectPosition(Player.Cross, GridPosition(0, 0))
       _ <- controller ? SelectPosition(Player.Circle, GridPosition(1, 0))

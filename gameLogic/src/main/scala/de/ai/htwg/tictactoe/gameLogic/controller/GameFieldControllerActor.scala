@@ -12,12 +12,12 @@ import de.ai.htwg.tictactoe.gameLogic.model.SelectPositionAck.SelectPositionRetu
 import de.ai.htwg.tictactoe.gameLogic.model.SelectPositionAck.SelectPositionReturnCode.GameWon
 import de.ai.htwg.tictactoe.gameLogic.model.SelectPositionAck.SelectPositionReturnCode.PositionSet
 
-class GameControllerActor private(startingPlayer: Player) extends Actor {
+class GameFieldControllerActor private(startingPlayer: Player) extends Actor {
   var gameField: GameField = GameField(startingPlayer)
 
   override def receive: Receive = {
 
-    case GameControllerActor.GetGrid => sender ! GameControllerActor.GetGridAck(gameField)
+    case GameFieldControllerActor.GetGrid => sender ! GameFieldControllerActor.GetGridAck(gameField)
 
     case SelectPosition(p, pos) if !gameField.isCurrentPlayer(p) => sender ! SelectPositionAck(p, pos, gameField, NotThisPlayersTurn)
     case SelectPosition(p, pos) if gameField.posIsSet(pos) => sender ! SelectPositionAck(p, pos, gameField, PositionAlreadySelected)
@@ -36,9 +36,9 @@ class GameControllerActor private(startingPlayer: Player) extends Actor {
 }
 
 
-object GameControllerActor {
+object GameFieldControllerActor {
   case object GetGrid
   case class GetGridAck(gameField: GameField)
 
-  def props(startingPlayer: Player) = Props(new GameControllerActor(startingPlayer))
+  def props(startingPlayer: Player) = Props(new GameFieldControllerActor(startingPlayer))
 }
