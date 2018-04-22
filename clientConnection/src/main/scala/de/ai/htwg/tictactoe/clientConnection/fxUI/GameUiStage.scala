@@ -1,4 +1,4 @@
-package de.ai.htwg.tictactoe.playerClient
+package de.ai.htwg.tictactoe.clientConnection.fxUI
 
 import scala.collection.JavaConverters
 import scala.concurrent.Promise
