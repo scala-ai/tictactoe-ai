@@ -9,7 +9,7 @@ case class Playground(
   def mapToCoordinate: List[(GridPosition, Field)] = {
     (0 until dimensions).flatMap(row =>
       (0 until dimensions).map(col =>
-        (GridPosition(col, row), values(row * dimensions + col))
+        (GridPosition(dimensions)(col, row), values(row * dimensions + col))
       )
     )(collection.breakOut)
   }
@@ -22,7 +22,7 @@ object Playground {
       x <- 0 until dimensions
       y <- 0 until dimensions
     } yield {
-      map.getOrElse(GridPosition(x, y), Field.Empty)
+      map.getOrElse(GridPosition(dimensions)(x, y), Field.Empty)
     }
 
     Playground(values.toVector, dimensions)

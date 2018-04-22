@@ -22,9 +22,10 @@ object GameFieldFormat extends OFormat[GameField] {
     )
   }
 
-  private def readGameFieldEntry: Reads[(GridPosition, Player)] = Reads { js =>
+  private def readGameFieldEntry(dimensions: Int): Reads[(GridPosition, Player)] = Reads { js =>
+    val posReads = GridPositionFormat(dimensions)
     for {
-      pos <- js.\(posLit).validate(GridPositionFormat)
+      pos <- js.\(posLit).validate(posReads)
       p <- js.\(playerLit).validate(PlayerFormat)
     } yield {
       pos -> p
@@ -50,8 +51,8 @@ object GameFieldFormat extends OFormat[GameField] {
     for {
       finished <- json.\(finishedLit).validate[Boolean]
       currentPlayer <- json.\(currentPlayerLit).validate(PlayerFormat)
-      field <- json.\(fieldLit).validate(Reads.list(readGameFieldEntry))
       dimensions <- json.\(dimensionsLit).validate[Int]
+      field <- json.\(fieldLit).validate(Reads.list(readGameFieldEntry(dimensions)))
     } yield {
       new GameField(currentPlayer, dimensions, field.toMap, finished)
     }

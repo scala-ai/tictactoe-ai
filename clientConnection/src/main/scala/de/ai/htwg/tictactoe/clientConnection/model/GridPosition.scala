@@ -3,25 +3,40 @@ package de.ai.htwg.tictactoe.clientConnection.model
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 
-case class GridPosition(x: Int, y: Int) {
-  // Fixme
-  @inline private def inRange = GridPosition.inRange _
-  def error(cord: Char, i: Int) = s"$cord coordinate must be between 0 and 3 (inclusive) but is: $i"
-  require(inRange(x), error('X', x))
-  require(inRange(y), error('Y', y))
 
+class GridPosition private[GridPosition](val x: Int, val y: Int, private val builder: GridPosition.Builder) {
+  val dimensions: Int = builder.dimensions
+
+  @inline private def inRange = builder.inRange _
   def incrementX: Option[GridPosition] = Some(x + 1).filter(inRange).map(x => copy(x = x))
   def decrementX: Option[GridPosition] = Some(x - 1).filter(inRange).map(x => copy(x = x))
   def incrementY: Option[GridPosition] = Some(y + 1).filter(inRange).map(y => copy(y = y))
   def decrementY: Option[GridPosition] = Some(y - 1).filter(inRange).map(y => copy(y = y))
 
-  def buildCombinationsOf4: List[List[GridPosition]] = GridPosition.buildCombinationsOf4(this)
+  def buildConnectedCombinations: List[List[GridPosition]] = GridPosition.buildConnectedCombinations(this)
+
+  private def copy(x: Int = this.x, y: Int = this.y) = new GridPosition(x, y, builder)
+
+  def unapply(pos: GridPosition): Option[(Int, Int)] = Some((pos.x, pos.y))
 }
 
 object GridPosition {
-  def inRange(i: Int): Boolean = i >= 0 && i <= 3
 
-  def buildCombinationsOf4(pos: GridPosition): List[List[GridPosition]] = {
+  class Builder private[GridPosition](val dimensions: Int) {
+    def apply(x: Int, y: Int): GridPosition = {
+      def error(cord: Char, i: Int) = s"$cord coordinate must be between 0 and 3 (inclusive) but is: $i"
+      require(inRange(x), error('X', x))
+      require(inRange(y), error('Y', y))
+
+      new GridPosition(x, y, this)
+    }
+
+    def inRange(i: Int): Boolean = i >= 0 && i < dimensions
+  }
+
+  def apply(dimensions: Int) = new Builder(dimensions)
+
+  def buildConnectedCombinations(pos: GridPosition): List[List[GridPosition]] = {
     List(
       horizontalLine(pos),
       verticalLine(pos),

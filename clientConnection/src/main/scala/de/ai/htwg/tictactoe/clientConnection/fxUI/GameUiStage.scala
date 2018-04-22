@@ -41,6 +41,7 @@ object GameUiStage {
 
 class GameUiStage private(name: String, dimensions: Int, onMouseClicked: GridPosition => Unit) {
 
+  private val posBuilder = GridPosition(dimensions)
   private val anchor = new AnchorPane
 
   private val stage = new Stage {
@@ -91,7 +92,7 @@ class GameUiStage private(name: String, dimensions: Int, onMouseClicked: GridPos
     val x = math.floor(me.x / cellWidth).toInt
     val y = math.floor(me.y / cellHeight).toInt
 
-    val pos = GridPosition(x, y)
+    val pos = posBuilder(x, y)
     onMouseClicked(pos)
   }
 
@@ -188,7 +189,7 @@ class GameUiStage private(name: String, dimensions: Int, onMouseClicked: GridPos
       x <- 0 until dimensions
       y <- 0 until dimensions
     } yield {
-      val pos = GridPosition(x, y)
+      val pos = posBuilder(x, y)
       (
         pos -> createCircle(x, y),
         pos -> createCross(x, y),
