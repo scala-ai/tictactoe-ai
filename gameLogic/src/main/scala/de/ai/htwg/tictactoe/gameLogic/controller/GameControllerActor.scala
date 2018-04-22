@@ -4,16 +4,13 @@ import akka.actor.Actor
 import akka.actor.ActorRef
 import akka.actor.Props
 import de.ai.htwg.tictactoe.clientConnection.messages.GameControllerMessages
-import de.ai.htwg.tictactoe.clientConnection.model.Player
-import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
 import de.ai.htwg.tictactoe.clientConnection.model.GameField
+import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
+import de.ai.htwg.tictactoe.clientConnection.model.Player
 
 object GameControllerActor {
-
   def props(dimensions: Int, startingPlayer: Player) = Props(new GameControllerActor(dimensions, startingPlayer))
-
 }
-
 
 class GameControllerActor private(dimensions: Int, startingPlayer: Player) extends Actor {
   private val gameFieldActor: ActorRef = context.actorOf(GameFieldControllerActor.props(startingPlayer = startingPlayer, dimensions))
@@ -25,13 +22,12 @@ class GameControllerActor private(dimensions: Int, startingPlayer: Player) exten
   private val RetCode = GameFieldControllerActor.RetCode
 
   implicit class ActorListExtension(list: List[ActorRef]) {
-    def !!(msg: Any) = list.foreach { r => r ! msg }
+    def !!(msg: Any): Unit = list.foreach { r => r ! msg }
   }
 
   private def handleGameAlreadyWon(state: GameField, players: List[ActorRef]): Unit = {
     winner.foreach { w => players !! GameControllerMessages.GameWon(w, state) }
   }
-
 
   private def handleSelectPosAck(retCode: GameFieldControllerActor.RetCode, state: GameField, pos: GridPosition, player: Player): Unit = {
     (player, retCode) match {

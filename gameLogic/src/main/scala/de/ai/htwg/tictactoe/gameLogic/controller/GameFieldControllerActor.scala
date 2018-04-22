@@ -3,12 +3,12 @@ package de.ai.htwg.tictactoe.gameLogic.controller
 import akka.actor.Actor
 import akka.actor.Props
 import de.ai.htwg.tictactoe.clientConnection.model.GameField
-import de.ai.htwg.tictactoe.clientConnection.model.Player
 import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
-import de.ai.htwg.tictactoe.gameLogic.controller.GameFieldControllerActor.SelectPosition
+import de.ai.htwg.tictactoe.clientConnection.model.Player
+import de.ai.htwg.tictactoe.gameLogic.controller.GameFieldControllerActor.RetCode.GameAlreadyFinished
 import de.ai.htwg.tictactoe.gameLogic.controller.GameFieldControllerActor.RetCode.NotThisPlayersTurn
 import de.ai.htwg.tictactoe.gameLogic.controller.GameFieldControllerActor.RetCode.PositionAlreadySelected
-import de.ai.htwg.tictactoe.gameLogic.controller.GameFieldControllerActor.RetCode.GameAlreadyFinished
+import de.ai.htwg.tictactoe.gameLogic.controller.GameFieldControllerActor.SelectPosition
 
 object GameFieldControllerActor {
 
