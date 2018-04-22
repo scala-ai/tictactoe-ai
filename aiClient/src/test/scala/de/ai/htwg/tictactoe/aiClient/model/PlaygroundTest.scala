@@ -1,5 +1,6 @@
 package de.ai.htwg.tictactoe.aiClient.model
 
+import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers
 
@@ -18,10 +19,10 @@ class PlaygroundTest extends FreeSpec with Matchers {
         println(mapToCoordinate)
 
         mapToCoordinate.size shouldBe 4
-        mapToCoordinate should contain((Coordinate(0, 0), Field.Empty))
-        mapToCoordinate should contain((Coordinate(1, 0), Field.Circle))
-        mapToCoordinate should contain((Coordinate(0, 1), Field.Cross))
-        mapToCoordinate should contain((Coordinate(1, 1), Field.Empty))
+        mapToCoordinate should contain((GridPosition(0, 0), Field.Empty))
+        mapToCoordinate should contain((GridPosition(1, 0), Field.Circle))
+        mapToCoordinate should contain((GridPosition(0, 1), Field.Cross))
+        mapToCoordinate should contain((GridPosition(1, 1), Field.Empty))
       }
     }
   }

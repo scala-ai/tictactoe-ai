@@ -2,8 +2,8 @@ package de.ai.htwg.tictactoe.aiClient.learning.action
 
 import de.ai.htwg.tictactoe.aiClient.learning.state.TicTacToeState
 import de.ai.htwg.tictactoe.aiClient.model
-import de.ai.htwg.tictactoe.aiClient.model.Coordinate
 import de.ai.htwg.tictactoe.aiClient.model.Field
+import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers
 
@@ -24,14 +24,14 @@ class TicTacToeActionSpaceTest extends FreeSpec with Matchers {
       val ticTacToeState = TicTacToeState(playground)
       val possibleActions = TicTacToeActionSpace().getPossibleActions(ticTacToeState)
       possibleActions.size shouldBe 8
-      possibleActions should contain(TicTacToeAction(Coordinate(1, 0), playground.dimensions))
-      possibleActions should contain(TicTacToeAction(Coordinate(1, 1), playground.dimensions))
-      possibleActions should contain(TicTacToeAction(Coordinate(3, 1), playground.dimensions))
-      possibleActions should contain(TicTacToeAction(Coordinate(1, 2), playground.dimensions))
-      possibleActions should contain(TicTacToeAction(Coordinate(2, 2), playground.dimensions))
-      possibleActions should contain(TicTacToeAction(Coordinate(3, 2), playground.dimensions))
-      possibleActions should contain(TicTacToeAction(Coordinate(1, 3), playground.dimensions))
-      possibleActions should contain(TicTacToeAction(Coordinate(3, 3), playground.dimensions))
+      possibleActions should contain(TicTacToeAction(GridPosition(1, 0), playground.dimensions))
+      possibleActions should contain(TicTacToeAction(GridPosition(1, 1), playground.dimensions))
+      possibleActions should contain(TicTacToeAction(GridPosition(3, 1), playground.dimensions))
+      possibleActions should contain(TicTacToeAction(GridPosition(1, 2), playground.dimensions))
+      possibleActions should contain(TicTacToeAction(GridPosition(2, 2), playground.dimensions))
+      possibleActions should contain(TicTacToeAction(GridPosition(3, 2), playground.dimensions))
+      possibleActions should contain(TicTacToeAction(GridPosition(1, 3), playground.dimensions))
+      possibleActions should contain(TicTacToeAction(GridPosition(3, 3), playground.dimensions))
     }
   }
 

@@ -6,9 +6,9 @@ import de.ai.htwg.tictactoe.aiClient.learning.action.TicTacToeAction
 import de.ai.htwg.tictactoe.aiClient.learning.action.TicTacToeActionSpace
 import de.ai.htwg.tictactoe.aiClient.learning.policy.EpsGreedy
 import de.ai.htwg.tictactoe.aiClient.learning.state.TicTacToeState
-import de.ai.htwg.tictactoe.aiClient.model.Coordinate
 import de.ai.htwg.tictactoe.aiClient.model.Field
 import de.ai.htwg.tictactoe.aiClient.model.Playground
+import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers
@@ -40,7 +40,7 @@ class EpsGreedyTest extends FreeSpec with Matchers with MockFactory {
         )
 
         val action = greedy.nextAction(TicTacToeState(playground))
-        action shouldBe TicTacToeAction(Coordinate(1, 1), playground.dimensions)
+        action shouldBe TicTacToeAction(GridPosition(1, 1), playground.dimensions)
       }
       "return a best action if rand = 0.6" in {
         val mockedRandom = mock[Random]
@@ -53,12 +53,12 @@ class EpsGreedyTest extends FreeSpec with Matchers with MockFactory {
           epsilonNbEpoch = 2,
           actionSpace = actionSpace,
           decisionCalculator = (_, _) => {
-            TicTacToeAction(Coordinate(0, 1), playground.dimensions)
+            TicTacToeAction(GridPosition(0, 1), playground.dimensions)
           }
         )
 
         val action = greedy.nextAction(TicTacToeState(playground))
-        action shouldBe TicTacToeAction(Coordinate(0, 1), playground.dimensions)
+        action shouldBe TicTacToeAction(GridPosition(0, 1), playground.dimensions)
       }
     }
     "epoch 2 of 2 should" - {
@@ -73,12 +73,12 @@ class EpsGreedyTest extends FreeSpec with Matchers with MockFactory {
           epsilonNbEpoch = 2,
           actionSpace = actionSpace,
           decisionCalculator = (_, _) => {
-            TicTacToeAction(Coordinate(0, 1), playground.dimensions)
+            TicTacToeAction(GridPosition(0, 1), playground.dimensions)
           }
         )
 
         val action = greedy.nextAction(TicTacToeState(playground))
-        action shouldBe TicTacToeAction(Coordinate(0, 1), playground.dimensions)
+        action shouldBe TicTacToeAction(GridPosition(0, 1), playground.dimensions)
       }
     }
     "epoch 0 of 2 should" - {
@@ -99,7 +99,7 @@ class EpsGreedyTest extends FreeSpec with Matchers with MockFactory {
         )
 
         val action = greedy.nextAction(TicTacToeState(playground))
-        action shouldBe TicTacToeAction(Coordinate(1, 1), playground.dimensions)
+        action shouldBe TicTacToeAction(GridPosition(1, 1), playground.dimensions)
       }
     }
   }

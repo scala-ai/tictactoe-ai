@@ -1,13 +1,15 @@
 package de.ai.htwg.tictactoe.aiClient.model
 
+import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
+
 case class Playground(
     values: Vector[Field],
     dimensions: Int,
 ) {
-  def mapToCoordinate: List[(Coordinate, Field)] = {
+  def mapToCoordinate: List[(GridPosition, Field)] = {
     (0 until dimensions).flatMap(row =>
       (0 until dimensions).map(col =>
-        (Coordinate(col, row), values(row * dimensions + col))
+        (GridPosition(col, row), values(row * dimensions + col))
       )
     )(collection.breakOut)
   }
@@ -15,12 +17,12 @@ case class Playground(
 
 object Playground {
 
-  def fromCoordinateMap(map: Map[Coordinate, Field], dimensions: Int): Playground = {
+  def fromCoordinateMap(map: Map[GridPosition, Field], dimensions: Int): Playground = {
     val values = for {
       x <- 0 until dimensions
       y <- 0 until dimensions
     } yield {
-      map.getOrElse(Coordinate(x, y), Field.Empty)
+      map.getOrElse(GridPosition(x, y), Field.Empty)
     }
 
     Playground(values.toVector, dimensions)
