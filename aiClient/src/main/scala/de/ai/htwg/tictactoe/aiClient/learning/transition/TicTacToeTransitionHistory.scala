@@ -9,5 +9,9 @@ case class TicTacToeTransitionHistory(
   override def addTransition(transition: Transition[TicTacToeAction, TicTacToeState]): TicTacToeTransitionHistory =
     copy(transitions = transition :: transitions)
 
-  override def reverseTransitions(): List[Transition[TicTacToeAction, TicTacToeState]] = transitions.reverse
+  override def reverseTransitions(): List[Transition[TicTacToeAction, TicTacToeState]] =
+    transitions.reverse
+
+  override def truncate(): TransitionHistory[TicTacToeAction, TicTacToeState] =
+    copy(transitions = List())
 }

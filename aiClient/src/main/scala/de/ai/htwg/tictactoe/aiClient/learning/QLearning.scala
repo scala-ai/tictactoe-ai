@@ -12,27 +12,25 @@ import de.ai.htwg.tictactoe.aiClient.learning.transition.TransitionFactory
 import de.ai.htwg.tictactoe.aiClient.learning.transition.TransitionHistory
 import org.nd4j.linalg.factory.Nd4j
 
-class QLearning[S <: State, A <: Action, R <: EpochResult](
-    val epochs: Int,
-    val policy: Policy[S, A],
-    val rewardCalculator: RewardCalculator[A, S, R],
-    val actionSpace: ActionSpace[S, A],
-    val neuralNet: NeuralNet,
-    val transitionHistory: TransitionHistory[A, S],
-    val transitionFactory: TransitionFactory[A, S],
-    val decisionCalculator: DecisionCalculator[S, A]
+case class QLearning[S <: State, A <: Action, R <: EpochResult](
+    policy: Policy[S, A],
+    rewardCalculator: RewardCalculator[A, S, R],
+    actionSpace: ActionSpace[S, A],
+    neuralNet: NeuralNet,
+    transitionHistory: TransitionHistory[A, S],
+    transitionFactory: TransitionFactory[A, S],
+    decisionCalculator: DecisionCalculator[S, A]
 ) extends Learning[S, A] {
-  override def getDecision(state: S): A = {
+  override def getDecision(state: S): (QLearning[S, A, R], A) = {
     // We are in state S
     // Let's run our Q function on S to get Q values for all possible actions
     val action = policy.nextAction(state)
     val reward = rewardCalculator.getImmediateReward(action, state)
-    //TODO
-    transitionHistory.addTransition(transitionFactory(state, action, reward))
-    action
+    val updatedHistory = transitionHistory.addTransition(transitionFactory(state, action, reward))
+    (copy(transitionHistory = updatedHistory), action)
   }
 
-  override def trainHistory(reward: Double): Unit = {
+  override def trainHistory(reward: Double): QLearning[S, A, R] = {
     // last calculated q value (is the next value of actual state)
     // iterate over all transitions in history backwards
     transitionHistory
@@ -53,6 +51,10 @@ class QLearning[S <: State, A <: Action, R <: EpochResult](
         neuralNet.train(input, y)
         newQVal
       })
+    copy(
+      policy = policy.incrementStep(),
+      transitionHistory = transitionHistory.truncate()
+    )
   }
 }
 object QLearning {
