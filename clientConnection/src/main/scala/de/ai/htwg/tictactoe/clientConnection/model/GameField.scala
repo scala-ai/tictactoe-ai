@@ -40,6 +40,17 @@ class GameField private[model](
     checkLengthMaxConnectedList(list.map(updatedGameField.get), 0, 0) >= GameField.noConnectedFieldRequiredToWin
   }
 
+  def getAllEmptyPos(): List[GridPosition] = {
+    val positions = for {
+      x <- 0 until dimensions
+      y <- 0 until dimensions
+    } yield {
+      posBuilder(x, y)
+    }
+
+    positions.toList.filterNot(gameField.contains)
+  }
+
 }
 
 object GameField {

@@ -1,9 +1,6 @@
 package de.ai.htwg.tictactoe.clientConnection.model.format
 
 import de.ai.htwg.tictactoe.clientConnection.model.Player
-import de.ai.htwg.tictactoe.clientConnection.model.Player
-import de.ai.htwg.tictactoe.clientConnection.model.Player
-import de.ai.htwg.tictactoe.clientConnection.model.Player
 import play.api.libs.json.JsValue
 import play.api.libs.json.JsResult
 import play.api.libs.json.Format
