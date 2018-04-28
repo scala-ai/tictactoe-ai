@@ -1,6 +1,7 @@
 package de.ai.htwg.tictactoe.aiClient.learning
 
 import de.ai.htwg.tictactoe.aiClient.learning.core.net.NeuralNet
+import grizzled.slf4j.Logging
 import org.deeplearning4j.nn.api.OptimizationAlgorithm
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration
 import org.deeplearning4j.nn.conf.layers.DenseLayer
@@ -12,7 +13,7 @@ import org.nd4j.linalg.api.ndarray.INDArray
 import org.nd4j.linalg.learning.config.Adam
 import org.nd4j.linalg.lossfunctions.LossFunctions
 
-case class TTTNeuralNet() extends NeuralNet {
+case class TTTNeuralNet() extends NeuralNet with Logging {
   private val dimensions = 4
   private val actions = dimensions * dimensions
   private val state = dimensions * dimensions
@@ -71,8 +72,10 @@ case class TTTNeuralNet() extends NeuralNet {
   override def calc(input: INDArray): INDArray = model.output(reshapeInput(input), true)
 
   override def train(input: INDArray, output: INDArray): Unit = {
+    info("start train model")
     model.fit(reshapeInput(input), reshapeInput(output))
     model.finetune()
+    info("finished train model")
   }
 
   override def persist(): Unit = ???

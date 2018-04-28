@@ -29,16 +29,19 @@ class AiActor private(player: Player, clientMainActor: ActorRef, gameControllerA
   override def receive: Receive = {
     case GameControllerMessages.PosAlreadySet(_: GridPosition) => error("Pos already set")
     case GameControllerMessages.NotYourTurn(_: GridPosition) => error("Not your turn")
-    case GameControllerMessages.PositionSet(gf: GameField) =>
-      if (gf.isCurrentPlayer(player)) {
-        debug("It is your turn")
-        val action = learningUnit.getDecision(TTTState(gf))
-        gameControllerActor ! GameControllerMessages.SetPos(action.coordinate)
-      } else {
-        debug("Hmm not your turn")
-      }
+    case GameControllerMessages.PositionSet(gf: GameField) => doGameAction(gf)
     case GameControllerMessages.GameWon(winner: Player, _: GameField) =>
       debug(s"winner: $winner")
       learningUnit.trainResult(winner == player)
+  }
+
+  private def doGameAction(gf: GameField): Unit = {
+    if (gf.isCurrentPlayer(player)) {
+      debug("It is your turn")
+      val action = learningUnit.getDecision(TTTState(gf))
+      gameControllerActor ! GameControllerMessages.SetPos(action.coordinate)
+    } else {
+      debug("Hmm not your turn")
+    }
   }
 }
