@@ -1,9 +1,14 @@
 package de.ai.htwg.tictactoe.gameLogic.controller
 
+import java.util.concurrent.TimeUnit
+
+import scala.concurrent.ExecutionContextExecutor
+
 import akka.actor.Actor
 import akka.actor.ActorRef
 import akka.actor.Props
 import akka.pattern.ask
+import akka.util.Timeout
 import de.ai.htwg.tictactoe.clientConnection.messages.GameControllerMessages
 import de.ai.htwg.tictactoe.clientConnection.model.GameField
 import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
@@ -56,6 +61,8 @@ class GameControllerActor private(dimensions: Int, startingPlayer: Player) exten
 
   private def sendCurrentState(receiver: Player): Unit = {
     val s = sender()
+    implicit val timeout: Timeout = Timeout(200, TimeUnit.MILLISECONDS)
+    implicit val executionContext: ExecutionContextExecutor = context.dispatcher
     gameFieldActor.ask(GameFieldControllerActor.GetGrid).mapTo[GameFieldControllerActor.GetGridAck].foreach {
       case GameFieldControllerActor.GetGridAck(state) =>
         s ! GameControllerMessages.PositionSet(state)
