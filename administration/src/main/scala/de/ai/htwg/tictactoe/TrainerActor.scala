@@ -6,6 +6,7 @@ import de.ai.htwg.tictactoe.TrainerActor.StartTraining
 import de.ai.htwg.tictactoe.aiClient.AiActor
 import de.ai.htwg.tictactoe.aiClient.AiActor.RegisterGame
 import de.ai.htwg.tictactoe.clientConnection.messages.GameControllerMessages
+import de.ai.htwg.tictactoe.clientConnection.messages.GameControllerMessages.GameFinished
 import de.ai.htwg.tictactoe.clientConnection.model.Player
 import de.ai.htwg.tictactoe.gameLogic.controller.GameControllerActor
 import grizzled.slf4j.Logging
@@ -22,9 +23,12 @@ class TrainerActor extends Actor with Logging {
   private val circle = context.actorOf(AiActor.props())
   private val cross = context.actorOf(AiActor.props())
 
+  private var remainingEpochs = 0
+
   override def receive: Receive = {
-    case StartTraining(count) =>
-      info("Start training with" + count)
+    case StartTraining(epochs) =>
+      remainingEpochs = epochs
+      info(s"Start training with $epochs remaining epochs")
       // TODO listen for game win and start next one
       val gameName = "game"
       val game = context.actorOf(GameControllerActor.props(dimensions, Player.Cross), gameName)
@@ -32,6 +36,7 @@ class TrainerActor extends Actor with Logging {
       cross ! RegisterGame(Player.Cross, game)
       // register itself as watcher TODO: use a general watch registration message
       game ! GameControllerMessages.RegisterCircle
+    case GameFinished(_, _) if remainingEpochs > 0 => self ! StartTraining(remainingEpochs - 1)
   }
 
 }
