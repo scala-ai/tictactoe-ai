@@ -3,8 +3,8 @@ package de.ai.htwg.tictactoe.playerClient
 import akka.actor.Actor
 import akka.actor.ActorRef
 import akka.actor.Props
-import de.ai.htwg.tictactoe.clientConnection.fxUI.ClientMainActor
 import de.ai.htwg.tictactoe.clientConnection.fxUI.GameUiActor
+import de.ai.htwg.tictactoe.clientConnection.fxUI.UiMainActor
 import de.ai.htwg.tictactoe.clientConnection.messages.GameControllerMessages
 import de.ai.htwg.tictactoe.clientConnection.model.GameField
 import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
@@ -24,7 +24,7 @@ class PlayerUiActor private(player: Player, clientMainActor: ActorRef, gameContr
     case Player.Circle => gameControllerActor ! GameControllerMessages.RegisterCircle
     case Player.Cross => gameControllerActor ! GameControllerMessages.RegisterCross
   }
-  clientMainActor ! ClientMainActor.CreateGameUI(s"$gameName-$player")
+  clientMainActor ! UiMainActor.CreateGameUI(s"$gameName-$player")
 
   private def handleMouseEvent(pos: GridPosition): Unit = {
     self ! SelectPos(pos)
@@ -50,7 +50,7 @@ class PlayerUiActor private(player: Player, clientMainActor: ActorRef, gameContr
   }
 
   def receivePreStart: Receive = {
-    case ClientMainActor.ReturnGameUI(ref) => context.become(new MainState(ref))
+    case UiMainActor.ReturnGameUI(ref) => context.become(new MainState(ref))
   }
 
   override def receive: Receive = receivePreStart

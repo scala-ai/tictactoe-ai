@@ -5,6 +5,6 @@ import akka.actor.ActorSystem
 object TrainMain extends App {
   val system = ActorSystem()
 
-  val game = system.actorOf(TrainerActor.props(system), "trainerActor")
-  game ! TrainerActor.StartTraining(10)
+  val trainer = system.actorOf(TrainerActor.props(), "trainerActor")
+  trainer ! TrainerActor.StartTraining(10)
 }

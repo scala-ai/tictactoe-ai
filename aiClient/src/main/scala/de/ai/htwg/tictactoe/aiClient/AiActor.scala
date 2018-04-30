@@ -13,35 +13,45 @@ import grizzled.slf4j.Logging
 
 
 object AiActor {
-  def props(player: Player, clientMainActor: ActorRef, gameControllerActor: ActorRef, gameName: String) =
-    Props(new AiActor(player, clientMainActor, gameControllerActor, gameName))
+  def props() =
+    Props(new AiActor())
+
+  case class RegisterGame(player: Player, gameControllerActor: ActorRef)
 }
 
-class AiActor private(player: Player, clientMainActor: ActorRef, gameControllerActor: ActorRef, gameName: String)
-  extends Actor with Logging {
-  player match {
-    case Player.Circle => gameControllerActor ! GameControllerMessages.RegisterCircle
-    case Player.Cross => gameControllerActor ! GameControllerMessages.RegisterCross
-  }
+class AiActor private() extends Actor with Logging {
 
-  val learningUnit = TTTLearningProcessor()
+  // TODO remove this
+  private var currentPlayer: Player = Player.Cross
+
+  private val learningUnit = TTTLearningProcessor()
 
   override def receive: Receive = {
     case GameControllerMessages.PosAlreadySet(_: GridPosition) => error("Pos already set")
     case GameControllerMessages.NotYourTurn(_: GridPosition) => error("Not your turn")
-    case GameControllerMessages.PositionSet(gf: GameField) => doGameAction(gf)
+    case GameControllerMessages.PositionSet(gf: GameField) => doGameAction(gf, sender())
     case GameControllerMessages.GameFinished(result: GameControllerMessages.GameResult, _: GameField) =>
       debug(s"game finished")
       learningUnit.trainResult(result == GameControllerMessages.GameWon)
+    case AiActor.RegisterGame(p, game) => handleSetGame(p, game)
   }
 
-  private def doGameAction(gf: GameField): Unit = {
-    if (gf.isCurrentPlayer(player)) {
-      debug("It is your turn")
+  private def handleSetGame(player: Player, gameControllerActor: ActorRef): Unit = {
+    currentPlayer = player
+    player match {
+      case Player.Circle => gameControllerActor ! GameControllerMessages.RegisterCircle
+      case Player.Cross => gameControllerActor ! GameControllerMessages.RegisterCross
+    }
+    info("ai player is ready to play")
+  }
+
+  private def doGameAction(gf: GameField, gameControllerActor: ActorRef): Unit = {
+    if (gf.isCurrentPlayer(currentPlayer)) {
+      trace("It is your turn")
       val action = learningUnit.getDecision(TTTState(gf))
       gameControllerActor ! GameControllerMessages.SetPos(action.coordinate)
     } else {
-      debug("Hmm not your turn")
+      trace("Hmm not your turn")
     }
   }
 }
