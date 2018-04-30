@@ -13,6 +13,7 @@ object GameControllerMessages {
   case class NotYourTurn(pos: GridPosition)
   case class GameFinished(result: GameResult, gf: GameField)
   case class PositionSet(gf: GameField)
+  case object YourTurn
 
 
   sealed trait GameResult

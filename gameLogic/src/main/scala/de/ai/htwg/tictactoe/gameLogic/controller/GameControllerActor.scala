@@ -3,6 +3,7 @@ package de.ai.htwg.tictactoe.gameLogic.controller
 import akka.actor.Actor
 import akka.actor.ActorRef
 import akka.actor.Props
+import akka.pattern.ask
 import de.ai.htwg.tictactoe.clientConnection.messages.GameControllerMessages
 import de.ai.htwg.tictactoe.clientConnection.model.GameField
 import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
@@ -53,12 +54,28 @@ class GameControllerActor private(dimensions: Int, startingPlayer: Player) exten
     }
   }
 
+  private def sendCurrentState(receiver: Player): Unit = {
+    val s = sender()
+    gameFieldActor.ask(GameFieldControllerActor.GetGrid).mapTo[GameFieldControllerActor.GetGridAck].foreach {
+      case GameFieldControllerActor.GetGridAck(state) =>
+        s ! GameControllerMessages.PositionSet(state)
+        if (state.isCurrentPlayer(receiver)) s ! GameControllerMessages.YourTurn
+    }
+  }
+
   override def receive: Receive = {
     case GameControllerMessages.SetPos(pos) if playerListCircle.contains(sender()) => gameFieldActor ! GameFieldControllerActor.SelectPosition(Player.Circle, pos)
     case GameControllerMessages.SetPos(pos) if playerListCross.contains(sender()) => gameFieldActor ! GameFieldControllerActor.SelectPosition(Player.Cross, pos)
     case GameFieldControllerActor.SelectPositionAck(player, pos, state, retCode) => handleSelectPosAck(retCode, state, pos, player)
-    case GameControllerMessages.RegisterCircle => playerListCircle = sender() :: playerListCircle
-    case GameControllerMessages.RegisterCross => playerListCross = sender() :: playerListCross
+
+    case GameControllerMessages.RegisterCircle =>
+      playerListCircle = sender() :: playerListCircle
+      sendCurrentState(Player.Circle)
+
+    case GameControllerMessages.RegisterCross =>
+      playerListCross = sender() :: playerListCross
+      sendCurrentState(Player.Cross)
+
     case GameControllerMessages.Unregister =>
       playerListCircle = playerListCircle.filterNot(_ == sender())
       playerListCross = playerListCross.filterNot(_ == sender())
