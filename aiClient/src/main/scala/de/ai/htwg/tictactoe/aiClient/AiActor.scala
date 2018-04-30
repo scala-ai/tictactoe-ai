@@ -42,6 +42,7 @@ class AiActor private() extends Actor with Logging {
       case Player.Circle => gameControllerActor ! GameControllerMessages.RegisterCircle
       case Player.Cross => gameControllerActor ! GameControllerMessages.RegisterCross
     }
+    info("ai player is ready to play")
   }
 
   private def doGameAction(gf: GameField, gameControllerActor: ActorRef): Unit = {
