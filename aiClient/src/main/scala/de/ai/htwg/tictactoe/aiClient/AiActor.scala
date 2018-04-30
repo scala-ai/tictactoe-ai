@@ -30,9 +30,9 @@ class AiActor private(player: Player, clientMainActor: ActorRef, gameControllerA
     case GameControllerMessages.PosAlreadySet(_: GridPosition) => error("Pos already set")
     case GameControllerMessages.NotYourTurn(_: GridPosition) => error("Not your turn")
     case GameControllerMessages.PositionSet(gf: GameField) => doGameAction(gf)
-    case GameControllerMessages.GameWon(winner: Player, _: GameField) =>
-      debug(s"winner: $winner")
-      learningUnit.trainResult(winner == player)
+    case GameControllerMessages.GameFinished(result: GameControllerMessages.GameResult, _: GameField) =>
+      debug(s"game finished")
+      learningUnit.trainResult(result == GameControllerMessages.GameWon)
   }
 
   private def doGameAction(gf: GameField): Unit = {

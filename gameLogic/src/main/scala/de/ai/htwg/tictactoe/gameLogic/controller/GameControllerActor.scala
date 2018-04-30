@@ -25,23 +25,28 @@ class GameControllerActor private(dimensions: Int, startingPlayer: Player) exten
     def !!(msg: Any): Unit = list.foreach { r => r ! msg }
   }
 
-  private def handleGameAlreadyWon(state: GameField, players: List[ActorRef]): Unit = {
-    winner.foreach { w => players !! GameControllerMessages.GameWon(w, state) }
+  private def handleGameAlreadyFinished(state: GameField, players: List[ActorRef], receiver: Player): Unit = {
+    // TODO handle Game Draw
+    winner.foreach {
+      case `receiver` => players !! GameControllerMessages.GameFinished(GameControllerMessages.GameWon, state)
+      case _ => players !! GameControllerMessages.GameFinished(GameControllerMessages.GameLost, state)
+    }
   }
 
   private def handleSelectPosAck(retCode: GameFieldControllerActor.RetCode, state: GameField, pos: GridPosition, player: Player): Unit = {
     (player, retCode) match {
+      case (_, RetCode.PositionAlreadySelected) => ??? // TODO Nicolas
       case (_, RetCode.PositionSet) =>
         playerListCircle !! GameControllerMessages.PositionSet(state)
         playerListCross !! GameControllerMessages.PositionSet(state)
 
       case (_, RetCode.GameWon) =>
         winner = Some(player)
-        playerListCircle !! GameControllerMessages.GameWon(player, state)
-        playerListCross !! GameControllerMessages.GameWon(player, state)
+        handleGameAlreadyFinished(state, playerListCircle, Player.Circle)
+        handleGameAlreadyFinished(state, playerListCross, Player.Cross)
 
-      case (Player.Circle, RetCode.GameAlreadyFinished) => handleGameAlreadyWon(state, playerListCircle)
-      case (Player.Cross, RetCode.GameAlreadyFinished) => handleGameAlreadyWon(state, playerListCross)
+      case (Player.Circle, RetCode.GameAlreadyFinished) => handleGameAlreadyFinished(state, playerListCircle, Player.Circle)
+      case (Player.Cross, RetCode.GameAlreadyFinished) => handleGameAlreadyFinished(state, playerListCross, Player.Cross)
 
       case (Player.Circle, RetCode.NotThisPlayersTurn) => playerListCircle !! GameControllerMessages.NotYourTurn(pos)
       case (Player.Cross, RetCode.NotThisPlayersTurn) => playerListCross !! GameControllerMessages.NotYourTurn(pos)

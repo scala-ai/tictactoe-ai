@@ -40,8 +40,9 @@ class PlayerUiActor private(player: Player, clientMainActor: ActorRef, gameContr
       case GameControllerMessages.PosAlreadySet(_: GridPosition) => debug("position already set")
       case GameControllerMessages.NotYourTurn(_: GridPosition) => debug("not your turn")
       case GameControllerMessages.PositionSet(gf: GameField) => uiActor ! GameUiActor.PrintField(gf)
-      case GameControllerMessages.GameWon(winner: Player, gf: GameField) =>
-        debug(s"winner: $winner")
+      case GameControllerMessages.GameFinished(result: GameControllerMessages.GameResult, gf: GameField) =>
+        if(result == GameControllerMessages.GameWon)
+          debug(s"winner: $player")
         uiActor ! GameUiActor.PrintField(gf)
     }
 
