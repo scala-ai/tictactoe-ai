@@ -9,6 +9,7 @@ import de.ai.htwg.tictactoe.aiClient.learning.core.state.EpochResult
 import de.ai.htwg.tictactoe.aiClient.learning.core.state.State
 import de.ai.htwg.tictactoe.aiClient.learning.core.transition.TransitionFactory
 import de.ai.htwg.tictactoe.aiClient.learning.core.transition.TransitionHistory
+import grizzled.slf4j.Logging
 import org.nd4j.linalg.factory.Nd4j
 
 case class QLearning[S <: State, A <: Action, R <: EpochResult](
@@ -18,7 +19,8 @@ case class QLearning[S <: State, A <: Action, R <: EpochResult](
     transitionHistory: TransitionHistory[A, S],
     transitionFactory: TransitionFactory[A, S],
     actionSpace: ActionSpace[S, A]
-) extends Learning[S, A, R] {
+) extends Learning[S, A, R] with Logging {
+
   override def getDecision(state: S): (QLearning[S, A, R], A) = {
     // We are in state S
     // Let's run our Q function on S to get Q values for all possible actions
@@ -33,9 +35,12 @@ case class QLearning[S <: State, A <: Action, R <: EpochResult](
     // last calculated q value (is the next value of actual state)
     // iterate over all transitions in history backwards
     val epochReward = rewardCalculator.getLongTermReward(epochResult)
+    debug("start training (reward = " + epochReward + ")")
     transitionHistory
       .reverseTransitions()
       .foldLeft(epochReward)((futureQVal, transition) => {
+        debug("train transition " + transition.action)
+
         val state = transition.observation
         val action = transition.action
         val reward = transition.reward
@@ -53,6 +58,7 @@ case class QLearning[S <: State, A <: Action, R <: EpochResult](
         neuralNet.train(input, y)
         newQVal
       })
+    debug("training finished")
     copy(
       policy = policy.incrementStep(),
       transitionHistory = transitionHistory.truncate()

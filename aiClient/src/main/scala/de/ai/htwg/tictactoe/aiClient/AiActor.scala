@@ -46,11 +46,11 @@ class AiActor private() extends Actor with Logging {
 
   private def doGameAction(gf: GameField, gameControllerActor: ActorRef): Unit = {
     if (gf.isCurrentPlayer(currentPlayer)) {
-      debug("It is your turn")
+      trace("It is your turn")
       val action = learningUnit.getDecision(TTTState(gf))
       gameControllerActor ! GameControllerMessages.SetPos(action.coordinate)
     } else {
-      debug("Hmm not your turn")
+      trace("Hmm not your turn")
     }
   }
 }

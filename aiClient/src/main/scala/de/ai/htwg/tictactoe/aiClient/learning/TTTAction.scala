@@ -12,4 +12,6 @@ case class TTTAction(
   override def asVector: INDArray =
     Nd4j.zeros(dimensions, dimensions)
       .putScalar(Array(coordinate.x, coordinate.y), 1)
+
+  override def toString: String = "[" + coordinate.x + "," + coordinate.y + "] in " + dimensions + "x" + dimensions
 }

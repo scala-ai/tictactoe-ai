@@ -5,6 +5,7 @@ import akka.actor.Props
 import de.ai.htwg.tictactoe.TrainerActor.StartTraining
 import de.ai.htwg.tictactoe.aiClient.AiActor
 import de.ai.htwg.tictactoe.aiClient.AiActor.RegisterGame
+import de.ai.htwg.tictactoe.clientConnection.messages.GameControllerMessages
 import de.ai.htwg.tictactoe.clientConnection.model.Player
 import de.ai.htwg.tictactoe.gameLogic.controller.GameControllerActor
 import grizzled.slf4j.Logging
@@ -29,6 +30,8 @@ class TrainerActor extends Actor with Logging {
       val game = context.actorOf(GameControllerActor.props(dimensions, Player.Cross), gameName)
       circle ! RegisterGame(Player.Circle, game)
       cross ! RegisterGame(Player.Cross, game)
+      // register itself as watcher TODO: use a general watch registration message
+      game ! GameControllerMessages.RegisterCircle
   }
 
 }

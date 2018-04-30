@@ -72,10 +72,10 @@ case class TTTNeuralNet() extends NeuralNet with Logging {
   override def calc(input: INDArray): INDArray = model.output(reshapeInput(input), true)
 
   override def train(input: INDArray, output: INDArray): Unit = {
-    info("start train model")
+    trace("train network")
     model.fit(reshapeInput(input), reshapeInput(output))
     model.finetune()
-    info("finished train model")
+    trace("finished train network")
   }
 
   override def persist(): Unit = ???
