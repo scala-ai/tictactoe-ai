@@ -19,17 +19,30 @@ object TicTacToeBuild {
   val scalaVersion = Keys.scalaVersion := scalaVersionNumber
 
   val scalaOptions = scalacOptions ++= Seq(
-    "-deprecation", // Emit warning and location for usages of deprecated APIs.
-    "-feature", // Emit warning and location for usages of features that should be imported explicitly.
-    "-unchecked", // Enable additional warnings where generated code depends on assumptions.
-    // "-Xfatal-warnings", // Fail the compilation if there are any warnings.
-    // FIXME This is a confirmed Scala bug in 2.12 Xlint will produce Position.point on NoPosition Error
-    // "-Xlint", // Enable recommended additional warnings.
-    "-Ywarn-adapted-args", // Warn if an argument list is modified to match the receiver.
-    "-Ywarn-dead-code", // Warn when dead code is identified.
-    "-Ywarn-inaccessible", // Warn about inaccessible types in method signatures.
-    "-Ywarn-nullary-override", // Warn when non-nullary overrides nullary, e.g. def foo() over def foo.
-    "-Ywarn-numeric-widen" // Warn when numerics are widened.
+    "-Xlint:adapted-args", //               Warn if an argument list is modified to match the receiver.
+    "-Xlint:nullary-unit", //               Warn when nullary methods return Unit.
+    "-Xlint:inaccessible", //               Warn about inaccessible types in method signatures.
+    "-Xlint:nullary-override", //           Warn when non-nullary `def f()' overrides nullary `def f'.
+    "-Xlint:infer-any", //                  Warn when a type argument is inferred to be `Any`.
+    "-Xlint:missing-interpolator", //       A string literal appears to be missing an interpolator id.
+    "-Xlint:doc-detached", //               A Scaladoc comment appears to be detached from its element.
+    "-Xlint:private-shadow", //             A private field (or class parameter) shadows a superclass field.
+    "-Xlint:type-parameter-shadow", //      A local type parameter shadows a type already in scope.
+    "-Xlint:poly-implicit-overload", //     Parameterized overloaded implicit methods are not visible as view bounds.
+    "-Xlint:option-implicit", //            Option.apply used implicit view.
+    "-Xlint:delayedinit-select", //         Selecting member of DelayedInit.
+    "-Xlint:by-name-right-associative", //  By-name parameter of right associative operator.
+    "-Xlint:package-object-classes", //     Class or object defined in package object.
+    "-Xlint:unsound-match", //              Pattern match may not be typesafe.
+    "-Xlint:stars-align", //                Pattern sequence wildcard must align with sequence component.
+    "-Xlint:constant", //                   Evaluation of a constant arithmetic expression results in an error.
+    "-Xlint:unused", //                     Enable -Ywarn-unused:imports,privates,locals,implicits.
+    "-deprecation", //                      Emit warning and location for usages of deprecated APIs.
+    "-feature", //                          Emit warning and location for usages of features that should be imported explicitly.
+    "-unchecked", //                        Enable additional warnings where generated code depends on assumptions.
+    // "-Xfatal-warnings", //               Fail the compilation if there are any warnings.
+    "-Ywarn-dead-code", //                  Warn when dead code is identified.
+    "-Ywarn-numeric-widen" //               Warn when numerics are widened.
   )
 
 
