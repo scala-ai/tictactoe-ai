@@ -2,30 +2,30 @@ package de.ai.htwg.tictactoe.clientConnection.fxUI
 
 import java.util.concurrent.CountDownLatch
 
-import akka.actor.Props
 import akka.actor.Actor
 import akka.actor.ActorRef
-import de.ai.htwg.tictactoe.clientConnection.fxUI.ClientMainActor.ReturnGameUI
+import akka.actor.Props
+import de.ai.htwg.tictactoe.clientConnection.fxUI.UiMainActor.ReturnGameUI
 import scalafx.application.JFXApp
-import scalafx.application.Platform
 import scalafx.application.JFXApp.PrimaryStage
+import scalafx.application.Platform
 
-object ClientMainActor {
+object UiMainActor {
 
   @volatile
-  private[ClientMainActor] var hasStarted = false
+  private[UiMainActor] var hasStarted = false
 
-  def props(dimensions: Int): Props = Props(new ClientMainActor(dimensions))
+  def props(dimensions: Int): Props = Props(new UiMainActor(dimensions))
 
   case class CreateGameUI(name: String)
   case class ReturnGameUI(gameUiActor: ActorRef)
 }
 
-class ClientMainActor private(dimensions: Int) extends Actor {
+class UiMainActor private(dimensions: Int) extends Actor {
   // just to make sure there is only ever one one ui actor.
-  ClientMainActor.synchronized {
-    if (ClientMainActor.hasStarted) throw new IllegalStateException("ClientMainActor already started")
-    ClientMainActor.hasStarted = true
+  UiMainActor.synchronized {
+    if (UiMainActor.hasStarted) throw new IllegalStateException("ClientMainActor already started")
+    UiMainActor.hasStarted = true
   }
 
   private val appStartedLatch = new CountDownLatch(1)
@@ -61,12 +61,13 @@ class ClientMainActor private(dimensions: Int) extends Actor {
   override def postStop(): Unit = {
     Platform.exit()
     appThread.join()
-    ClientMainActor.synchronized {
-      ClientMainActor.hasStarted = false
+    UiMainActor.synchronized {
+      UiMainActor.hasStarted = false
     }
   }
+
   override def receive: Receive = {
-    case ClientMainActor.CreateGameUI(name: String) => handleAddStage(name)
+    case UiMainActor.CreateGameUI(name: String) => handleAddStage(name)
   }
 }
 
