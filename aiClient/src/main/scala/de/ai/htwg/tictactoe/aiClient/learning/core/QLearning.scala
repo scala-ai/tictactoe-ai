@@ -77,5 +77,5 @@ case class QLearning[S <: State, A <: Action, R <: EpochResult](
 }
 object QLearning {
   val alpha = 0.9
-  val gamma = 0.999
+  val gamma = 0.6
 }

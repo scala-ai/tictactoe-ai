@@ -24,7 +24,7 @@ object TTTLearningProcessor {
       policy = EpsGreedy[TTTState, TTTAction](
         random = Random,
         minEpsilon = 0.01f,
-        epsilonNbEpoch = 100
+        epsilonNbEpoch = 100000
       ),
       rewardCalculator = TTTRewardCalculator(),
       neuralNet = TTTNeuralNet(),
