@@ -30,7 +30,7 @@ class TrainerActor extends Actor with Logging {
       remainingEpochs = epochs
       info(s"Start training with $epochs remaining epochs")
       // TODO listen for game win and start next one
-      val gameName = "game"
+      val gameName = "game" + epochs
       val game = context.actorOf(GameControllerActor.props(dimensions, Player.Cross), gameName)
       circle ! RegisterGame(Player.Circle, game)
       cross ! RegisterGame(Player.Cross, game)
