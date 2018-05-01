@@ -51,6 +51,11 @@ class GameControllerActor private(dimensions: Int, startingPlayer: Player) exten
         handleGameAlreadyFinished(state, playerListCircle, Player.Circle)
         handleGameAlreadyFinished(state, playerListCross, Player.Cross)
 
+      case (_, RetCode.GameUndecided) =>
+        winner = None
+        playerListCircle !! GameControllerMessages.GameFinished(GameControllerMessages.GameDraw, state)
+        playerListCross !! GameControllerMessages.GameFinished(GameControllerMessages.GameDraw, state)
+
       case (Player.Circle, RetCode.GameAlreadyFinished) => handleGameAlreadyFinished(state, playerListCircle, Player.Circle)
       case (Player.Cross, RetCode.GameAlreadyFinished) => handleGameAlreadyFinished(state, playerListCross, Player.Cross)
 

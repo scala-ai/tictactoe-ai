@@ -12,6 +12,7 @@ class GameField private[model](
   val posBuilder = GridPosition(dimensions)
 
   def posIsSet(pos: GridPosition): Boolean = gameField.contains(pos)
+
   def isCurrentPlayer(p: Player): Boolean = p == current
 
   def setPos(x: Int, y: Int): GameField = {
@@ -21,7 +22,8 @@ class GameField private[model](
   def setPos(pos: GridPosition): GameField = {
     require(!isFinished, "Game is already finished") // FIXME solve in return type. Don't throw an exception here.
     val updatedGameField = this.gameField + (pos -> current)
-    val finished = pos.buildConnectedCombinations.exists(checkIsWinCondition(updatedGameField))
+    val finished = pos.buildConnectedCombinations.exists(checkIsWinCondition(updatedGameField)) ||
+      getAllEmptyPos(updatedGameField).isEmpty
     new GameField(
       if (finished) current else Player.other(current),
       dimensions,
@@ -40,7 +42,9 @@ class GameField private[model](
     checkLengthMaxConnectedList(list.map(updatedGameField.get), 0, 0) >= GameField.noConnectedFieldRequiredToWin
   }
 
-  def getAllEmptyPos(): List[GridPosition] = {
+  def getAllEmptyPos: List[GridPosition] = getAllEmptyPos(gameField)
+
+  private def getAllEmptyPos(gf: Map[GridPosition, Player]): List[GridPosition] = {
     val positions = for {
       x <- 0 until dimensions
       y <- 0 until dimensions
@@ -48,8 +52,10 @@ class GameField private[model](
       posBuilder(x, y)
     }
 
-    positions.toList.filterNot(gameField.contains)
+    positions.toList.filterNot(gf.contains)
   }
+
+  def finishedUndecided = getAllEmptyPos.isEmpty
 
   def getPos(pos: GridPosition): Option[Player] = gameField.get(pos)
 

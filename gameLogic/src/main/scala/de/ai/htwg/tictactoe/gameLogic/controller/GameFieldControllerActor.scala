@@ -25,6 +25,7 @@ object GameFieldControllerActor {
   object RetCode {
     case object PositionSet extends RetCode
     case object GameWon extends RetCode
+    case object GameUndecided extends RetCode
     case object GameAlreadyFinished extends RetCode
     case object PositionAlreadySelected extends RetCode
     case object NotThisPlayersTurn extends RetCode
@@ -35,6 +36,7 @@ object GameFieldControllerActor {
 class GameFieldControllerActor private(startingPlayer: Player, dimensions: Int) extends Actor {
   var gameField: GameField = GameField(startingPlayer, dimensions)
   private val comp = GameFieldControllerActor
+
   override def receive: Receive = {
 
     case GameFieldControllerActor.GetGrid => sender ! GameFieldControllerActor.GetGridAck(gameField)
@@ -45,7 +47,11 @@ class GameFieldControllerActor private(startingPlayer: Player, dimensions: Int) 
     case SelectPosition(p, pos) =>
       gameField = gameField.setPos(pos)
       val ret = if (gameField.isFinished) {
-        comp.RetCode.GameWon
+        if (gameField.finishedUndecided) {
+          comp.RetCode.GameUndecided
+        } else {
+          comp.RetCode.GameWon
+        }
       } else {
         comp.RetCode.PositionSet
       }
