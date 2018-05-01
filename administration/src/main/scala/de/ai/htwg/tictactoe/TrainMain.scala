@@ -18,5 +18,5 @@ object TrainMain extends App {
 
   // TODO this delay is necessary, cause the actor needs some time to init its neural network
   // also fixes the logger not initialized problem
-  delay(() => trainer ! TrainerActor.StartTraining(3), 4000)
+  delay(() => trainer ! TrainerActor.StartTraining(1000), 4000)
 }

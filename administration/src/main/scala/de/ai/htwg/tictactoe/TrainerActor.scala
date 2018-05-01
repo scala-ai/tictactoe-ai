@@ -40,13 +40,13 @@ class TrainerActor extends Actor with Logging {
       circle ! RegisterGame(Player.Circle, game)
       cross ! RegisterGame(Player.Cross, game)
 
-    case AiActor.TrainingFinished if remainingEpochs == 0 =>
+    case AiActor.TrainingFinished if remainingEpochs == 1 =>
       info(s"Start test run after training")
       sequence += 1
       val gameName = "test-game" + sequence
       val game = context.actorOf(GameControllerActor.props(dimensions, Player.Cross), gameName)
       circle ! RegisterGame(Player.Circle, game)
-      val realPlayer = context.actorOf(PlayerUiActor.props(Player.Cross, clientMain, game, gameName))
+      context.actorOf(PlayerUiActor.props(Player.Cross, clientMain, game, gameName))
 
     case AiActor.TrainingFinished => {
       readyActors = sender() :: readyActors
