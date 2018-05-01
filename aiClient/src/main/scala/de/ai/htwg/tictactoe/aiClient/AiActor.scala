@@ -24,7 +24,7 @@ class AiActor private() extends Actor with Logging {
   // TODO remove this
   private var currentPlayer: Player = Player.Cross
 
-  private val learningUnit = TTTLearningProcessor()
+  private var learningUnit = TTTLearningProcessor()
 
   override def receive: Receive = {
     case GameControllerMessages.PosAlreadySet(_: GridPosition) => error("Pos already set")
@@ -32,7 +32,7 @@ class AiActor private() extends Actor with Logging {
     case GameControllerMessages.PositionSet(gf: GameField) => doGameAction(gf, sender())
     case GameControllerMessages.GameFinished(result: GameControllerMessages.GameResult, _: GameField) =>
       debug(s"game finished")
-      learningUnit.trainResult(result == GameControllerMessages.GameWon)
+      learningUnit = learningUnit.trainResult(result == GameControllerMessages.GameWon)
     case AiActor.RegisterGame(p, game) => handleSetGame(p, game)
   }
 
@@ -48,7 +48,8 @@ class AiActor private() extends Actor with Logging {
   private def doGameAction(gf: GameField, gameControllerActor: ActorRef): Unit = {
     if (gf.isCurrentPlayer(currentPlayer)) {
       trace("It is your turn")
-      val action = learningUnit.getDecision(TTTState(gf))
+      val (action, newLearningUnit) = learningUnit.getDecision(TTTState(gf))
+      learningUnit = newLearningUnit
       gameControllerActor ! GameControllerMessages.SetPos(action.coordinate)
     } else {
       trace("Hmm not your turn")

@@ -66,7 +66,11 @@ case class QLearning[S <: State, A <: Action, R <: EpochResult](
   }
 
   private def calcBestAction(state: S, possibleActions: List[A]): A = possibleActions
-    .map(a => (a, neuralNet.calc(a.asVector).getDouble(0)))
+    .map(a => {
+      val input = Nd4j.concat(1, state.asVector, a.asVector)
+      val result = neuralNet.calc(input).getDouble(0)
+      (a, result)
+    })
     .maxBy(_._2)
     ._1
 
