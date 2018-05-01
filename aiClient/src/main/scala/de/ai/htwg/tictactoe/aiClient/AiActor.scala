@@ -28,11 +28,11 @@ class AiActor private() extends Actor with Logging {
   private var learningUnit = TTTLearningProcessor()
 
   override def receive: Receive = {
-    case GameControllerMessages.PosAlreadySet(_: GridPosition) => error("Pos already set")
-    case GameControllerMessages.NotYourTurn(_: GridPosition) => error("Not your turn")
+    case GameControllerMessages.PosAlreadySet(_: GridPosition) => error(s"$currentPlayer: Pos already set")
+    case GameControllerMessages.NotYourTurn(_: GridPosition) => error(s"$currentPlayer: Not your turn")
     case GameControllerMessages.PositionSet(gf: GameField) => doGameAction(gf, sender())
     case GameControllerMessages.GameFinished(result: GameControllerMessages.GameResult, _: GameField) =>
-      debug(s"game finished")
+      debug(s"$currentPlayer: game finished, result: $result")
       learningUnit = learningUnit.trainResult(result match {
         case GameControllerMessages.GameWon => TTTEpochResult.won
         case GameControllerMessages.GameLost => TTTEpochResult.lost
@@ -47,17 +47,17 @@ class AiActor private() extends Actor with Logging {
       case Player.Circle => gameControllerActor ! GameControllerMessages.RegisterCircle
       case Player.Cross => gameControllerActor ! GameControllerMessages.RegisterCross
     }
-    info("ai player is ready to play")
+    info(s"$currentPlayer: ai player is ready to play")
   }
 
   private def doGameAction(gf: GameField, gameControllerActor: ActorRef): Unit = {
     if (gf.isCurrentPlayer(currentPlayer)) {
-      trace("It is your turn")
+      trace(s"$currentPlayer: It is your turn")
       val (action, newLearningUnit) = learningUnit.getDecision(TTTState(gf))
       learningUnit = newLearningUnit
       gameControllerActor ! GameControllerMessages.SetPos(action.coordinate)
     } else {
-      trace("Hmm not your turn")
+      trace(s"$currentPlayer: Hmm not your turn")
     }
   }
 }
