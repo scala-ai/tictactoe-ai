@@ -3,6 +3,7 @@ package de.ai.htwg.tictactoe.aiClient
 import akka.actor.Actor
 import akka.actor.ActorRef
 import akka.actor.Props
+import de.ai.htwg.tictactoe.aiClient.AiActor.TrainingFinished
 import de.ai.htwg.tictactoe.aiClient.learning.TTTEpochResult
 import de.ai.htwg.tictactoe.aiClient.learning.TTTLearningProcessor
 import de.ai.htwg.tictactoe.aiClient.learning.TTTState
@@ -14,13 +15,15 @@ import grizzled.slf4j.Logging
 
 
 object AiActor {
-  def props() =
-    Props(new AiActor())
+  def props() = Props(new AiActor(List()))
+
+  def props(watchers: List[ActorRef]) = Props(new AiActor(watchers))
 
   case class RegisterGame(player: Player, gameControllerActor: ActorRef)
+  case object TrainingFinished
 }
 
-class AiActor private() extends Actor with Logging {
+class AiActor private(watchers: List[ActorRef]) extends Actor with Logging {
 
   // TODO remove this
   private var currentPlayer: Player = Player.Cross
@@ -38,6 +41,7 @@ class AiActor private() extends Actor with Logging {
         case GameControllerMessages.GameLost => TTTEpochResult.lost
         case GameControllerMessages.GameDraw => TTTEpochResult.undecided
       })
+      watchers.foreach(_ ! TrainingFinished)
     case AiActor.RegisterGame(p, game) => handleSetGame(p, game)
   }
 

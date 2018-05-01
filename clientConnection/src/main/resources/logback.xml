@@ -23,7 +23,7 @@
   <logger name="org.deeplearning4j" level="warn"/>
   <logger name="org.nd4j" level="warn"/>
   <logger name="org.reflections" level="warn"/>
-  <logger name="de.ai.htwg.tictactoe" level="debug"/>
+  <logger name="de.ai.htwg.tictactoe" level="trace"/>
   <root level="info">
     <appender-ref ref="console"/>
     <appender-ref ref="file"/>

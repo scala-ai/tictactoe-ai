@@ -17,12 +17,14 @@ case class EpsGreedy[S <: State, A <: Action](
     val ep = getEpsilon
     if (random.nextFloat > ep) {
       // get actual best action
-      debug("calc actual best action (epsilon = " + ep + ")")
-      bestAction()
+      val action = bestAction()
+      debug(s"calc actual best action $action (epsilon = " + ep + ")")
+      action
     } else {
       // get random action
-      debug("use random action (epsilon = " + ep + ")")
-      possibleActions.toVector(random.nextInt(possibleActions.size))
+      val randomAction = possibleActions.toVector(random.nextInt(possibleActions.size))
+      debug(s"use random action $randomAction (epsilon = " + ep + ")")
+      randomAction
     }
   }
 
