@@ -6,5 +6,5 @@ object TrainMain extends App {
   val system = ActorSystem()
 
   val trainer = system.actorOf(TrainerActor.props(), "trainerActor")
-  trainer ! TrainerActor.StartTraining(100000)
+  trainer ! TrainerActor.StartTraining(10000)
 }
