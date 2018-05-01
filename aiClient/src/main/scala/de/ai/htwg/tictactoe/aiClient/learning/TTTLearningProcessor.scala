@@ -15,7 +15,7 @@ case class TTTLearningProcessor(
     (action, copy(learning = newLearning))
   }
 
-  def trainResult(win: Boolean): TTTLearningProcessor = copy(learning.trainHistory(TTTEpochResult(win)))
+  def trainResult(result: TTTEpochResult): TTTLearningProcessor = copy(learning.trainHistory(result))
 }
 
 object TTTLearningProcessor {

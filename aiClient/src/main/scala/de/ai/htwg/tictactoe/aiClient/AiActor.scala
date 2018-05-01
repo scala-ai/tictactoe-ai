@@ -3,6 +3,7 @@ package de.ai.htwg.tictactoe.aiClient
 import akka.actor.Actor
 import akka.actor.ActorRef
 import akka.actor.Props
+import de.ai.htwg.tictactoe.aiClient.learning.TTTEpochResult
 import de.ai.htwg.tictactoe.aiClient.learning.TTTLearningProcessor
 import de.ai.htwg.tictactoe.aiClient.learning.TTTState
 import de.ai.htwg.tictactoe.clientConnection.messages.GameControllerMessages
@@ -32,7 +33,11 @@ class AiActor private() extends Actor with Logging {
     case GameControllerMessages.PositionSet(gf: GameField) => doGameAction(gf, sender())
     case GameControllerMessages.GameFinished(result: GameControllerMessages.GameResult, _: GameField) =>
       debug(s"game finished")
-      learningUnit = learningUnit.trainResult(result == GameControllerMessages.GameWon)
+      learningUnit = learningUnit.trainResult(result match {
+        case GameControllerMessages.GameWon => TTTEpochResult.won
+        case GameControllerMessages.GameLost => TTTEpochResult.lost
+        case GameControllerMessages.GameDraw => TTTEpochResult.undecided
+      })
     case AiActor.RegisterGame(p, game) => handleSetGame(p, game)
   }
 
