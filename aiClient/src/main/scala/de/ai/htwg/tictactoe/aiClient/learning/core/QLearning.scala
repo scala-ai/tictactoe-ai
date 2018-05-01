@@ -50,6 +50,7 @@ case class QLearning[S <: State, A <: Action, R <: EpochResult](
         // calc old q value for this action in this state
         val input = Nd4j.concat(1, stateVector, actionVector)
         val oldQVal = neuralNet.calc(input).getDouble(0)
+        assert(!oldQVal.isNaN)
 
         // new q value Q(s, a)
         val newQVal = (1 - QLearning.alpha) * oldQVal + QLearning.alpha * (reward + QLearning.gamma * futureQVal)
@@ -70,6 +71,7 @@ case class QLearning[S <: State, A <: Action, R <: EpochResult](
       .map(a => {
         val input = Nd4j.concat(1, state.asVector, a.asVector)
         val result = neuralNet.calc(input).getDouble(0)
+        assert(!result.isNaN)
         (a, result)
       })
     trace(s"Q-Values: $ratedActions")

@@ -7,6 +7,7 @@ import org.deeplearning4j.nn.conf.NeuralNetConfiguration
 import org.deeplearning4j.nn.conf.layers.DenseLayer
 import org.deeplearning4j.nn.conf.layers.OutputLayer
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork
+import org.deeplearning4j.nn.weights.WeightInit
 import org.deeplearning4j.rl4j.util.Constants
 import org.nd4j.linalg.activations.Activation
 import org.nd4j.linalg.api.ndarray.INDArray
@@ -22,7 +23,7 @@ case class TTTNeuralNet() extends NeuralNet with Logging {
   private val hiddenNodes2 = 18
   private val hiddenNodes3 = 18
   private val outputNodes = 1 // q value
-  private val learningRate = 0.01
+  // private val learningRate = 0.01
 
   private val configuration =
     new NeuralNetConfiguration.Builder()
@@ -34,34 +35,36 @@ case class TTTNeuralNet() extends NeuralNet with Logging {
       .build())
       .biasInit(1)
       //.regularization(true).l2(1e-4)
-      .regularization(true)
       .l2(1e-4)
       .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
-      .learningRate(learningRate)
-      .iterations(1).list.layer(0, new DenseLayer.Builder()
-      .nIn(inputNodes)
-      .nOut(hiddenNodes1)
-      //.weightInit(WeightInit.XAVIER)
-      .activation(Activation.RELU)
-      .build
-    ).layer(1, new DenseLayer.Builder()
-      .nIn(hiddenNodes1)
-      .nOut(hiddenNodes2)
-      .activation(Activation.RELU)
-      .build
-    ).layer(2, new DenseLayer.Builder()
-      .nIn(hiddenNodes2)
-      .nOut(hiddenNodes3)
-      .activation(Activation.RELU)
-      .build
-    ).layer(3, new OutputLayer.Builder(LossFunctions.LossFunction.MSE)
-      //.activation(Activation.SOFTMAX)
-      //.activation(Activation.TANH)
-      .activation(Activation.IDENTITY)
-      .nIn(hiddenNodes3)
-      .nOut(outputNodes)
-      .build
-    ).pretrain(false)
+      .list
+      .layer(0, new DenseLayer.Builder()
+        .nIn(inputNodes)
+        .nOut(hiddenNodes1)
+        .weightInit(WeightInit.XAVIER)
+        .activation(Activation.RELU)
+        .build)
+      .layer(1, new DenseLayer.Builder()
+        .nIn(hiddenNodes1)
+        .nOut(hiddenNodes2)
+        .weightInit(WeightInit.XAVIER)
+        .activation(Activation.RELU)
+        .build)
+      .layer(2, new DenseLayer.Builder()
+        .nIn(hiddenNodes2)
+        .nOut(hiddenNodes3)
+        .weightInit(WeightInit.XAVIER)
+        .activation(Activation.RELU)
+        .build)
+      .layer(3, new OutputLayer.Builder(LossFunctions.LossFunction.MSE)
+        //.activation(Activation.SOFTMAX)
+        //.activation(Activation.TANH)
+        .activation(Activation.IDENTITY)
+        .nIn(hiddenNodes3)
+        .nOut(outputNodes)
+        .weightInit(WeightInit.XAVIER)
+        .build)
+      .pretrain(false)
       .backprop(true)
       .build
 
@@ -74,7 +77,7 @@ case class TTTNeuralNet() extends NeuralNet with Logging {
   override def train(input: INDArray, output: INDArray): Unit = {
     trace("train network")
     model.fit(reshapeInput(input), reshapeInput(output))
-    model.finetune()
+    // model.finetune()
     trace("finished train network")
   }
 
