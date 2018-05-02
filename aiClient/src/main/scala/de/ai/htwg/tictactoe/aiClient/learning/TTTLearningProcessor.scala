@@ -23,8 +23,8 @@ object TTTLearningProcessor {
     QLearning[TTTState, TTTAction, TTTEpochResult](
       policy = EpsGreedy[TTTState, TTTAction](
         random = Random,
-        minEpsilon = 0,
-        epsilonNbEpoch = 1
+        minEpsilon = 0.1f,
+        epsilonNbEpoch = 10000
       ),
       rewardCalculator = TTTRewardCalculator(),
       neuralNet = TTTNeuralNet(),

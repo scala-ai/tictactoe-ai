@@ -15,5 +15,5 @@ object TrainMain extends App {
   // TODO this delay is necessary, cause the actor needs some time to init its neural network
   // also fixes the logger not initialized problem
   private implicit val executionContext: ExecutionContextExecutor = system.dispatcher
-  system.scheduler.scheduleOnce(Duration(4, TimeUnit.SECONDS), trainer, TrainerActor.StartTraining(1000))
+  system.scheduler.scheduleOnce(Duration(4, TimeUnit.SECONDS), trainer, TrainerActor.StartTraining(10000))
 }
