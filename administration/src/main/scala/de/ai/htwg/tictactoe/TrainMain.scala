@@ -1,7 +1,9 @@
 package de.ai.htwg.tictactoe
 
-import java.util.Timer
-import java.util.TimerTask
+import java.util.concurrent.TimeUnit
+
+import scala.concurrent.ExecutionContextExecutor
+import scala.concurrent.duration.Duration
 
 import akka.actor.ActorSystem
 
@@ -10,13 +12,8 @@ object TrainMain extends App {
 
   val trainer = system.actorOf(TrainerActor.props(), "trainerActor")
 
-  val timer = new Timer
-
-  private def delay(f: () => Unit, n: Long): Unit = timer.schedule(new TimerTask() {
-    def run(): Unit = f()
-  }, n)
-
   // TODO this delay is necessary, cause the actor needs some time to init its neural network
   // also fixes the logger not initialized problem
-  delay(() => trainer ! TrainerActor.StartTraining(1000), 4000)
+  private implicit val executionContext: ExecutionContextExecutor = system.dispatcher
+  system.scheduler.scheduleOnce(Duration(4, TimeUnit.SECONDS), trainer, TrainerActor.StartTraining(1000))
 }

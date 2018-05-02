@@ -48,14 +48,13 @@ class TrainerActor extends Actor with Logging {
       circle ! RegisterGame(Player.Circle, game)
       context.actorOf(PlayerUiActor.props(Player.Cross, clientMain, game, gameName))
 
-    case AiActor.TrainingFinished => {
+    case AiActor.TrainingFinished =>
       readyActors = sender() :: readyActors
       debug(s"training finished message (ready = ${readyActors.size})")
       if (readyActors.size == 2) {
         readyActors = List()
         self ! StartTraining(remainingEpochs - 1)
       }
-    }
   }
 
 }
