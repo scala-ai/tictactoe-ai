@@ -5,10 +5,10 @@ import akka.actor.Props
 import de.ai.htwg.tictactoe.clientConnection.model.GameField
 import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
 import de.ai.htwg.tictactoe.clientConnection.model.Player
+import de.ai.htwg.tictactoe.gameLogic.controller.GameFieldControllerActor.SelectPosition
 import de.ai.htwg.tictactoe.gameLogic.controller.GameFieldControllerActor.RetCode.GameAlreadyFinished
 import de.ai.htwg.tictactoe.gameLogic.controller.GameFieldControllerActor.RetCode.NotThisPlayersTurn
 import de.ai.htwg.tictactoe.gameLogic.controller.GameFieldControllerActor.RetCode.PositionAlreadySelected
-import de.ai.htwg.tictactoe.gameLogic.controller.GameFieldControllerActor.SelectPosition
 
 object GameFieldControllerActor {
 
@@ -19,7 +19,7 @@ object GameFieldControllerActor {
   case class GetGridAck(gameField: GameField)
   case class SelectPosition(p: Player, pos: GridPosition)
 
-  case class SelectPositionAck(p: Player, pos: GridPosition, state: GameField, returnCode: RetCode)
+  case class SelectPositionAck(state: GameField, returnCode: RetCode)
 
   sealed trait RetCode
   object RetCode {
@@ -41,9 +41,9 @@ class GameFieldControllerActor private(startingPlayer: Player, dimensions: Int) 
 
     case GameFieldControllerActor.GetGrid => sender ! GameFieldControllerActor.GetGridAck(gameField)
 
-    case SelectPosition(p, pos) if !gameField.isCurrentPlayer(p) => sender ! comp.SelectPositionAck(p, pos, gameField, NotThisPlayersTurn)
-    case SelectPosition(p, pos) if gameField.posIsSet(pos) => sender ! comp.SelectPositionAck(p, pos, gameField, PositionAlreadySelected)
-    case SelectPosition(p, pos) if gameField.isFinished => sender ! comp.SelectPositionAck(p, pos, gameField, GameAlreadyFinished)
+    case SelectPosition(p, pos) if !gameField.isCurrentPlayer(p) => sender ! comp.SelectPositionAck(gameField, NotThisPlayersTurn)
+    case SelectPosition(p, pos) if gameField.posIsSet(pos) => sender ! comp.SelectPositionAck(gameField, PositionAlreadySelected)
+    case SelectPosition(p, pos) if gameField.isFinished => sender ! comp.SelectPositionAck(gameField, GameAlreadyFinished)
     case SelectPosition(p, pos) =>
       gameField = gameField.setPos(pos)
       val ret = if (gameField.isFinished) {
@@ -56,7 +56,7 @@ class GameFieldControllerActor private(startingPlayer: Player, dimensions: Int) 
         comp.RetCode.PositionSet
       }
 
-      sender ! comp.SelectPositionAck(p, pos, gameField, ret)
+      sender ! comp.SelectPositionAck(gameField, ret)
   }
 
 }

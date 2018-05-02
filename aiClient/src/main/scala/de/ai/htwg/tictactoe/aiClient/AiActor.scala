@@ -31,10 +31,15 @@ class AiActor private(watchers: List[ActorRef]) extends Actor with Logging {
   private var learningUnit = TTTLearningProcessor()
 
   override def receive: Receive = {
+    case AiActor.RegisterGame(p, game) => handleSetGame(p, game)
+
+    case GameControllerMessages.GameUpdated(_) => trace("game updated") // not interesting
+    case GameControllerMessages.GameFinished(_, _) => trace("game finished") // not interesting
     case GameControllerMessages.PosAlreadySet(_: GridPosition) => error(s"$currentPlayer: Pos already set")
     case GameControllerMessages.NotYourTurn(_: GridPosition) => error(s"$currentPlayer: Not your turn")
-    case GameControllerMessages.PositionSet(gf: GameField) => doGameAction(gf, sender())
-    case GameControllerMessages.GameFinished(result: GameControllerMessages.GameResult, _: GameField) =>
+    case GameControllerMessages.YourTurn(gf: GameField) => doGameAction(gf, sender())
+
+    case GameControllerMessages.YourResult(_, result) =>
       debug(s"$currentPlayer: game finished, result: $result")
       learningUnit = learningUnit.trainResult(result match {
         case GameControllerMessages.GameWon => TTTEpochResult.won
@@ -42,7 +47,6 @@ class AiActor private(watchers: List[ActorRef]) extends Actor with Logging {
         case GameControllerMessages.GameDraw => TTTEpochResult.undecided
       })
       watchers.foreach(_ ! TrainingFinished)
-    case AiActor.RegisterGame(p, game) => handleSetGame(p, game)
   }
 
   private def handleSetGame(player: Player, gameControllerActor: ActorRef): Unit = {
@@ -55,13 +59,9 @@ class AiActor private(watchers: List[ActorRef]) extends Actor with Logging {
   }
 
   private def doGameAction(gf: GameField, gameControllerActor: ActorRef): Unit = {
-    if (gf.isCurrentPlayer(currentPlayer)) {
-      trace(s"$currentPlayer: It is your turn")
-      val (action, newLearningUnit) = learningUnit.getDecision(TTTState(gf))
-      learningUnit = newLearningUnit
-      gameControllerActor ! GameControllerMessages.SetPos(action.coordinate)
-    } else {
-      trace(s"$currentPlayer: Hmm not your turn")
-    }
+    trace(s"$currentPlayer: It is your turn")
+    val (action, newLearningUnit) = learningUnit.getDecision(TTTState(gf))
+    learningUnit = newLearningUnit
+    gameControllerActor ! GameControllerMessages.SetPos(action.coordinate)
   }
 }

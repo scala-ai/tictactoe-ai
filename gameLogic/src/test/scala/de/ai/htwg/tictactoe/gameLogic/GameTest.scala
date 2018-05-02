@@ -53,7 +53,7 @@ class GameTest extends GameLogicTestSpec[ActorRef] {
       controller.tell(SelectPosition(Player.Cross, pos), testActor)
 
       expectMsgPF(duration) {
-        case SelectPositionAck(Player.Cross, `pos`, field, GFCA.RetCode.GameWon) => field.isFinished shouldBe true
+        case SelectPositionAck(field, GFCA.RetCode.GameWon) => field.isFinished shouldBe true
       }
     }
 
@@ -66,7 +66,7 @@ class GameTest extends GameLogicTestSpec[ActorRef] {
       }
 
       expectMsgPF(duration) {
-        case SelectPositionAck(Player.Circle, `pos2`, field, GFCA.RetCode.GameWon) => field.isFinished shouldBe true
+        case SelectPositionAck(field, GFCA.RetCode.GameWon) => field.isFinished shouldBe true
       }
 
     }

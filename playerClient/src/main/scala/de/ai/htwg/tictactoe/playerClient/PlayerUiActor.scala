@@ -39,10 +39,13 @@ class PlayerUiActor private(player: Player, clientMainActor: ActorRef, gameContr
       case SelectPos(pos) => gameControllerActor ! GameControllerMessages.SetPos(pos)
       case GameControllerMessages.PosAlreadySet(_: GridPosition) => debug("position already set")
       case GameControllerMessages.NotYourTurn(_: GridPosition) => debug("not your turn")
-      case GameControllerMessages.PositionSet(gf: GameField) => uiActor ! GameUiActor.PrintField(gf)
-      case GameControllerMessages.GameFinished(result: GameControllerMessages.GameResult, gf: GameField) =>
-        if(result == GameControllerMessages.GameWon)
-          debug(s"winner: $player")
+      case GameControllerMessages.GameUpdated(gf: GameField) => uiActor ! GameUiActor.PrintField(gf)
+      case GameControllerMessages.GameFinished(gf: GameField, winner) =>
+        winner match {
+          case Some(w) => debug(s"winner: $w")
+          case None => debug("game draw")
+        }
+
         uiActor ! GameUiActor.PrintField(gf)
     }
 
