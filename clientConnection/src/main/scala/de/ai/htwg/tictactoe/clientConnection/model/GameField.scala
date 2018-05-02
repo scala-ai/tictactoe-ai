@@ -23,7 +23,7 @@ class GameField private[model](
     require(!isFinished, "Game is already finished") // FIXME solve in return type. Don't throw an exception here.
     val updatedGameField = this.gameField + (pos -> current)
     val finished = pos.buildConnectedCombinations.exists(checkIsWinCondition(updatedGameField)) ||
-      finishedUndecided
+      allPosSet(updatedGameField)
     new GameField(
       if (finished) current else Player.other(current),
       dimensions,
@@ -55,7 +55,11 @@ class GameField private[model](
     positions.toList.filterNot(gf.contains)
   }
 
-  def finishedUndecided: Boolean = gameField.size >= dimensions * dimensions
+  def finishedUndecided: Boolean = isFinished && allPosSet()
+
+  def allPosSet(): Boolean = allPosSet(gameField)
+
+  private def allPosSet(gameField: Map[GridPosition, Player]): Boolean = gameField.size >= dimensions * dimensions
 
   def getPos(pos: GridPosition): Option[Player] = gameField.get(pos)
 
