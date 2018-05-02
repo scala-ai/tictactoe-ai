@@ -1,19 +1,14 @@
 package de.ai.htwg.tictactoe
 
-import java.util.concurrent.TimeUnit
-
-import scala.concurrent.ExecutionContextExecutor
-import scala.concurrent.duration.Duration
-
 import akka.actor.ActorSystem
+import grizzled.slf4j.Logging
 
-object TrainMain extends App {
+object TrainMain extends App with Logging {
+  // this direct logger call will prevent calls to not initialized loggers in a multi threaded environment (actor system)
+  trace("game start")
   val system = ActorSystem()
 
   val trainer = system.actorOf(TrainerActor.props(), "trainerActor")
+  trainer ! TrainerActor.StartTraining(10000)
 
-  // TODO this delay is necessary, cause the actor needs some time to init its neural network
-  // also fixes the logger not initialized problem
-  private implicit val executionContext: ExecutionContextExecutor = system.dispatcher
-  system.scheduler.scheduleOnce(Duration(4, TimeUnit.SECONDS), trainer, TrainerActor.StartTraining(10000))
 }
