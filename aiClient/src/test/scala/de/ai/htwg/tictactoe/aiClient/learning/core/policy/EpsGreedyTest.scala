@@ -34,10 +34,10 @@ class EpsGreedyTest extends FreeSpec with Matchers with MockFactory {
 
         val greedy = EpsGreedy[TTTState, TTTAction](
           epoch = 1,
-          PolicyConfiguration(
+          EpsGreedyConfiguration(
             minEpsilon = 0,
             random = mockedRandom,
-            epsilonNbEpochs = 2
+            nbEpochVisits = 2
           )
         )
 
@@ -50,10 +50,10 @@ class EpsGreedyTest extends FreeSpec with Matchers with MockFactory {
 
         val greedy = EpsGreedy[TTTState, TTTAction](
           epoch = 1,
-          PolicyConfiguration(
+          EpsGreedyConfiguration(
             minEpsilon = 0,
             random = mockedRandom,
-            epsilonNbEpochs = 2
+            nbEpochVisits = 2
           )
         )
 
@@ -69,10 +69,10 @@ class EpsGreedyTest extends FreeSpec with Matchers with MockFactory {
 
         val greedy = EpsGreedy[TTTState, TTTAction](
           epoch = 2,
-          PolicyConfiguration(
+          EpsGreedyConfiguration(
             minEpsilon = 0,
             random = mockedRandom,
-            epsilonNbEpochs = 2
+            nbEpochVisits = 2
           )
         )
 
@@ -89,10 +89,10 @@ class EpsGreedyTest extends FreeSpec with Matchers with MockFactory {
 
         val greedy = EpsGreedy[TTTState, TTTAction](
           epoch = 0,
-          PolicyConfiguration(
+          EpsGreedyConfiguration(
             minEpsilon = 0,
             random = mockedRandom,
-            epsilonNbEpochs = 2
+            nbEpochVisits = 2
           )
         )
 

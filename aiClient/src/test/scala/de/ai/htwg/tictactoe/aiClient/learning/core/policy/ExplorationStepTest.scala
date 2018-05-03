@@ -37,10 +37,10 @@ class ExplorationStepTest extends FreeSpec with Matchers with MockFactory {
 
         val greedy = ExplorationStep[TTTState, TTTAction](
           mockedStepSupplier,
-          PolicyConfiguration(
+          ExplorationStepConfiguration(
             minEpsilon = 0,
             random = mockedRandom,
-            epsilonNbEpochs = 2
+            nbStepVisits = 2
           )
         )
 
@@ -56,10 +56,10 @@ class ExplorationStepTest extends FreeSpec with Matchers with MockFactory {
 
         val greedy = ExplorationStep[TTTState, TTTAction](
           mockedStepSupplier,
-          PolicyConfiguration(
+          ExplorationStepConfiguration(
             minEpsilon = 0,
             random = mockedRandom,
-            epsilonNbEpochs = 2
+            nbStepVisits = 2
           )
         )
 
@@ -78,10 +78,10 @@ class ExplorationStepTest extends FreeSpec with Matchers with MockFactory {
 
         val greedy = ExplorationStep[TTTState, TTTAction](
           mockedStepSupplier,
-          PolicyConfiguration(
+          ExplorationStepConfiguration(
             minEpsilon = 0,
             random = mockedRandom,
-            epsilonNbEpochs = 2
+            nbStepVisits = 2
           )
         )
 
@@ -101,10 +101,10 @@ class ExplorationStepTest extends FreeSpec with Matchers with MockFactory {
 
         val greedy = ExplorationStep[TTTState, TTTAction](
           mockedStepSupplier,
-          PolicyConfiguration(
+          ExplorationStepConfiguration(
             minEpsilon = 0,
             random = mockedRandom,
-            epsilonNbEpochs = 2
+            nbStepVisits = 2
           )
         )
 

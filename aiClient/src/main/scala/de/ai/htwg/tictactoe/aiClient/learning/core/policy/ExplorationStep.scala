@@ -7,11 +7,11 @@ import grizzled.slf4j.Logging
 
 case class ExplorationStep[S <: State, A <: Action](
     stepSupplier: StepSupplier[S],
-    policyProperties: PolicyConfiguration
+    policyProperties: ExplorationStepConfiguration
 ) extends Policy[S, A] with Logging {
   private val random = policyProperties.random
   private val minEpsilon = policyProperties.minEpsilon
-  private val epsilonNbEpoch = policyProperties.epsilonNbEpochs
+  private val nbStepVisits = policyProperties.nbStepVisits
 
   override def nextAction(input: S, bestAction: () => A, possibleActions: List[A]): A = {
     val visits = stepSupplier.visitsForState(input)
@@ -35,7 +35,7 @@ case class ExplorationStep[S <: State, A <: Action](
 
   override def resetSteps(): ExplorationStep[S, A] = copy(stepSupplier = stepSupplier.resetVisits())
 
-  private def getEpsilon(visits: Long): Float = math.min(1f, math.max(minEpsilon, 1.toFloat - visits.toFloat / epsilonNbEpoch.toFloat))
+  private def getEpsilon(visits: Long): Float = math.min(1f, math.max(minEpsilon, 1.toFloat - visits.toFloat / nbStepVisits.toFloat))
 }
 
 object ExplorationStep {
@@ -50,17 +50,19 @@ object ExplorationStep {
   case class HashStepSupplier[S <: State](
       map: Map[Int, Long]
   ) extends StepSupplier[S] {
-    override def visitsForState(state: S): Long = map(state.hash)
+    override def visitsForState(state: S): Long = get(state)
 
-    override def incrementVisit(state: S): StepSupplier[S] = copy(map.updated(state.hash, map(state.hash) + 1))
+    override def incrementVisit(state: S): StepSupplier[S] = copy(map.updated(state.hash, get(state) + 1))
 
     override def resetVisits(): StepSupplier[S] = copy(Map())
+
+    private def get(state: State) = if (map.contains(state.hash)) map(state.hash) else 0L
   }
 
   object HashStepSupplier {
     def apply[S <: State](): HashStepSupplier[S] = new HashStepSupplier(Map())
   }
 
-  def apply[S <: State, A <: Action](policyProperties: PolicyConfiguration): ExplorationStep[S, A] =
+  def apply[S <: State, A <: Action](policyProperties: ExplorationStepConfiguration): ExplorationStep[S, A] =
     new ExplorationStep(HashStepSupplier(), policyProperties)
 }

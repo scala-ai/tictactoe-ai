@@ -3,6 +3,9 @@ package de.ai.htwg.tictactoe.aiClient.learning
 import de.ai.htwg.tictactoe.aiClient.learning.core.QLearning
 import de.ai.htwg.tictactoe.aiClient.learning.core.QLearningConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.policy.EpsGreedy
+import de.ai.htwg.tictactoe.aiClient.learning.core.policy.EpsGreedyConfiguration
+import de.ai.htwg.tictactoe.aiClient.learning.core.policy.ExplorationStep
+import de.ai.htwg.tictactoe.aiClient.learning.core.policy.ExplorationStepConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.policy.PolicyConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.transition.TransitionHistoryImpl
 
@@ -24,7 +27,10 @@ object TTTLearningProcessor {
       qLearningProperties: QLearningConfiguration
   ): TTTLearningProcessor = new TTTLearningProcessor(
     QLearning[TTTState, TTTAction, TTTEpochResult](
-      policy = EpsGreedy[TTTState, TTTAction](policyProperties),
+      policy = policyProperties match {
+        case c: EpsGreedyConfiguration => EpsGreedy[TTTState, TTTAction](c)
+        case c: ExplorationStepConfiguration => ExplorationStep[TTTState, TTTAction](c)
+      },
       rewardCalculator = TTTRewardCalculator(),
       neuralNet = TTTNeuralNet(),
       transitionHistory = TransitionHistoryImpl[TTTAction, TTTState](),

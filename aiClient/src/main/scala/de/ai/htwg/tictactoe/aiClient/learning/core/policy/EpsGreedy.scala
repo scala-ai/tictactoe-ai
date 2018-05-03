@@ -6,11 +6,11 @@ import grizzled.slf4j.Logging
 
 case class EpsGreedy[S <: State, A <: Action](
     epoch: Long,
-    policyProperties: PolicyConfiguration
+    policyProperties: EpsGreedyConfiguration
 ) extends Policy[S, A] with Logging {
   private val random = policyProperties.random
   private val minEpsilon = policyProperties.minEpsilon
-  private val epsilonNbEpoch = policyProperties.epsilonNbEpochs
+  private val epsilonNbEpoch = policyProperties.nbEpochVisits
 
   override def nextAction(input: S, bestAction: () => A, possibleActions: List[A]): A = {
     val ep = getEpsilon
@@ -37,6 +37,6 @@ case class EpsGreedy[S <: State, A <: Action](
 }
 
 object EpsGreedy {
-  def apply[S <: State, A <: Action](policyProperties: PolicyConfiguration): EpsGreedy[S, A] =
+  def apply[S <: State, A <: Action](policyProperties: EpsGreedyConfiguration): EpsGreedy[S, A] =
     new EpsGreedy[S, A](0, policyProperties)
 }

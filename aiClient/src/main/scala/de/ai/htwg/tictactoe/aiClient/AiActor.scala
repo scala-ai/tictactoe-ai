@@ -9,6 +9,7 @@ import de.ai.htwg.tictactoe.aiClient.learning.TTTEpochResult
 import de.ai.htwg.tictactoe.aiClient.learning.TTTLearningProcessor
 import de.ai.htwg.tictactoe.aiClient.learning.TTTState
 import de.ai.htwg.tictactoe.aiClient.learning.core.QLearningConfiguration
+import de.ai.htwg.tictactoe.aiClient.learning.core.policy.EpsGreedyConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.policy.PolicyConfiguration
 import de.ai.htwg.tictactoe.clientConnection.messages.GameControllerMessages
 import de.ai.htwg.tictactoe.clientConnection.model.GameField
@@ -18,7 +19,7 @@ import grizzled.slf4j.Logging
 
 
 object AiActor {
-  def props() = Props(new AiActor(List(), LearningProcessorConfiguration(PolicyConfiguration(), QLearningConfiguration())))
+  def props() = Props(new AiActor(List(), LearningProcessorConfiguration(EpsGreedyConfiguration(), QLearningConfiguration())))
 
   def props(watchers: List[ActorRef], properties: LearningProcessorConfiguration) = Props(new AiActor(watchers, properties))
 
