@@ -18,8 +18,11 @@ case class QLearning[S <: State, A <: Action, R <: EpochResult](
     neuralNet: NeuralNet,
     transitionHistory: TransitionHistory[A, S],
     transitionFactory: TransitionFactory[A, S],
-    actionSpace: ActionSpace[S, A]
+    actionSpace: ActionSpace[S, A],
+    qLearningProperties: QLearningConfiguration
 ) extends Learning[S, A, R] with Logging {
+  private val alpha = qLearningProperties.alpha
+  private val gamma = qLearningProperties.gamma
 
   override def getDecision(state: S): (QLearning[S, A, R], A) = {
     // We are in state S
@@ -53,7 +56,7 @@ case class QLearning[S <: State, A <: Action, R <: EpochResult](
         assert(!oldQVal.isNaN)
 
         // new q value Q(s, a)
-        val newQVal = (1 - QLearning.alpha) * oldQVal + QLearning.alpha * (reward + QLearning.gamma * futureQVal)
+        val newQVal = (1 - alpha) * oldQVal + alpha * (reward + gamma * futureQVal)
         val y = Nd4j.zeros(1)
         y.putScalar(Array[Int](0, 0), newQVal)
         neuralNet.train(input, y)
@@ -78,8 +81,4 @@ case class QLearning[S <: State, A <: Action, R <: EpochResult](
     ratedActions.maxBy(_._2)._1
   }
 
-}
-object QLearning {
-  val alpha = 0.9
-  val gamma = 0.6
 }

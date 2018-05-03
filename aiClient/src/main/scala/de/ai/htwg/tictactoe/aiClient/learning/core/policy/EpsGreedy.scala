@@ -1,17 +1,16 @@
 package de.ai.htwg.tictactoe.aiClient.learning.core.policy
 
-import scala.util.Random
-
 import de.ai.htwg.tictactoe.aiClient.learning.core.action.Action
 import de.ai.htwg.tictactoe.aiClient.learning.core.state.State
 import grizzled.slf4j.Logging
 
 case class EpsGreedy[S <: State, A <: Action](
     epoch: Long,
-    random: Random,
-    minEpsilon: Float,
-    epsilonNbEpoch: Long
+    policyProperties: PolicyConfiguration
 ) extends Policy[S, A] with Logging {
+  private val random = policyProperties.random
+  private val minEpsilon = policyProperties.minEpsilon
+  private val epsilonNbEpoch = policyProperties.epsilonNbEpochs
 
   override def nextAction(input: S, bestAction: () => A, possibleActions: List[A]): A = {
     val ep = getEpsilon
@@ -36,9 +35,6 @@ case class EpsGreedy[S <: State, A <: Action](
 }
 
 object EpsGreedy {
-  def apply[S <: State, A <: Action](
-      random: Random,
-      minEpsilon: Float,
-      epsilonNbEpoch: Long
-  ): EpsGreedy[S, A] = new EpsGreedy[S, A](0, random, minEpsilon, epsilonNbEpoch)
+  def apply[S <: State, A <: Action](policyProperties: PolicyConfiguration): EpsGreedy[S, A] =
+    new EpsGreedy[S, A](0, policyProperties)
 }

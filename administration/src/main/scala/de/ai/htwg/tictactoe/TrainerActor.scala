@@ -1,11 +1,16 @@
 package de.ai.htwg.tictactoe
 
+import scala.util.Random
+
 import akka.actor.Actor
 import akka.actor.ActorRef
 import akka.actor.Props
 import de.ai.htwg.tictactoe.TrainerActor.StartTraining
 import de.ai.htwg.tictactoe.aiClient.AiActor
+import de.ai.htwg.tictactoe.aiClient.AiActor.LearningProcessorConfiguration
 import de.ai.htwg.tictactoe.aiClient.AiActor.RegisterGame
+import de.ai.htwg.tictactoe.aiClient.learning.core.QLearningConfiguration
+import de.ai.htwg.tictactoe.aiClient.learning.core.policy.PolicyConfiguration
 import de.ai.htwg.tictactoe.clientConnection.fxUI.UiMainActor
 import de.ai.htwg.tictactoe.clientConnection.model.Player
 import de.ai.htwg.tictactoe.gameLogic.controller.GameControllerActor
@@ -21,8 +26,19 @@ object TrainerActor {
 class TrainerActor extends Actor with Logging {
 
   private val dimensions = 4
-  private val circle = context.actorOf(AiActor.props(List(self)))
-  private val cross = context.actorOf(AiActor.props(List(self)))
+  private val properties = LearningProcessorConfiguration(
+    PolicyConfiguration(
+      minEpsilon = 0.3f,
+      epsilonNbEpochs = 10000,
+      random = Random
+    ),
+    QLearningConfiguration(
+      alpha = 0.9,
+      gamma = 0.6
+    )
+  )
+  private val circle = context.actorOf(AiActor.props(List(self), properties))
+  private val cross = context.actorOf(AiActor.props(List(self), properties))
   private val clientMain = context.actorOf(UiMainActor.props(dimensions), "clientMain")
 
   private var readyActors: List[ActorRef] = List()

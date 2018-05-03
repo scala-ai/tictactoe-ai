@@ -3,10 +3,13 @@ package de.ai.htwg.tictactoe.aiClient
 import akka.actor.Actor
 import akka.actor.ActorRef
 import akka.actor.Props
+import de.ai.htwg.tictactoe.aiClient.AiActor.LearningProcessorConfiguration
 import de.ai.htwg.tictactoe.aiClient.AiActor.TrainingFinished
 import de.ai.htwg.tictactoe.aiClient.learning.TTTEpochResult
 import de.ai.htwg.tictactoe.aiClient.learning.TTTLearningProcessor
 import de.ai.htwg.tictactoe.aiClient.learning.TTTState
+import de.ai.htwg.tictactoe.aiClient.learning.core.QLearningConfiguration
+import de.ai.htwg.tictactoe.aiClient.learning.core.policy.PolicyConfiguration
 import de.ai.htwg.tictactoe.clientConnection.messages.GameControllerMessages
 import de.ai.htwg.tictactoe.clientConnection.model.GameField
 import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
@@ -15,20 +18,28 @@ import grizzled.slf4j.Logging
 
 
 object AiActor {
-  def props() = Props(new AiActor(List()))
+  def props() = Props(new AiActor(List(), LearningProcessorConfiguration(PolicyConfiguration(), QLearningConfiguration())))
 
-  def props(watchers: List[ActorRef]) = Props(new AiActor(watchers))
+  def props(watchers: List[ActorRef], properties: LearningProcessorConfiguration) = Props(new AiActor(watchers, properties))
 
   case class RegisterGame(player: Player, gameControllerActor: ActorRef)
   case object TrainingFinished
+
+  case class LearningProcessorConfiguration(
+      policyProperties: PolicyConfiguration,
+      qLearningProperties: QLearningConfiguration
+  )
 }
 
-class AiActor private(watchers: List[ActorRef]) extends Actor with Logging {
+class AiActor private(watchers: List[ActorRef], properties: LearningProcessorConfiguration) extends Actor with Logging {
 
   // TODO remove this
   private var currentPlayer: Player = Player.Cross
 
-  private var learningUnit = TTTLearningProcessor()
+  private var learningUnit = TTTLearningProcessor(
+    policyProperties = properties.policyProperties,
+    qLearningProperties = properties.qLearningProperties
+  )
 
   override def receive: Receive = {
     case AiActor.RegisterGame(p, game) => handleSetGame(p, game)
@@ -55,7 +66,7 @@ class AiActor private(watchers: List[ActorRef]) extends Actor with Logging {
       case Player.Circle => gameControllerActor ! GameControllerMessages.RegisterCircle
       case Player.Cross => gameControllerActor ! GameControllerMessages.RegisterCross
     }
-    info(s"$currentPlayer: ai player is ready to play")
+    debug(s"$currentPlayer: ai player is ready to play")
   }
 
   private def doGameAction(gf: GameField, gameControllerActor: ActorRef): Unit = {

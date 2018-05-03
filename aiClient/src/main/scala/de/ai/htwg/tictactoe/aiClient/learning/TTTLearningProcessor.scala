@@ -1,9 +1,9 @@
 package de.ai.htwg.tictactoe.aiClient.learning
 
-import scala.util.Random
-
 import de.ai.htwg.tictactoe.aiClient.learning.core.QLearning
+import de.ai.htwg.tictactoe.aiClient.learning.core.QLearningConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.policy.EpsGreedy
+import de.ai.htwg.tictactoe.aiClient.learning.core.policy.PolicyConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.transition.TransitionHistoryImpl
 
 case class TTTLearningProcessor(
@@ -19,18 +19,18 @@ case class TTTLearningProcessor(
 }
 
 object TTTLearningProcessor {
-  def apply(): TTTLearningProcessor = new TTTLearningProcessor(
+  def apply(
+      policyProperties: PolicyConfiguration,
+      qLearningProperties: QLearningConfiguration
+  ): TTTLearningProcessor = new TTTLearningProcessor(
     QLearning[TTTState, TTTAction, TTTEpochResult](
-      policy = EpsGreedy[TTTState, TTTAction](
-        random = Random,
-        minEpsilon = 0.1f,
-        epsilonNbEpoch = 10000
-      ),
+      policy = EpsGreedy[TTTState, TTTAction](policyProperties),
       rewardCalculator = TTTRewardCalculator(),
       neuralNet = TTTNeuralNet(),
       transitionHistory = TransitionHistoryImpl[TTTAction, TTTState](),
       transitionFactory = TTTTransition,
-      actionSpace = TTTActionSpace()
+      actionSpace = TTTActionSpace(),
+      qLearningProperties = qLearningProperties
     )
   )
 }

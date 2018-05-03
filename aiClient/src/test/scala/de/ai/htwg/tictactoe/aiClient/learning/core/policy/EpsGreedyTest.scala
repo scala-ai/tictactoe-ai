@@ -34,9 +34,11 @@ class EpsGreedyTest extends FreeSpec with Matchers with MockFactory {
 
         val greedy = EpsGreedy[TTTState, TTTAction](
           epoch = 1,
-          random = mockedRandom,
-          minEpsilon = 0,
-          epsilonNbEpoch = 2
+          PolicyConfiguration(
+            minEpsilon = 0,
+            random = mockedRandom,
+            epsilonNbEpochs = 2
+          )
         )
 
         val action = greedy.nextAction(TTTState(gameField), () => fail("should not be called"), possibleActions)
@@ -48,9 +50,11 @@ class EpsGreedyTest extends FreeSpec with Matchers with MockFactory {
 
         val greedy = EpsGreedy[TTTState, TTTAction](
           epoch = 1,
-          random = mockedRandom,
-          minEpsilon = 0,
-          epsilonNbEpoch = 2
+          PolicyConfiguration(
+            minEpsilon = 0,
+            random = mockedRandom,
+            epsilonNbEpochs = 2
+          )
         )
 
         val action = greedy.nextAction(TTTState(gameField),
@@ -65,9 +69,11 @@ class EpsGreedyTest extends FreeSpec with Matchers with MockFactory {
 
         val greedy = EpsGreedy[TTTState, TTTAction](
           epoch = 2,
-          random = mockedRandom,
-          minEpsilon = 0,
-          epsilonNbEpoch = 2
+          PolicyConfiguration(
+            minEpsilon = 0,
+            random = mockedRandom,
+            epsilonNbEpochs = 2
+          )
         )
 
         val action = greedy.nextAction(TTTState(gameField),
@@ -83,9 +89,11 @@ class EpsGreedyTest extends FreeSpec with Matchers with MockFactory {
 
         val greedy = EpsGreedy[TTTState, TTTAction](
           epoch = 0,
-          random = mockedRandom,
-          minEpsilon = 0,
-          epsilonNbEpoch = 2
+          PolicyConfiguration(
+            minEpsilon = 0,
+            random = mockedRandom,
+            epsilonNbEpochs = 2
+          )
         )
 
         val action = greedy.nextAction(TTTState(gameField), () => fail("should not be called"), possibleActions)
