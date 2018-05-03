@@ -61,7 +61,7 @@ class TrainerActor extends Actor with Logging {
       sequence += 1
       val gameName = "test-game" + sequence
       val game = context.actorOf(GameControllerActor.props(dimensions, Player.Cross), gameName)
-      circle ! RegisterGame(Player.Circle, game)
+      sender() ! RegisterGame(Player.Circle, game)
       context.actorOf(PlayerUiActor.props(Player.Cross, clientMain, game, gameName))
 
     case AiActor.TrainingFinished =>
