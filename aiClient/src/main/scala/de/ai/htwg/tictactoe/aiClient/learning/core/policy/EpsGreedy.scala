@@ -17,17 +17,19 @@ case class EpsGreedy[S <: State, A <: Action](
     if (random.nextFloat > ep) {
       // get actual best action
       val action = bestAction()
-      debug(s"calc actual best action $action (epsilon = " + ep + ")")
+      debug(s"calc actual best action $action (epsilon = $ep)")
       action
     } else {
       // get random action
       val randomAction = possibleActions.toVector(random.nextInt(possibleActions.size))
-      debug(s"use random action $randomAction (epsilon = " + ep + ")")
+      debug(s"use random action $randomAction (epsilon = $ep)")
       randomAction
     }
   }
 
-  override def incrementStep(): EpsGreedy[S, A] = copy(epoch = epoch + 1)
+  override def incrementEpoch(): Policy[S, A] = copy(epoch = epoch + 1)
+
+  override def incrementStep(state: S): EpsGreedy[S, A] = copy()
 
   override def resetSteps(): EpsGreedy[S, A] = copy(epoch = 0)
 

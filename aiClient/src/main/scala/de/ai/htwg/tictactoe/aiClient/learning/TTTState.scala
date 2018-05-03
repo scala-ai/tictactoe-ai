@@ -15,4 +15,6 @@ case class TTTState(
     val order = 'c'
     Nd4j.create(values.toArray, shape, order)
   }
+
+  override def hash: Int = field.fieldHash
 }

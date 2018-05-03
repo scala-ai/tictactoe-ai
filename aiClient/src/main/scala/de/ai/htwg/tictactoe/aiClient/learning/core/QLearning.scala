@@ -62,9 +62,12 @@ case class QLearning[S <: State, A <: Action, R <: EpochResult](
         neuralNet.train(input, y)
         newQVal
       })
+    val updatedPolicy = transitionHistory
+      .reverseTransitions()
+      .foldLeft(policy)((p, s) => p.incrementStep(s.observation))
     debug("training finished")
     copy(
-      policy = policy.incrementStep(),
+      policy = updatedPolicy.incrementEpoch(),
       transitionHistory = transitionHistory.truncate()
     )
   }

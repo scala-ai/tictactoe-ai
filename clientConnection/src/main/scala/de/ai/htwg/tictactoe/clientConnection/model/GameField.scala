@@ -64,6 +64,11 @@ class GameField private[model](
   def getPos(pos: GridPosition): Option[Player] = gameField.get(pos)
 
   def foreach[U](func: (GridPosition, Player) => U): Unit = gameField.foreach(t => func(t._1, t._2))
+
+  def fieldHash: Int = gameField
+    .map(g => (g._1.x, g._1.y, g._2))
+    .toSet
+    .hashCode()
 }
 
 object GameField {
