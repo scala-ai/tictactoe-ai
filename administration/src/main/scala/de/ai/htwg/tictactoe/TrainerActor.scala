@@ -46,7 +46,8 @@ class TrainerActor extends Actor with Logging {
       gamma = 0.4
     )
   )
-  private val cross = context.actorOf(AiActor.props(List(self), properties))
+  private val watcher = context.actorOf(WatcherActor.props())
+  private val cross = context.actorOf(AiActor.props(List(self, watcher), properties))
   private val circle = context.actorOf(LogicPlayerActor.props(new Random(5L)))
   private val clientMain = context.actorOf(UiMainActor.props(dimensions), "clientMain")
   private val aiClients = 1 // count of players to wait for ready message
@@ -59,7 +60,7 @@ class TrainerActor extends Actor with Logging {
   override def receive: Receive = {
     case StartTraining(epochs) if epochs > 0 =>
       remainingEpochs = epochs
-      info(s"Start training with $epochs remaining epochs")
+      debug(s"Start training with $epochs remaining epochs")
       val gameName = "game" + epochs
       val game = context.actorOf(GameControllerActor.props(dimensions, Player.Cross), gameName)
       cross ! AiActor.RegisterGame(Player.Cross, game)
@@ -67,7 +68,7 @@ class TrainerActor extends Actor with Logging {
       currentGame = game
 
     case AiActor.TrainingFinished if remainingEpochs == 1 =>
-      info(s"Start test run after training")
+      debug(s"Start test run after training")
       sequence += 1
       val gameName = "test-game" + sequence
       val game = context.actorOf(GameControllerActor.props(dimensions, Player.Cross), gameName)

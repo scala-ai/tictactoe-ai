@@ -4,6 +4,7 @@ import akka.actor.Actor
 import akka.actor.ActorRef
 import akka.actor.Props
 import de.ai.htwg.tictactoe.aiClient.AiActor.LearningProcessorConfiguration
+import de.ai.htwg.tictactoe.aiClient.AiActor.TrainingEpochResult
 import de.ai.htwg.tictactoe.aiClient.AiActor.TrainingFinished
 import de.ai.htwg.tictactoe.aiClient.learning.TTTEpochResult
 import de.ai.htwg.tictactoe.aiClient.learning.TTTLearningProcessor
@@ -11,6 +12,7 @@ import de.ai.htwg.tictactoe.aiClient.learning.TTTState
 import de.ai.htwg.tictactoe.aiClient.learning.core.QLearningConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.policy.EpsGreedyConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.policy.PolicyConfiguration
+import de.ai.htwg.tictactoe.aiClient.learning.core.state.EpochResult
 import de.ai.htwg.tictactoe.clientConnection.messages.GameControllerMessages
 import de.ai.htwg.tictactoe.clientConnection.model.GameField
 import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
@@ -25,6 +27,7 @@ object AiActor {
 
   case class RegisterGame(player: Player, gameControllerActor: ActorRef)
   case object TrainingFinished
+  case class TrainingEpochResult(epochResult: EpochResult)
 
   case class LearningProcessorConfiguration(
       policyProperties: PolicyConfiguration,
@@ -52,12 +55,14 @@ class AiActor private(watchers: List[ActorRef], properties: LearningProcessorCon
     case GameControllerMessages.YourTurn(gf: GameField) => doGameAction(gf, sender())
 
     case GameControllerMessages.YourResult(_, result) =>
-      info(s"$currentPlayer: game finished, result: $result")
-      learningUnit = learningUnit.trainResult(result match {
+      debug(s"$currentPlayer: game finished, result: $result")
+      val epochResult = result match {
         case GameControllerMessages.GameWon => TTTEpochResult.won
         case GameControllerMessages.GameLost => TTTEpochResult.lost
         case GameControllerMessages.GameDraw => TTTEpochResult.undecided
-      })
+      }
+      watchers.foreach(_ ! TrainingEpochResult(epochResult))
+      learningUnit = learningUnit.trainResult(epochResult)
       watchers.foreach(_ ! TrainingFinished)
   }
 
