@@ -4,6 +4,7 @@ import scala.util.Random
 
 import akka.actor.Actor
 import akka.actor.ActorRef
+import akka.actor.PoisonPill
 import akka.actor.Props
 import de.ai.htwg.tictactoe.TrainerActor.StartTraining
 import de.ai.htwg.tictactoe.aiClient.AiActor
@@ -33,15 +34,15 @@ class TrainerActor extends Actor with Logging {
     random = Random
   )
   private val explorationStepConfiguration = ExplorationStepConfiguration(
-    minEpsilon = 0.3f,
-    nbStepVisits = 10,
+    minEpsilon = 0.2f,
+    nbStepVisits = 500,
     random = Random
   )
   private val properties = LearningProcessorConfiguration(
     explorationStepConfiguration,
     QLearningConfiguration(
-      alpha = 0.9,
-      gamma = 0.6
+      alpha = 0.8,
+      gamma = 0.4
     )
   )
   private val circle = context.actorOf(AiActor.props(List(self), properties))
@@ -49,10 +50,9 @@ class TrainerActor extends Actor with Logging {
   private val clientMain = context.actorOf(UiMainActor.props(dimensions), "clientMain")
 
   private var readyActors: List[ActorRef] = List()
-
   private var sequence = 0
-
   private var remainingEpochs = 0
+  private var currentGame: ActorRef = _
 
   override def receive: Receive = {
     case StartTraining(epochs) if epochs > 0 =>
@@ -62,6 +62,7 @@ class TrainerActor extends Actor with Logging {
       val game = context.actorOf(GameControllerActor.props(dimensions, Player.Cross), gameName)
       circle ! RegisterGame(Player.Circle, game)
       cross ! RegisterGame(Player.Cross, game)
+      currentGame = game
 
     case AiActor.TrainingFinished if remainingEpochs == 1 =>
       info(s"Start test run after training")
@@ -74,6 +75,7 @@ class TrainerActor extends Actor with Logging {
     case AiActor.TrainingFinished =>
       readyActors = sender() :: readyActors
       debug(s"training finished message (ready = ${readyActors.size})")
+      currentGame ! PoisonPill
       if (readyActors.size == 2) {
         readyActors = List()
         self ! StartTraining(remainingEpochs - 1)
