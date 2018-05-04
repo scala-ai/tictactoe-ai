@@ -52,7 +52,7 @@ class AiActor private(watchers: List[ActorRef], properties: LearningProcessorCon
     case GameControllerMessages.YourTurn(gf: GameField) => doGameAction(gf, sender())
 
     case GameControllerMessages.YourResult(_, result) =>
-      debug(s"$currentPlayer: game finished, result: $result")
+      info(s"$currentPlayer: game finished, result: $result")
       learningUnit = learningUnit.trainResult(result match {
         case GameControllerMessages.GameWon => TTTEpochResult.won
         case GameControllerMessages.GameLost => TTTEpochResult.lost

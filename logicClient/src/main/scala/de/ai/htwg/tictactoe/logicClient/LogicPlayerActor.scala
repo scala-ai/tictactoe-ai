@@ -1,4 +1,4 @@
-package de.ai.htwg.tictactoe.playerClient
+package de.ai.htwg.tictactoe.logicClient
 
 import scala.util.Random
 
@@ -7,17 +7,17 @@ import akka.actor.ActorRef
 import akka.actor.Props
 import de.ai.htwg.tictactoe.clientConnection.messages.GameControllerMessages
 import de.ai.htwg.tictactoe.clientConnection.model.GameField
+import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
 import de.ai.htwg.tictactoe.clientConnection.model.Player
-import de.ai.htwg.tictactoe.playerClient.LogicPlayerActor.RegisterGame
 import grizzled.slf4j.Logging
 
 object LogicPlayerActor {
-  def props(dimensions: Int, random: Random) = Props(new LogicPlayerActor(dimensions, random))
+  def props(random: Random) = Props(new LogicPlayerActor(random))
 
   case class RegisterGame(player: Player, gameControllerActor: ActorRef)
 }
 
-class LogicPlayerActor private(dimensions: Int, random: Random) extends Actor with Logging {
+class LogicPlayerActor private(random: Random) extends Actor with Logging {
 
   case class GameScope(todo: Set[(Int, Int)]) {
     def nextAction(random: Random): ((Int, Int), GameScope) = {
@@ -27,23 +27,34 @@ class LogicPlayerActor private(dimensions: Int, random: Random) extends Actor wi
     }
   }
 
-  var gameScope = GameScope(Set())
+  override def receive: Receive = actorContext(GameScope(Set()))
 
-  override def receive: Receive = {
-    case RegisterGame(p, game) => handleSetGame(p, game)
-    case GameControllerMessages.YourTurn(gf: GameField) => doGameAction(gf, sender())
+  def actorContext(gameScope: GameScope): Receive = {
+    case LogicPlayerActor.RegisterGame(p, game) => handleSetGame(p, game)
+
+    case GameControllerMessages.GameUpdated(_) => trace("LogicPlayer: Game updated") // not interesting
+    case GameControllerMessages.GameFinished(_, _) => trace("LogicPlayer: Game finished") // not interesting
+    case GameControllerMessages.PosAlreadySet(_: GridPosition) => error(s"LogicPlayer: Pos already set")
+    case GameControllerMessages.NotYourTurn(_: GridPosition) => error(s"LogicPlayer: Not your turn")
+    case GameControllerMessages.YourTurn(gf: GameField) => doGameAction(gameScope, gf, sender())
+
+    case GameControllerMessages.YourResult(_, result) =>
+      debug(s"LogicPlayer: Game finished, result: $result")
   }
 
-  private def doGameAction(gf: GameField, ref: ActorRef): Unit = {
-    val (action, newGameScope) = gameScope.nextAction(random)
+  private def doGameAction(gameScope: GameScope, gf: GameField, gameControllerActor: ActorRef): Unit = {
     val possibleActions = gf.getAllEmptyPos
-    gameScope = newGameScope
-    possibleActions.collectFirst({
-      case p if p.x == action._1 && p.y == action._2 => p
-    }).map(p => {
-      info(s"Choose action $p")
-      p
-    }).fold(possibleActions(random.nextInt(possibleActions.size)))
+    gameControllerActor ! GameControllerMessages.SetPos(
+      if (gameScope.todo.isEmpty) {
+        possibleActions(random.nextInt(possibleActions.size))
+      } else {
+        val (action, newGameScope) = gameScope.nextAction(random)
+        context.become(actorContext(newGameScope))
+        possibleActions.collectFirst({
+          case p if p.x == action._1 && p.y == action._2 => p
+        }).fold(possibleActions(random.nextInt(possibleActions.size)))(e => e)
+      }
+    )
   }
 
   private def handleSetGame(player: Player, gameControllerActor: ActorRef): Unit = {
@@ -51,8 +62,9 @@ class LogicPlayerActor private(dimensions: Int, random: Random) extends Actor wi
       case Player.Circle => gameControllerActor ! GameControllerMessages.RegisterCircle
       case Player.Cross => gameControllerActor ! GameControllerMessages.RegisterCross
     }
-    gameScope = GameScope(possibleWinActions(random.nextInt(possibleWinActions.size)))
-    info(s"New game scope: ${gameScope.todo}")
+    val newGameScope = GameScope(possibleWinActions(random.nextInt(possibleWinActions.size)))
+    context.become(actorContext(newGameScope))
+    debug(s"New game scope: ${newGameScope.todo}")
     debug("logicPlayer is ready to play")
   }
 

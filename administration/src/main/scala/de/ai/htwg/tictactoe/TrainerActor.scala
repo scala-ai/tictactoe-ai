@@ -16,6 +16,7 @@ import de.ai.htwg.tictactoe.aiClient.learning.core.policy.ExplorationStepConfigu
 import de.ai.htwg.tictactoe.clientConnection.fxUI.UiMainActor
 import de.ai.htwg.tictactoe.clientConnection.model.Player
 import de.ai.htwg.tictactoe.gameLogic.controller.GameControllerActor
+import de.ai.htwg.tictactoe.logicClient.LogicPlayerActor
 import de.ai.htwg.tictactoe.playerClient.PlayerUiActor
 import grizzled.slf4j.Logging
 
@@ -35,7 +36,7 @@ class TrainerActor extends Actor with Logging {
   )
   private val explorationStepConfiguration = ExplorationStepConfiguration(
     minEpsilon = 0.2f,
-    nbStepVisits = 500,
+    nbStepVisits = 100,
     random = Random
   )
   private val properties = LearningProcessorConfiguration(
@@ -45,9 +46,10 @@ class TrainerActor extends Actor with Logging {
       gamma = 0.4
     )
   )
-  private val circle = context.actorOf(AiActor.props(List(self), properties))
   private val cross = context.actorOf(AiActor.props(List(self), properties))
+  private val circle = context.actorOf(LogicPlayerActor.props(new Random(5L)))
   private val clientMain = context.actorOf(UiMainActor.props(dimensions), "clientMain")
+  private val aiClients = 1 // count of players to wait for ready message
 
   private var readyActors: List[ActorRef] = List()
   private var sequence = 0
@@ -60,8 +62,8 @@ class TrainerActor extends Actor with Logging {
       info(s"Start training with $epochs remaining epochs")
       val gameName = "game" + epochs
       val game = context.actorOf(GameControllerActor.props(dimensions, Player.Cross), gameName)
-      circle ! RegisterGame(Player.Circle, game)
-      cross ! RegisterGame(Player.Cross, game)
+      cross ! AiActor.RegisterGame(Player.Cross, game)
+      circle ! LogicPlayerActor.RegisterGame(Player.Circle, game)
       currentGame = game
 
     case AiActor.TrainingFinished if remainingEpochs == 1 =>
@@ -76,7 +78,7 @@ class TrainerActor extends Actor with Logging {
       readyActors = sender() :: readyActors
       debug(s"training finished message (ready = ${readyActors.size})")
       currentGame ! PoisonPill
-      if (readyActors.size == 2) {
+      if (readyActors.size == aiClients) {
         readyActors = List()
         self ! StartTraining(remainingEpochs - 1)
       }

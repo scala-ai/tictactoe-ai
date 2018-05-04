@@ -9,6 +9,6 @@ object TrainMain extends App with Logging {
   val system = ActorSystem()
 
   val trainer = system.actorOf(TrainerActor.props(), "trainerActor")
-  trainer ! TrainerActor.StartTraining(10000)
+  trainer ! TrainerActor.StartTraining(100000)
 
 }
