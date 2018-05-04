@@ -1,19 +1,20 @@
-import sbt.project
-import sbt.Keys
 import sbt.Def
-import sbt.file
-import sbt.Project
-import sbt.stringToOrganization
+import sbt.Keys
 import sbt.Keys.scalacOptions
+import sbt.Project
+import sbt.file
+import sbt.project
+import sbt.stringToOrganization
 
 
 object TicTacToeBuild {
 
   lazy val administration = project
-  lazy val aiClient = project
   lazy val clientConnection = project
   lazy val gameLogic = project
   lazy val playerClient = project
+  lazy val aiClient = project
+  lazy val logicClient = project
 
   val scalaVersionNumber = "2.12.5"
   val scalaVersion = Keys.scalaVersion := scalaVersionNumber

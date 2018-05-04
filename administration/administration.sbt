@@ -3,4 +3,5 @@ lazy val administration = TicTacToeBuild.defaultProject(project).dependsOn(
   TicTacToeBuild.clientConnection,
   TicTacToeBuild.aiClient,
   TicTacToeBuild.playerClient,
+  TicTacToeBuild.logicClient,
 )

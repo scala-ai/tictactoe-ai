@@ -9,4 +9,5 @@ lazy val aiClient = TicTacToeBuild.aiClient
 lazy val clientConnection = TicTacToeBuild.clientConnection
 lazy val playerClient = TicTacToeBuild.playerClient
 lazy val gameLogic = TicTacToeBuild.gameLogic
+lazy val logicClient = TicTacToeBuild.logicClient
 
