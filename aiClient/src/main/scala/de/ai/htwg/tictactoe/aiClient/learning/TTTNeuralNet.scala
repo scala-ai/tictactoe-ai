@@ -14,7 +14,7 @@ import org.nd4j.linalg.api.ndarray.INDArray
 import org.nd4j.linalg.learning.config.Adam
 import org.nd4j.linalg.lossfunctions.LossFunctions
 
-case class TTTNeuralNet() extends NeuralNet with Logging {
+class TTTNeuralNet() extends NeuralNet with Logging {
   private val dimensions = 4
   private val actions = dimensions * dimensions
   private val state = dimensions * dimensions
