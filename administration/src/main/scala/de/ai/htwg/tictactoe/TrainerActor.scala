@@ -17,6 +17,7 @@ import de.ai.htwg.tictactoe.aiClient.learning.core.policy.ExplorationStepConfigu
 import de.ai.htwg.tictactoe.clientConnection.model.Player
 import de.ai.htwg.tictactoe.clientConnection.util.DelegatedPartialFunction
 import de.ai.htwg.tictactoe.gameLogic.controller.GameControllerActor
+import de.ai.htwg.tictactoe.logicClient.LogicPlayerActor
 import de.ai.htwg.tictactoe.playerClient.PlayerUiActor
 import grizzled.slf4j.Logging
 
@@ -73,43 +74,51 @@ class TrainerActor(dimensions: Int, clientMain: ActorRef) extends Actor with Sta
     private var readyActors: List[ActorRef] = Nil
     var currentGame: ActorRef = doTraining(
       context.actorOf(AiActor.props(List(self, watcherActor), properties)),
-      context.actorOf(AiActor.props(List(self), properties)),
+      context.actorOf(LogicPlayerActor.props(new Random(5L), List(self)))
+      // context.actorOf(AiActor.props(List(self), properties))
     )
 
     def doTraining(circle: ActorRef, cross: ActorRef): ActorRef = {
       info(s"Train epoch ${totalEpochs - remainingEpochs}")
       val game = context.actorOf(GameControllerActor.props(dimensions, Player.Cross), s"game-$remainingEpochs")
-      circle ! RegisterGame(Player.Circle, game)
-      cross ! RegisterGame(Player.Cross, game)
+      // must be sent twice, cause we don't know the player type
+      circle ! AiActor.RegisterGame(Player.Circle, game)
+      circle ! LogicPlayerActor.RegisterGame(Player.Circle, game)
+      cross ! AiActor.RegisterGame(Player.Cross, game)
+      cross ! LogicPlayerActor.RegisterGame(Player.Cross, game)
       game
     }
 
     override def pf: PartialFunction[Any, Unit] = {
-      case AiActor.TrainingFinished =>
-        debug(s"training finished message (ready = ${readyActors.size})")
-        readyActors match {
-          case Nil =>
-            readyActors = sender() :: Nil
+      case AiActor.TrainingFinished => handlePlayerReady(sender())
+      case LogicPlayerActor.PlayerReady => handlePlayerReady(sender())
+    }
 
-          case first :: Nil =>
-            remainingEpochs -= 1
-            if (remainingEpochs > 0) {
-              readyActors = Nil
-              currentGame ! PoisonPill // FIXME turn into restart
-              // this will mix who is circle and who is cross
-              currentGame = doTraining(sender(), first)
-            } else {
-              readyActors = sender() :: first :: Nil
-              context.become(new RunTestGames(readyActors.toVector))
-              warn {
-                val time = System.currentTimeMillis() - start
-                val ms = time % 1000
-                val secs = time / 1000 % 60
-                val min = time / 1000 / 60
-                s"Training of $totalEpochs epochs finished after $min min $secs sec $ms ms."
-              }
+    private def handlePlayerReady(sender: ActorRef): Unit = {
+      debug(s"training finished message (ready = ${readyActors.size})")
+      readyActors match {
+        case Nil =>
+          readyActors = sender :: Nil
+
+        case first :: Nil =>
+          remainingEpochs -= 1
+          if (remainingEpochs > 0) {
+            readyActors = Nil
+            currentGame ! PoisonPill // FIXME turn into restart
+            // this will mix who is circle and who is cross
+            currentGame = doTraining(sender, first)
+          } else {
+            readyActors = sender :: first :: Nil
+            context.become(new RunTestGames(readyActors.toVector))
+            warn {
+              val time = System.currentTimeMillis() - start
+              val ms = time % 1000
+              val secs = time / 1000 % 60
+              val min = time / 1000 / 60
+              s"Training of $totalEpochs epochs finished after $min min $secs sec $ms ms."
             }
-        }
+          }
+      }
     }
   }
 
