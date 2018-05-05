@@ -64,5 +64,7 @@ private class GameUiActor(name: String, dimensions: Int) extends Actor {
     case GameUiActor.SubscribeToMouseEvents(fac) => listeners = Subscriber(sender(), fac) :: listeners
     case GameUiActor.Unsubscribe => listeners = listeners.filterNot(_.actorRef == sender())
   }
-
+  override def postStop(): Unit = {
+    stage.stop()
+  }
 }
