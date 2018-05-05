@@ -36,7 +36,7 @@ class TrainerActor extends Actor with Logging {
   )
   private val explorationStepConfiguration = ExplorationStepConfiguration(
     minEpsilon = 0.2f,
-    nbStepVisits = 100,
+    nbStepVisits = 400,
     random = Random
   )
   private val properties = LearningProcessorConfiguration(
@@ -46,9 +46,12 @@ class TrainerActor extends Actor with Logging {
       gamma = 0.4
     )
   )
+
+  private val logicPlayerRandom = new Random(5L)
+  private val gameRandom = new Random(3L)
   private val watcher = context.actorOf(WatcherActor.props())
   private val cross = context.actorOf(AiActor.props(List(self, watcher), properties))
-  private val circle = context.actorOf(LogicPlayerActor.props(new Random(5L)))
+  private val circle = context.actorOf(LogicPlayerActor.props(logicPlayerRandom))
   private val clientMain = context.actorOf(UiMainActor.props(dimensions), "clientMain")
   private val aiClients = 1 // count of players to wait for ready message
 
@@ -62,7 +65,7 @@ class TrainerActor extends Actor with Logging {
       remainingEpochs = epochs
       debug(s"Start training with $epochs remaining epochs")
       val gameName = "game" + epochs
-      val game = context.actorOf(GameControllerActor.props(dimensions, Player.Cross), gameName)
+      val game = context.actorOf(GameControllerActor.props(dimensions, randomPlayer(gameRandom)), gameName)
       cross ! AiActor.RegisterGame(Player.Cross, game)
       circle ! LogicPlayerActor.RegisterGame(Player.Circle, game)
       currentGame = game
@@ -71,7 +74,7 @@ class TrainerActor extends Actor with Logging {
       debug(s"Start test run after training")
       sequence += 1
       val gameName = "test-game" + sequence
-      val game = context.actorOf(GameControllerActor.props(dimensions, Player.Cross), gameName)
+      val game = context.actorOf(GameControllerActor.props(dimensions, randomPlayer(gameRandom)), gameName)
       sender() ! RegisterGame(Player.Circle, game)
       context.actorOf(PlayerUiActor.props(Player.Cross, clientMain, game, gameName))
 
@@ -83,6 +86,12 @@ class TrainerActor extends Actor with Logging {
         readyActors = List()
         self ! StartTraining(remainingEpochs - 1)
       }
+  }
+
+  private def randomPlayer(random: Random) = if (random.nextBoolean()) {
+    Player.Cross
+  } else {
+    Player.Circle
   }
 
 }

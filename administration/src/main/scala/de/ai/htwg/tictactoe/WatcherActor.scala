@@ -15,16 +15,20 @@ class WatcherActor extends Actor with Logging {
   private var wonGames = 0
   private var lostGames = 0
   private var drawGames = 0
+  private var epoch = 0
+
 
   override def receive: Receive = {
     case AiActor.TrainingEpochResult(result) =>
+      epoch = epoch + 1
       result match {
         case TTTEpochResult(true, false) => wonGames = wonGames + 1
         case TTTEpochResult(false, false) => lostGames = lostGames + 1
         case TTTEpochResult(false, true) => drawGames = drawGames + 1
         case _ => error("Unknown epoch result!")
       }
-      info(s" +:$wonGames 0:$drawGames -:$lostGames = ${(wonGames + drawGames).toFloat / (wonGames + lostGames + drawGames)}")
+      //addData.put((epoch, wonGames))
+      info(s"$epoch - (+) $wonGames (0) $drawGames (-) $lostGames = ${(wonGames + drawGames).toFloat / (wonGames + lostGames + drawGames)}")
   }
 
 }
