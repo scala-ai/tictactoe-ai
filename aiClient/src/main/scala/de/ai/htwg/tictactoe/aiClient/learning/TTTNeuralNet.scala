@@ -20,8 +20,8 @@ case class TTTNeuralNet() extends NeuralNet with Logging {
   private val state = dimensions * dimensions
   private val inputNodes = actions + state
   private val hiddenNodes1 = 32
-  private val hiddenNodes2 = 18
-  private val hiddenNodes3 = 18
+  private val hiddenNodes2 = 32
+  private val hiddenNodes3 = 32
   private val outputNodes = 1 // q value
   // private val learningRate = 0.01
 

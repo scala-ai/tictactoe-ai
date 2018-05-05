@@ -22,7 +22,7 @@
   </appender>
   <logger name="org.deeplearning4j" level="warn"/>
   <logger name="org.nd4j" level="warn"/>
-  <logger name="org.reflections" level="warn"/>
+  <logger name="org.reflections" level="error"/>
   <logger name="de.ai.htwg.tictactoe" level="info"/>
   <root level="info">
     <appender-ref ref="console"/>
