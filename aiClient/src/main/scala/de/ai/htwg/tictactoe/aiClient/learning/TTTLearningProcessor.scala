@@ -9,16 +9,16 @@ import de.ai.htwg.tictactoe.aiClient.learning.core.policy.ExplorationStepConfigu
 import de.ai.htwg.tictactoe.aiClient.learning.core.policy.PolicyConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.transition.TransitionHistoryImpl
 
-case class TTTLearningProcessor(
+class TTTLearningProcessor(
     learning: QLearning[TTTState, TTTAction, TTTEpochResult]
 ) {
 
   def getDecision(state: TTTState): (TTTAction, TTTLearningProcessor) = {
     val (newLearning, action) = learning.getDecision(state)
-    (action, copy(learning = newLearning))
+    (action, new TTTLearningProcessor(learning = newLearning))
   }
 
-  def trainResult(result: TTTEpochResult): TTTLearningProcessor = copy(learning.trainHistory(result))
+  def trainResult(result: TTTEpochResult): TTTLearningProcessor = new TTTLearningProcessor(learning.trainHistory(result))
 }
 
 object TTTLearningProcessor {
@@ -32,7 +32,7 @@ object TTTLearningProcessor {
         case c: ExplorationStepConfiguration => ExplorationStep[TTTState, TTTAction](c)
       },
       rewardCalculator = TTTRewardCalculator(),
-      neuralNet = TTTNeuralNet(),
+      neuralNet = new TTTNeuralNet(),
       transitionHistory = TransitionHistoryImpl[TTTAction, TTTState](),
       transitionFactory = TTTTransition,
       actionSpace = TTTActionSpace(),

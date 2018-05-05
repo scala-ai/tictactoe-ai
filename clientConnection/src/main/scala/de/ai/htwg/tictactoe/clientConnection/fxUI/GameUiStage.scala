@@ -227,5 +227,11 @@ class GameUiStage private(name: String, dimensions: Int, onMouseClicked: GridPos
     )
   }
 
+  def stop(): Unit = {
+    Platform.runLater{
+      stage.close()
+    }
+  }
+
 
 }
