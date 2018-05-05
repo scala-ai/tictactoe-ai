@@ -47,6 +47,8 @@ class TrainerActor(dimensions: Int, clientMain: ActorRef) extends Actor with Sta
     )
   )
 
+  private val watcherActor = context.actorOf(WatcherActor.props())
+
   override def receive: Receive = PreInitialize
 
   private object PreInitialize extends DelegateReceive {
@@ -70,7 +72,7 @@ class TrainerActor(dimensions: Int, clientMain: ActorRef) extends Actor with Sta
     var remainingEpochs: Int = totalEpochs
     private var readyActors: List[ActorRef] = Nil
     var currentGame: ActorRef = doTraining(
-      context.actorOf(AiActor.props(List(self), properties)),
+      context.actorOf(AiActor.props(List(self, watcherActor), properties)),
       context.actorOf(AiActor.props(List(self), properties)),
     )
 
@@ -84,19 +86,20 @@ class TrainerActor(dimensions: Int, clientMain: ActorRef) extends Actor with Sta
 
     override def pf: PartialFunction[Any, Unit] = {
       case AiActor.TrainingFinished =>
+        debug(s"training finished message (ready = ${readyActors.size})")
         readyActors match {
           case Nil =>
             readyActors = sender() :: Nil
 
-          case first :: rest =>
+          case first :: Nil =>
             remainingEpochs -= 1
             if (remainingEpochs > 0) {
-              readyActors = rest
+              readyActors = Nil
               currentGame ! PoisonPill // FIXME turn into restart
               // this will mix who is circle and who is cross
               currentGame = doTraining(sender(), first)
             } else {
-              readyActors = sender() :: first :: rest
+              readyActors = sender() :: first :: Nil
               context.become(new RunTestGames(readyActors.toVector))
               warn {
                 val time = System.currentTimeMillis() - start
@@ -107,8 +110,6 @@ class TrainerActor(dimensions: Int, clientMain: ActorRef) extends Actor with Sta
               }
             }
         }
-
-        debug(s"training finished message (ready = ${readyActors.size})")
     }
   }
 

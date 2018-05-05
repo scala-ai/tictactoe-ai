@@ -113,6 +113,7 @@ class AiActor private(watchers: List[ActorRef], properties: LearningProcessorCon
         }
         watchers.foreach(_ ! TrainingEpochResult(epochResult))
         learningUnit = learningUnit.trainResult(epochResult)
+        context.become(new PreInitialized(Some(learningUnit)))
         watchers.foreach(_ ! TrainingFinished)
     }
 
