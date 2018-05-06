@@ -2,8 +2,8 @@ package de.ai.htwg.tictactoe
 
 import akka.actor.ActorSystem
 import de.ai.htwg.tictactoe.aiClient.AiActor
-import de.ai.htwg.tictactoe.aiClient.AiActor.RegisterGame
 import de.ai.htwg.tictactoe.clientConnection.fxUI.UiMainActor
+import de.ai.htwg.tictactoe.clientConnection.messages.RegisterGame
 import de.ai.htwg.tictactoe.clientConnection.model.Player
 import de.ai.htwg.tictactoe.gameLogic.controller.GameControllerActor
 import de.ai.htwg.tictactoe.playerClient.PlayerUiActor

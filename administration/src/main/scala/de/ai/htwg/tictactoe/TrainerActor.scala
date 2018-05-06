@@ -10,10 +10,10 @@ import akka.actor.Stash
 import de.ai.htwg.tictactoe.TrainerActor.StartTraining
 import de.ai.htwg.tictactoe.aiClient.AiActor
 import de.ai.htwg.tictactoe.aiClient.AiActor.LearningProcessorConfiguration
-import de.ai.htwg.tictactoe.aiClient.AiActor.RegisterGame
 import de.ai.htwg.tictactoe.aiClient.learning.core.QLearningConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.policy.EpsGreedyConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.policy.ExplorationStepConfiguration
+import de.ai.htwg.tictactoe.clientConnection.messages.RegisterGame
 import de.ai.htwg.tictactoe.clientConnection.model.Player
 import de.ai.htwg.tictactoe.clientConnection.util.DelegatedPartialFunction
 import de.ai.htwg.tictactoe.gameLogic.controller.GameControllerActor
@@ -83,11 +83,10 @@ class TrainerActor(dimensions: Int, clientMain: ActorRef) extends Actor with Sta
       val game = context.actorOf(GameControllerActor.props(dimensions, Player.Cross), s"game-$remainingEpochs")
       // must be sent twice, cause we don't know the player type
       circle ! AiActor.UpdateTrainingState(true)
-      circle ! AiActor.RegisterGame(Player.Circle, game)
-      circle ! LogicPlayerActor.RegisterGame(Player.Circle, game)
       cross ! AiActor.UpdateTrainingState(true)
-      cross ! AiActor.RegisterGame(Player.Cross, game)
-      cross ! LogicPlayerActor.RegisterGame(Player.Cross, game)
+
+      circle ! RegisterGame(Player.Circle, game)
+      cross ! RegisterGame(Player.Cross, game)
       game
     }
 

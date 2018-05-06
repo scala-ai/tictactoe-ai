@@ -19,6 +19,7 @@ import de.ai.htwg.tictactoe.aiClient.learning.core.policy.EpsGreedyConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.policy.PolicyConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.state.EpochResult
 import de.ai.htwg.tictactoe.clientConnection.messages.GameControllerMessages
+import de.ai.htwg.tictactoe.clientConnection.messages.RegisterGame
 import de.ai.htwg.tictactoe.clientConnection.model.GameField
 import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
 import de.ai.htwg.tictactoe.clientConnection.model.Player
@@ -31,7 +32,6 @@ object AiActor {
 
   def props(watchers: List[ActorRef], properties: LearningProcessorConfiguration) = Props(new AiActor(watchers, properties))
 
-  case class RegisterGame(player: Player, gameControllerActor: ActorRef)
   case object TrainingFinished
   case class TrainingEpochResult(epochResult: EpochResult)
   case class UpdateTrainingState(training: Boolean)
@@ -52,7 +52,7 @@ class AiActor private(watchers: List[ActorRef], properties: LearningProcessorCon
   ) extends DelegatedPartialFunction[Any, Unit] {
     case class InitNet(net: TTTLearningProcessor)
 
-    var register: Option[AiActor.RegisterGame] = None
+    var register: Option[RegisterGame] = None
 
     if (net.isEmpty) {
       implicit val disp: ExecutionContextExecutor = context.dispatcher
@@ -71,7 +71,7 @@ class AiActor private(watchers: List[ActorRef], properties: LearningProcessorCon
       case InitNet(n) =>
         net = Some(n)
         probeInit()
-      case r @ AiActor.RegisterGame(_, _) =>
+      case r @ RegisterGame(_, _) =>
         register = Some(r)
         probeInit()
       case UpdateTrainingState(b) => training = b

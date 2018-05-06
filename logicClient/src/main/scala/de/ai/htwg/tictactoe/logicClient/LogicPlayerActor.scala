@@ -6,6 +6,7 @@ import akka.actor.Actor
 import akka.actor.ActorRef
 import akka.actor.Props
 import de.ai.htwg.tictactoe.clientConnection.messages.GameControllerMessages
+import de.ai.htwg.tictactoe.clientConnection.messages.RegisterGame
 import de.ai.htwg.tictactoe.clientConnection.model.GameField
 import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
 import de.ai.htwg.tictactoe.clientConnection.model.Player
@@ -15,7 +16,6 @@ import grizzled.slf4j.Logging
 object LogicPlayerActor {
   def props(random: Random, watchers: List[ActorRef]) = Props(new LogicPlayerActor(random, watchers))
 
-  case class RegisterGame(player: Player, gameControllerActor: ActorRef)
   case object PlayerReady
 }
 
@@ -32,7 +32,7 @@ class LogicPlayerActor private(random: Random, watchers: List[ActorRef]) extends
   override def receive: Receive = actorContext(GameScope(Set()))
 
   def actorContext(gameScope: GameScope): Receive = {
-    case LogicPlayerActor.RegisterGame(p, game) => handleSetGame(p, game)
+    case RegisterGame(p, game) => handleSetGame(p, game)
 
     case GameControllerMessages.GameUpdated(_) => trace("LogicPlayer: Game updated") // not interesting
     case GameControllerMessages.GameFinished(_, _) => trace("LogicPlayer: Game finished") // not interesting
