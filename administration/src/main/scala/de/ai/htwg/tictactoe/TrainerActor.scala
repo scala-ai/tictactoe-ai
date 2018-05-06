@@ -102,7 +102,7 @@ class TrainerActor(dimensions: Int, clientMain: ActorRef) extends Actor with Sta
         case Nil =>
           readyActors = sender :: Nil
 
-        case first :: Nil =>
+        case first :: _ =>
           remainingEpochs -= 1
           if (remainingEpochs > 0) {
             readyActors = Nil
