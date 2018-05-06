@@ -31,20 +31,20 @@ class TrainerActor(dimensions: Int, clientMain: ActorRef) extends Actor with Sta
   private type DelegateReceive = DelegatedPartialFunction[Any, Unit]
 
   private val epsGreedyConfiguration = EpsGreedyConfiguration(
-    minEpsilon = 0.3f,
-    nbEpochVisits = 10000,
+    minEpsilon = 0.75f,
+    nbEpochVisits = 4000000,
     random = Random
   )
   private val explorationStepConfiguration = ExplorationStepConfiguration(
     minEpsilon = 0.2f,
-    nbStepVisits = 400,
+    nbStepVisits = 1000,
     random = Random
   )
   private val properties = LearningProcessorConfiguration(
-    explorationStepConfiguration,
+    epsGreedyConfiguration,
     QLearningConfiguration(
       alpha = 0.8,
-      gamma = 0.4
+      gamma = 0.6
     )
   )
 
@@ -82,8 +82,10 @@ class TrainerActor(dimensions: Int, clientMain: ActorRef) extends Actor with Sta
       info(s"Train epoch ${totalEpochs - remainingEpochs}")
       val game = context.actorOf(GameControllerActor.props(dimensions, Player.Cross), s"game-$remainingEpochs")
       // must be sent twice, cause we don't know the player type
+      circle ! AiActor.UpdateTrainingState(true)
       circle ! AiActor.RegisterGame(Player.Circle, game)
       circle ! LogicPlayerActor.RegisterGame(Player.Circle, game)
+      cross ! AiActor.UpdateTrainingState(true)
       cross ! AiActor.RegisterGame(Player.Cross, game)
       cross ! LogicPlayerActor.RegisterGame(Player.Cross, game)
       game
@@ -133,6 +135,8 @@ class TrainerActor(dimensions: Int, clientMain: ActorRef) extends Actor with Sta
       info(s"Start test run. ")
       val gameName = s"testGame-$testGameNumber"
       val ai = trainedActors(random.nextInt(trainedActors.size))
+      // update actor state to non training
+      ai ! AiActor.UpdateTrainingState(false)
       val game = context.actorOf(GameControllerActor.props(dimensions, Player.Cross), gameName)
       val p = if (random.nextBoolean()) Player.Cross else Player.Circle
 

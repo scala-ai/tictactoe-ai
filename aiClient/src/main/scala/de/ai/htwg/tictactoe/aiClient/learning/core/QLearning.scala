@@ -24,14 +24,37 @@ case class QLearning[S <: State, A <: Action, R <: EpochResult](
   private val alpha = qLearningProperties.alpha
   private val gamma = qLearningProperties.gamma
 
-  override def getDecision(state: S): (QLearning[S, A, R], A) = {
+  override def getTrainingDecision(state: S): (QLearning[S, A, R], A) = {
     // We are in state S
     // Let's run our Q function on S to get Q values for all possible actions
     val possibleActions = actionSpace.getPossibleActions(state)
+    // action depends on a training policy
     val action = policy.nextAction(state, () => calcBestAction(state, possibleActions), possibleActions)
+    createTransition(action, state)
+  }
+
+  override def getBestDecision(state: S): (QLearning[S, A, R], A) = {
+    val possibleActions = actionSpace.getPossibleActions(state)
+    val action = calcBestAction(state, possibleActions)
+    createTransition(action, state)
+  }
+
+  private def createTransition(action: A, state: S): (QLearning[S, A, R], A) = {
     val reward = rewardCalculator.getImmediateReward(action, state)
     val updatedHistory = transitionHistory.addTransition(transitionFactory(state, action, reward))
     (copy(transitionHistory = updatedHistory), action)
+  }
+
+  private def calcBestAction(state: S, possibleActions: List[A]): A = {
+    val ratedActions = possibleActions
+      .map(a => {
+        val input = Nd4j.concat(1, state.asVector, a.asVector)
+        val result = neuralNet.calc(input).getDouble(0)
+        assert(!result.isNaN)
+        (a, result)
+      })
+    trace(s"Q-Values: $ratedActions")
+    ratedActions.maxBy(_._2)._1
   }
 
   override def trainHistory(epochResult: R): QLearning[S, A, R] = {
@@ -70,18 +93,6 @@ case class QLearning[S <: State, A <: Action, R <: EpochResult](
       policy = updatedPolicy.incrementEpoch(),
       transitionHistory = transitionHistory.truncate()
     )
-  }
-
-  private def calcBestAction(state: S, possibleActions: List[A]): A = {
-    val ratedActions = possibleActions
-      .map(a => {
-        val input = Nd4j.concat(1, state.asVector, a.asVector)
-        val result = neuralNet.calc(input).getDouble(0)
-        assert(!result.isNaN)
-        (a, result)
-      })
-    trace(s"Q-Values: $ratedActions")
-    ratedActions.maxBy(_._2)._1
   }
 
 }

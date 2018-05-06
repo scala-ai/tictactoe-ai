@@ -10,6 +10,7 @@ import akka.actor.Stash
 import de.ai.htwg.tictactoe.aiClient.AiActor.LearningProcessorConfiguration
 import de.ai.htwg.tictactoe.aiClient.AiActor.TrainingEpochResult
 import de.ai.htwg.tictactoe.aiClient.AiActor.TrainingFinished
+import de.ai.htwg.tictactoe.aiClient.AiActor.UpdateTrainingState
 import de.ai.htwg.tictactoe.aiClient.learning.TTTEpochResult
 import de.ai.htwg.tictactoe.aiClient.learning.TTTLearningProcessor
 import de.ai.htwg.tictactoe.aiClient.learning.TTTState
@@ -33,6 +34,7 @@ object AiActor {
   case class RegisterGame(player: Player, gameControllerActor: ActorRef)
   case object TrainingFinished
   case class TrainingEpochResult(epochResult: EpochResult)
+  case class UpdateTrainingState(training: Boolean)
 
   case class LearningProcessorConfiguration(
       policyProperties: PolicyConfiguration,
@@ -45,7 +47,8 @@ class AiActor private(watchers: List[ActorRef], properties: LearningProcessorCon
   override def receive: Receive = new PreInitialized
 
   private class PreInitialized(
-      var net: Option[TTTLearningProcessor] = None
+      var net: Option[TTTLearningProcessor] = None,
+      var training: Boolean = true
   ) extends DelegatedPartialFunction[Any, Unit] {
     case class InitNet(net: TTTLearningProcessor)
 
@@ -71,6 +74,7 @@ class AiActor private(watchers: List[ActorRef], properties: LearningProcessorCon
       case r @ AiActor.RegisterGame(_, _) =>
         register = Some(r)
         probeInit()
+      case UpdateTrainingState(b) => training = b
 
       case _ => stash()
     }
@@ -79,7 +83,7 @@ class AiActor private(watchers: List[ActorRef], properties: LearningProcessorCon
       n <- net
       r <- register
     } {
-      context.become(new Initialized(n, r.player, r.gameControllerActor))
+      context.become(new Initialized(n, r.player, r.gameControllerActor, training))
       unstashAll()
     }
   }
@@ -88,6 +92,7 @@ class AiActor private(watchers: List[ActorRef], properties: LearningProcessorCon
       var learningUnit: TTTLearningProcessor,
       val currentPlayer: Player,
       val gameActor: ActorRef,
+      var training: Boolean
   ) extends DelegatedPartialFunction[Any, Unit] {
 
     currentPlayer match {
@@ -103,7 +108,7 @@ class AiActor private(watchers: List[ActorRef], properties: LearningProcessorCon
       case GameControllerMessages.PosAlreadySet(_: GridPosition) => error(s"$currentPlayer: Pos already set")
       case GameControllerMessages.NotYourTurn(_: GridPosition) => error(s"$currentPlayer: Not your turn")
       case GameControllerMessages.YourTurn(gf: GameField) => doGameAction(gf, sender())
-
+      case UpdateTrainingState(b) => training = b
       case GameControllerMessages.YourResult(_, result) =>
         debug(s"$currentPlayer: game finished, result: $result")
         val epochResult = result match {
@@ -113,13 +118,14 @@ class AiActor private(watchers: List[ActorRef], properties: LearningProcessorCon
         }
         watchers.foreach(_ ! TrainingEpochResult(epochResult))
         learningUnit = learningUnit.trainResult(epochResult)
-        context.become(new PreInitialized(Some(learningUnit)))
+        context.become(new PreInitialized(Some(learningUnit), training))
         watchers.foreach(_ ! TrainingFinished)
     }
 
     private def doGameAction(gf: GameField, gameControllerActor: ActorRef): Unit = {
       trace(s"$currentPlayer: It is your turn")
-      val (action, newLearningUnit) = learningUnit.getDecision(TTTState(gf))
+      // if actor is in training state calculate a training decision, else calculate best action
+      val (action, newLearningUnit) = if (training) learningUnit.getTrainingDecision(TTTState(gf)) else learningUnit.getBestDecision(TTTState(gf))
       learningUnit = newLearningUnit
       gameControllerActor ! GameControllerMessages.SetPos(action.coordinate)
     }

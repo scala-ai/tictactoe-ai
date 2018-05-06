@@ -8,13 +8,21 @@ import de.ai.htwg.tictactoe.aiClient.learning.core.policy.ExplorationStep
 import de.ai.htwg.tictactoe.aiClient.learning.core.policy.ExplorationStepConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.policy.PolicyConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.transition.TransitionHistoryImpl
+import grizzled.slf4j.Logging
 
 class TTTLearningProcessor(
     learning: QLearning[TTTState, TTTAction, TTTEpochResult]
-) {
+) extends Logging {
 
-  def getDecision(state: TTTState): (TTTAction, TTTLearningProcessor) = {
-    val (newLearning, action) = learning.getDecision(state)
+  def getTrainingDecision(state: TTTState): (TTTAction, TTTLearningProcessor) = {
+    debug(s"Ask for training decision")
+    val (newLearning, action) = learning.getTrainingDecision(state)
+    (action, new TTTLearningProcessor(learning = newLearning))
+  }
+
+  def getBestDecision(state: TTTState): (TTTAction, TTTLearningProcessor) = {
+    debug(s"Ask for best decision")
+    val (newLearning, action) = learning.getBestDecision(state)
     (action, new TTTLearningProcessor(learning = newLearning))
   }
 

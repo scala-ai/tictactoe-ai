@@ -11,6 +11,6 @@ object TrainMain extends App with Logging {
   val dimensions = 4
   val clientMain = system.actorOf(UiMainActor.props(dimensions), "clientMain")
   val trainer = system.actorOf(TrainerActor.props(dimensions, clientMain), "trainerActor")
-  trainer ! TrainerActor.StartTraining(100000)
+  trainer ! TrainerActor.StartTraining(1000000)
 
 }
