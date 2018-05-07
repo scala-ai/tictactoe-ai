@@ -14,6 +14,7 @@ import de.ai.htwg.tictactoe.aiClient.learning.core.QLearningConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.policy.EpsGreedyConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.policy.ExplorationStepConfiguration
 import de.ai.htwg.tictactoe.clientConnection.messages.RegisterGame
+import de.ai.htwg.tictactoe.clientConnection.messages.GameControllerMessages
 import de.ai.htwg.tictactoe.clientConnection.model.Player
 import de.ai.htwg.tictactoe.clientConnection.util.DelegatedPartialFunction
 import de.ai.htwg.tictactoe.gameLogic.controller.GameControllerActor
@@ -111,7 +112,7 @@ class TrainerActor(dimensions: Int, clientMain: ActorRef) extends Actor with Sta
           } else {
             readyActors = sender :: first :: Nil
             context.become(new RunTestGames(readyActors.toVector))
-            watcherActor ! WatcherActor.PrintCSV(10)
+            watcherActor ! WatcherActor.PrintCSV(100)
             info {
               val time = System.currentTimeMillis() - start
               val ms = time % 1000
@@ -138,6 +139,7 @@ class TrainerActor(dimensions: Int, clientMain: ActorRef) extends Actor with Sta
       // update actor state to non training
       ai ! AiActor.UpdateTrainingState(false)
       val game = context.actorOf(GameControllerActor.props(dimensions, Player.Cross), gameName)
+      game ! GameControllerMessages.RegisterObserver
       val p = if (random.nextBoolean()) Player.Cross else Player.Circle
 
       info(s"Start test run. player is: $p")
@@ -148,7 +150,13 @@ class TrainerActor(dimensions: Int, clientMain: ActorRef) extends Actor with Sta
     }
 
     override def pf: PartialFunction[Any, Unit] = {
-      case AiActor.TrainingFinished =>
+      case GameControllerMessages.GameFinished(_, winner) =>
+        info {
+          winner match {
+            case Some(player) => s"winner: $player"
+            case None => "game drawn"
+          }
+        }
         // FIXME turn into restart
         state.game ! PoisonPill
         state.player ! PlayerUiActor.Euthanize
