@@ -48,8 +48,6 @@ class TrainerActor(dimensions: Int, clientMain: ActorRef) extends Actor with Sta
     )
   )
 
-  private val watcherActor = context.actorOf(WatcherActor.props())
-
   override def receive: Receive = PreInitialize
 
   private object PreInitialize extends DelegateReceive {
@@ -72,6 +70,8 @@ class TrainerActor(dimensions: Int, clientMain: ActorRef) extends Actor with Sta
     val start: Long = System.currentTimeMillis()
     var remainingEpochs: Int = totalEpochs
     private var readyActors: List[ActorRef] = Nil
+    private val watcherActor = context.actorOf(WatcherActor.props())
+
     var currentGame: ActorRef = doTraining(
       context.actorOf(AiActor.props(List(self, watcherActor), properties)),
       context.actorOf(LogicPlayerActor.props(new Random(5L), List(self)))
@@ -111,7 +111,8 @@ class TrainerActor(dimensions: Int, clientMain: ActorRef) extends Actor with Sta
           } else {
             readyActors = sender :: first :: Nil
             context.become(new RunTestGames(readyActors.toVector))
-            warn {
+            watcherActor ! WatcherActor.PrintCSV(10)
+            info {
               val time = System.currentTimeMillis() - start
               val ms = time % 1000
               val secs = time / 1000 % 60

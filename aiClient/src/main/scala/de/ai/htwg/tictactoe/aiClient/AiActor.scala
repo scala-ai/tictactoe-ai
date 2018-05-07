@@ -17,7 +17,6 @@ import de.ai.htwg.tictactoe.aiClient.learning.TTTState
 import de.ai.htwg.tictactoe.aiClient.learning.core.QLearningConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.policy.EpsGreedyConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.policy.PolicyConfiguration
-import de.ai.htwg.tictactoe.aiClient.learning.core.state.EpochResult
 import de.ai.htwg.tictactoe.clientConnection.messages.GameControllerMessages
 import de.ai.htwg.tictactoe.clientConnection.messages.RegisterGame
 import de.ai.htwg.tictactoe.clientConnection.model.GameField
@@ -33,7 +32,7 @@ object AiActor {
   def props(watchers: List[ActorRef], properties: LearningProcessorConfiguration) = Props(new AiActor(watchers, properties))
 
   case object TrainingFinished
-  case class TrainingEpochResult(epochResult: EpochResult)
+  case class TrainingEpochResult(result: GameControllerMessages.GameResult)
   case class UpdateTrainingState(training: Boolean)
 
   case class LearningProcessorConfiguration(
@@ -116,7 +115,7 @@ class AiActor private(watchers: List[ActorRef], properties: LearningProcessorCon
           case GameControllerMessages.GameLost => TTTEpochResult.lost
           case GameControllerMessages.GameDraw => TTTEpochResult.undecided
         }
-        watchers.foreach(_ ! TrainingEpochResult(epochResult))
+        watchers.foreach(_ ! TrainingEpochResult(result))
         learningUnit = learningUnit.trainResult(epochResult)
         context.become(new PreInitialized(Some(learningUnit), training))
         watchers.foreach(_ ! TrainingFinished)
