@@ -13,8 +13,8 @@ import de.ai.htwg.tictactoe.aiClient.AiActor.LearningProcessorConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.QLearningConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.policy.EpsGreedyConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.policy.ExplorationStepConfiguration
-import de.ai.htwg.tictactoe.clientConnection.messages.RegisterGame
 import de.ai.htwg.tictactoe.clientConnection.messages.GameControllerMessages
+import de.ai.htwg.tictactoe.clientConnection.messages.RegisterGame
 import de.ai.htwg.tictactoe.clientConnection.model.Player
 import de.ai.htwg.tictactoe.clientConnection.util.DelegatedPartialFunction
 import de.ai.htwg.tictactoe.gameLogic.controller.GameControllerActor
@@ -29,6 +29,9 @@ object TrainerActor {
 }
 
 class TrainerActor(dimensions: Int, clientMain: ActorRef) extends Actor with Stash with Logging {
+  // every totalSteps / saveStateQuotient steps, the model is persisted
+  private val saveStateQuotient = 100
+
   private type DelegateReceive = DelegatedPartialFunction[Any, Unit]
 
   private val epsGreedyConfiguration = EpsGreedyConfiguration(
@@ -109,7 +112,7 @@ class TrainerActor(dimensions: Int, clientMain: ActorRef) extends Actor with Sta
             currentGame ! PoisonPill // FIXME turn into restart
             // this will mix who is circle and who is cross
             currentGame = doTraining(sender, first)
-            if (remainingEpochs % 500 == 0) {
+            if (remainingEpochs % (totalEpochs / saveStateQuotient) == 0) {
               first ! AiActor.SaveState
               sender ! AiActor.SaveState
             }
