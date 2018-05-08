@@ -1,5 +1,6 @@
 package de.ai.htwg.tictactoe.aiClient.learning.core.policy
 
+import scala.language.higherKinds
 import scala.util.Random
 
 import de.ai.htwg.tictactoe.aiClient.learning.TTTAction
@@ -11,6 +12,7 @@ import de.ai.htwg.tictactoe.clientConnection.model.Player
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers
+
 
 class ExplorationStepTest extends FreeSpec with Matchers with MockFactory {
 
