@@ -8,6 +8,7 @@ import akka.actor.ActorRef
 import akka.actor.Props
 import akka.actor.Stash
 import de.ai.htwg.tictactoe.aiClient.AiActor.LearningProcessorConfiguration
+import de.ai.htwg.tictactoe.aiClient.AiActor.SaveState
 import de.ai.htwg.tictactoe.aiClient.AiActor.TrainingEpochResult
 import de.ai.htwg.tictactoe.aiClient.AiActor.TrainingFinished
 import de.ai.htwg.tictactoe.aiClient.AiActor.UpdateTrainingState
@@ -32,6 +33,7 @@ object AiActor {
   def props(watchers: List[ActorRef], properties: LearningProcessorConfiguration) = Props(new AiActor(watchers, properties))
 
   case object TrainingFinished
+  case object SaveState
   case class TrainingEpochResult(result: GameControllerMessages.GameResult)
   case class UpdateTrainingState(training: Boolean)
 
@@ -46,14 +48,14 @@ class AiActor private(watchers: List[ActorRef], properties: LearningProcessorCon
   override def receive: Receive = new PreInitialized
 
   private class PreInitialized(
-      var net: Option[TTTLearningProcessor] = None,
+      var learningUnit: Option[TTTLearningProcessor] = None,
       var training: Boolean = true
   ) extends DelegatedPartialFunction[Any, Unit] {
     case class InitNet(net: TTTLearningProcessor)
 
     var register: Option[RegisterGame] = None
 
-    if (net.isEmpty) {
+    if (learningUnit.isEmpty) {
       implicit val disp: ExecutionContextExecutor = context.dispatcher
       Future {
         // long, blocking initialisation calls in actors can lead to problems.
@@ -68,18 +70,19 @@ class AiActor private(watchers: List[ActorRef], properties: LearningProcessorCon
 
     override def pf: Receive = {
       case InitNet(n) =>
-        net = Some(n)
+        learningUnit = Some(n)
         probeInit()
       case r @ RegisterGame(_, _) =>
         register = Some(r)
         probeInit()
       case UpdateTrainingState(b) => training = b
+      case SaveState => learningUnit.foreach(_.persist())
 
       case _ => stash()
     }
 
     def probeInit(): Unit = for {
-      n <- net
+      n <- learningUnit
       r <- register
     } {
       context.become(new Initialized(n, r.player, r.gameControllerActor, training))
@@ -119,6 +122,7 @@ class AiActor private(watchers: List[ActorRef], properties: LearningProcessorCon
         learningUnit = learningUnit.trainResult(epochResult)
         context.become(new PreInitialized(Some(learningUnit), training))
         watchers.foreach(_ ! TrainingFinished)
+      case SaveState => learningUnit.persist()
     }
 
     private def doGameAction(gf: GameField, gameControllerActor: ActorRef): Unit = {

@@ -7,18 +7,16 @@ trait NeuralNet {
 
   def train(input: INDArray, output: INDArray): Unit
 
-  protected def serialize(): String
+  def serialize(): String
 }
 
 object NeuralNet {
 
   trait Factory {
-
     def apply(): NeuralNet
 
     def deserialize(string: String): NeuralNet
 
     def serialize(neuralNet: NeuralNet): String = neuralNet.serialize()
-
   }
 }

@@ -1,5 +1,8 @@
 package de.ai.htwg.tictactoe.aiClient.learning
 
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+
 import de.ai.htwg.tictactoe.aiClient.learning.core.net.NeuralNet
 import grizzled.slf4j.Logging
 import org.deeplearning4j.nn.api.OptimizationAlgorithm
@@ -9,12 +12,15 @@ import org.deeplearning4j.nn.conf.layers.OutputLayer
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork
 import org.deeplearning4j.nn.weights.WeightInit
 import org.deeplearning4j.rl4j.util.Constants
+import org.deeplearning4j.util.ModelSerializer
 import org.nd4j.linalg.activations.Activation
 import org.nd4j.linalg.api.ndarray.INDArray
+import org.nd4j.linalg.factory.Nd4j
 import org.nd4j.linalg.learning.config.Adam
 import org.nd4j.linalg.lossfunctions.LossFunctions
 
 class TTTNeuralNet private(val model: MultiLayerNetwork) extends NeuralNet with Logging {
+
   model.init()
 
   override def calc(input: INDArray): INDArray = model.output(reshapeInput(input), true)
@@ -28,10 +34,15 @@ class TTTNeuralNet private(val model: MultiLayerNetwork) extends NeuralNet with 
 
   private def reshapeInput(input: INDArray) = input.reshape(1, input.length())
 
-  override protected def serialize(): String = ???
+  override def serialize(): String = {
+    val outputStream = new ByteArrayOutputStream()
+    ModelSerializer.writeModel(model, outputStream, true)
+    outputStream.toString("UTF-8")
+  }
 }
 
 object TTTNeuralNet extends NeuralNet.Factory {
+  private val seed = 5
   private val dimensions = 4
   private val actions = dimensions * dimensions
   private val state = dimensions * dimensions
@@ -40,8 +51,9 @@ object TTTNeuralNet extends NeuralNet.Factory {
   private val hiddenNodes2 = 32
   private val hiddenNodes3 = 32
   private val outputNodes = 1 // q value
-  
+
   override def apply(): NeuralNet = {
+    Nd4j.getRandom.setSeed(seed)
     val configuration =
       new NeuralNetConfiguration.Builder()
         .seed(Constants.NEURAL_NET_SEED)
@@ -89,7 +101,9 @@ object TTTNeuralNet extends NeuralNet.Factory {
   }
 
   override def deserialize(string: String): NeuralNet = {
-    val model: MultiLayerNetwork = ???
+    Nd4j.getRandom.setSeed(seed)
+    val model: MultiLayerNetwork =
+      ModelSerializer.restoreMultiLayerNetwork(new ByteArrayInputStream(string.getBytes("UTF-8")))
     new TTTNeuralNet(model)
   }
 }

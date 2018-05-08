@@ -1,5 +1,10 @@
 package de.ai.htwg.tictactoe.aiClient.learning
 
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+
 import de.ai.htwg.tictactoe.aiClient.learning.core.QLearning
 import de.ai.htwg.tictactoe.aiClient.learning.core.QLearningConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.policy.EpsGreedy
@@ -27,6 +32,16 @@ class TTTLearningProcessor(
   }
 
   def trainResult(result: TTTEpochResult): TTTLearningProcessor = new TTTLearningProcessor(learning.trainHistory(result))
+
+  def persist(): Unit = {
+    val now = LocalDateTime.now.format(DateTimeFormatter.ofPattern("YYYY-MM-dd-HH-mm-ss-SSS"))
+    val fileName = s"nets/$now.network"
+    debug(s"Save current neural network to $fileName")
+    val serializedNet = learning.neuralNet.serialize()
+    val file = Paths.get(fileName)
+    Files.createDirectories(file.getParent)
+    Files.write(file, serializedNet.getBytes("UTF-8"))
+  }
 }
 
 object TTTLearningProcessor {
