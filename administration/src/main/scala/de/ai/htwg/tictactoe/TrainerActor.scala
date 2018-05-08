@@ -109,8 +109,14 @@ class TrainerActor(dimensions: Int, clientMain: ActorRef) extends Actor with Sta
             currentGame ! PoisonPill // FIXME turn into restart
             // this will mix who is circle and who is cross
             currentGame = doTraining(sender, first)
+            if (remainingEpochs % 500 == 0) {
+              first ! AiActor.SaveState
+              sender ! AiActor.SaveState
+            }
           } else {
             readyActors = sender :: first :: Nil
+            first ! AiActor.SaveState
+            sender ! AiActor.SaveState
             context.become(new RunTestGames(readyActors.toVector))
             watcherActor ! WatcherActor.PrintCSV(100)
             info {
