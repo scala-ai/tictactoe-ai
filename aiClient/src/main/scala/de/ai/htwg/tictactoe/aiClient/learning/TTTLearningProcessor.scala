@@ -55,7 +55,8 @@ object TTTLearningProcessor {
         case c: ExplorationStepConfiguration => ExplorationStep[TTTState, TTTAction](c)
       },
       rewardCalculator = TTTRewardCalculator(),
-      neuralNet = TTTNeuralNet(),
+      neuralNet = TTTQTable(),
+      //neuralNet = TTTNeuralNet(),
       transitionHistory = TransitionHistoryImpl[TTTAction, TTTState](),
       transitionFactory = TTTTransition,
       actionSpace = TTTActionSpace(),
