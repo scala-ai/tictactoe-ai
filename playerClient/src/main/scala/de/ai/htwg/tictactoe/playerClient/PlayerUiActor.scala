@@ -8,7 +8,7 @@ import de.ai.htwg.tictactoe.clientConnection.fxUI.GameUiActor
 import de.ai.htwg.tictactoe.clientConnection.fxUI.UiMainActor
 import de.ai.htwg.tictactoe.clientConnection.messages.GameControllerMessages
 import de.ai.htwg.tictactoe.clientConnection.model.GameField
-import de.ai.htwg.tictactoe.clientConnection.model.GridPositionOLD
+import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
 import de.ai.htwg.tictactoe.clientConnection.model.Player
 import grizzled.slf4j.Logging
 
@@ -21,7 +21,7 @@ object PlayerUiActor {
 
 class PlayerUiActor private(player: Player, clientMainActor: ActorRef, gameControllerActor: ActorRef, gameName: String)
   extends Actor with Logging {
-  private case class SelectPos(pos: GridPositionOLD)
+  private case class SelectPos(pos: GridPosition)
 
   player match {
     case Player.Circle => gameControllerActor ! GameControllerMessages.RegisterCircle
@@ -29,7 +29,7 @@ class PlayerUiActor private(player: Player, clientMainActor: ActorRef, gameContr
   }
   clientMainActor ! UiMainActor.CreateGameUI(s"$gameName-$player")
 
-  private def handleMouseEvent(pos: GridPositionOLD): Unit = {
+  private def handleMouseEvent(pos: GridPosition): Unit = {
     self ! SelectPos(pos)
   }
 
@@ -43,8 +43,8 @@ class PlayerUiActor private(player: Player, clientMainActor: ActorRef, gameContr
         uiActor ! PoisonPill
         self ! PoisonPill
       case SelectPos(pos) => gameControllerActor ! GameControllerMessages.SetPos(pos)
-      case GameControllerMessages.PosAlreadySet(_: GridPositionOLD) => debug("position already set")
-      case GameControllerMessages.NotYourTurn(_: GridPositionOLD) => debug("not your turn")
+      case GameControllerMessages.PosAlreadySet(_: GridPosition) => debug("position already set")
+      case GameControllerMessages.NotYourTurn(_: GridPosition) => debug("not your turn")
       case GameControllerMessages.GameUpdated(gf: GameField) => uiActor ! GameUiActor.PrintField(gf)
       case GameControllerMessages.GameFinished(gf: GameField, winner) =>
         winner match {

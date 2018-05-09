@@ -4,7 +4,7 @@ import scala.collection.JavaConverters
 import scala.concurrent.Promise
 import scala.concurrent.Future
 
-import de.ai.htwg.tictactoe.clientConnection.model.GridPositionOLD
+import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
 import scalafx.geometry.Orientation
 import scalafx.scene.Node
 import scalafx.scene.Scene
@@ -30,7 +30,7 @@ object GameUiStage {
     def clear(): Unit
   }
 
-  def apply(name: String, dimensions: Int, onMouseClicked: GridPositionOLD => Unit): Future[GameUiStage] = {
+  def apply(name: String, dimensions: Int, onMouseClicked: GridPosition => Unit): Future[GameUiStage] = {
     val p = Promise[GameUiStage]()
     Platform.runLater(p.success(new GameUiStage(name, dimensions, onMouseClicked)))
 
@@ -39,9 +39,8 @@ object GameUiStage {
 
 }
 
-class GameUiStage private(name: String, dimensions: Int, onMouseClicked: GridPositionOLD => Unit) {
+class GameUiStage private(name: String, dimensions: Int, onMouseClicked: GridPosition => Unit) {
 
-  private val posBuilder = GridPositionOLD(dimensions)
   private val anchor = new AnchorPane
 
   private val stage = new Stage {
@@ -92,7 +91,7 @@ class GameUiStage private(name: String, dimensions: Int, onMouseClicked: GridPos
     val x = math.floor(me.x / cellWidth).toInt
     val y = math.floor(me.y / cellHeight).toInt
 
-    val pos = posBuilder(x, y)
+    val pos = GridPosition(x, y)
     onMouseClicked(pos)
   }
 
@@ -189,7 +188,7 @@ class GameUiStage private(name: String, dimensions: Int, onMouseClicked: GridPos
       x <- 0 until dimensions
       y <- 0 until dimensions
     } yield {
-      val pos = posBuilder(x, y)
+      val pos = GridPosition(x, y)
       (
         pos -> createCircle(x, y),
         pos -> createCross(x, y),
@@ -218,8 +217,8 @@ class GameUiStage private(name: String, dimensions: Int, onMouseClicked: GridPos
       uiElem.clear()
     }
   }
-  def circle(pos: GridPositionOLD): GameUiStage.UIElem = circles(pos)
-  def cross(pos: GridPositionOLD): GameUiStage.UIElem = crosses(pos)
+  def circle(pos: GridPosition): GameUiStage.UIElem = circles(pos)
+  def cross(pos: GridPosition): GameUiStage.UIElem = crosses(pos)
 
   def show(): Unit = {
     Platform.runLater(

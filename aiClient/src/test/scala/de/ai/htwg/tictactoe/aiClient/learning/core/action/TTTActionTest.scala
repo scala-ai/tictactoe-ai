@@ -1,7 +1,7 @@
 package de.ai.htwg.tictactoe.aiClient.learning.core.action
 
 import de.ai.htwg.tictactoe.aiClient.learning.TTTAction
-import de.ai.htwg.tictactoe.clientConnection.model.GridPositionOLD
+import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
 import org.nd4j.linalg.factory.Nd4j
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers
@@ -12,7 +12,7 @@ class TTTActionTest extends FreeSpec with Matchers {
     "should return an n-dimensional array" - {
       "for a coordinate (2,3) for a 4x4 field" in {
         val dimensions = 4
-        val action = TTTAction(GridPositionOLD(dimensions)(2, 3), dimensions)
+        val action = TTTAction(GridPosition(2, 3), dimensions)
         val actionAsVector = action.asVector
         actionAsVector.rank() shouldBe 2
         actionAsVector.rows() shouldBe dimensions

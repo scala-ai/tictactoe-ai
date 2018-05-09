@@ -12,10 +12,10 @@ class GameFieldTest extends FreeSpec with Matchers {
         val gameField = GameField(Player.Cross, dimensions).setPos(0, 1).setPos(1, 0)
 
         gameField.getAllEmptyPos.size shouldBe 2
-        gameField.gameField.get(gameField.posBuilder(0, 0)) shouldBe None
-        gameField.gameField.get(gameField.posBuilder(1, 0)) shouldBe Some(Player.Circle)
-        gameField.gameField.get(gameField.posBuilder(0, 1)) shouldBe Some(Player.Cross)
-        gameField.gameField.get(gameField.posBuilder(1, 1)) shouldBe None
+        gameField.gameField.get(GridPosition(0, 0)) shouldBe None
+        gameField.gameField.get(GridPosition(1, 0)) shouldBe Some(Player.Circle)
+        gameField.gameField.get(GridPosition(0, 1)) shouldBe Some(Player.Cross)
+        gameField.gameField.get(GridPosition(1, 1)) shouldBe None
       }
     }
     "returned hash values in a 2x2 GameField" - {

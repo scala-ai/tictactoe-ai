@@ -9,6 +9,7 @@ import de.ai.htwg.tictactoe.aiClient.learning.core.policy.ExplorationStep.StepSu
 import de.ai.htwg.tictactoe.clientConnection.model
 import de.ai.htwg.tictactoe.clientConnection.model.GameField
 import de.ai.htwg.tictactoe.clientConnection.model.Player
+import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers
@@ -18,13 +19,13 @@ class ExplorationStepTest extends FreeSpec with Matchers with MockFactory {
 
   val gameField: GameField = {
     val gf = model.GameField(Player.Cross, 2)
-    gf.setPos(gf.posBuilder(0, 1))
+    gf.setPos(GridPosition(0, 1))
   }
 
   val possibleActions = List(
-    TTTAction(gameField.posBuilder(0, 0), gameField.dimensions),
-    TTTAction(gameField.posBuilder(0, 1), gameField.dimensions),
-    TTTAction(gameField.posBuilder(1, 1), gameField.dimensions)
+    TTTAction(GridPosition(0, 0), gameField.dimensions),
+    TTTAction(GridPosition(0, 1), gameField.dimensions),
+    TTTAction(GridPosition(1, 1), gameField.dimensions)
   )
 
   "An exploration step in" - {
@@ -47,7 +48,7 @@ class ExplorationStepTest extends FreeSpec with Matchers with MockFactory {
         )
 
         val action = greedy.nextAction(TTTState(gameField), () => fail("should not be called"), possibleActions)
-        action shouldBe TTTAction(gameField.posBuilder(1, 1), gameField.dimensions)
+        action shouldBe TTTAction(GridPosition(1, 1), gameField.dimensions)
       }
       "return a best action if rand = 0.6" in {
         val mockedRandom = mock[Random]
@@ -66,8 +67,8 @@ class ExplorationStepTest extends FreeSpec with Matchers with MockFactory {
         )
 
         val action = greedy.nextAction(TTTState(gameField),
-          () => TTTAction(gameField.posBuilder(0, 0), gameField.dimensions), possibleActions)
-        action shouldBe TTTAction(gameField.posBuilder(0, 0), gameField.dimensions)
+          () => TTTAction(GridPosition(0, 0), gameField.dimensions), possibleActions)
+        action shouldBe TTTAction(GridPosition(0, 0), gameField.dimensions)
       }
     }
     "epoch 2 of 2 should" - {
@@ -88,8 +89,8 @@ class ExplorationStepTest extends FreeSpec with Matchers with MockFactory {
         )
 
         val action = greedy.nextAction(TTTState(gameField),
-          () => TTTAction(gameField.posBuilder(0, 1), gameField.dimensions), possibleActions)
-        action shouldBe TTTAction(gameField.posBuilder(0, 1), gameField.dimensions)
+          () => TTTAction(GridPosition(0, 1), gameField.dimensions), possibleActions)
+        action shouldBe TTTAction(GridPosition(0, 1), gameField.dimensions)
       }
     }
     "epoch 0 of 2 should" - {
@@ -111,7 +112,7 @@ class ExplorationStepTest extends FreeSpec with Matchers with MockFactory {
         )
 
         val action = greedy.nextAction(TTTState(gameField), () => fail("should not be called"), possibleActions)
-        action shouldBe TTTAction(gameField.posBuilder(0, 1), gameField.dimensions)
+        action shouldBe TTTAction(GridPosition(0, 1), gameField.dimensions)
       }
     }
   }

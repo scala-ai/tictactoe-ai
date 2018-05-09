@@ -2,6 +2,7 @@ package de.ai.htwg.tictactoe.aiClient.model
 
 import de.ai.htwg.tictactoe.clientConnection.model.GameField
 import de.ai.htwg.tictactoe.clientConnection.model.Player
+import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
 
 object GameFieldToVectorConverter {
 
@@ -10,7 +11,7 @@ object GameFieldToVectorConverter {
       x <- 0 until gameField.dimensions
       y <- 0 until gameField.dimensions
     } yield {
-      gameField.getPos(gameField.posBuilder(x, y))
+      gameField.getPos(GridPosition(x, y))
     }
     values.toVector.map(specificDoubleValueOfPlayer)
   }
