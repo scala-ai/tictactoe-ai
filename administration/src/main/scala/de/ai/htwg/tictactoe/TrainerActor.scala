@@ -77,7 +77,7 @@ class TrainerActor(strategyBuilder: TTTWinStrategyBuilder, clientMain: ActorRef)
 
     var currentGame: ActorRef = doTraining(
       context.actorOf(AiActor.props(List(self, watcherActor), properties)),
-      context.actorOf(LogicPlayerActor.props(new Random(5L), List(self)))
+      context.actorOf(LogicPlayerActor.props(strategyBuilder, new Random(5L), List(self)))
       // context.actorOf(AiActor.props(List(self), properties))
     )
 
