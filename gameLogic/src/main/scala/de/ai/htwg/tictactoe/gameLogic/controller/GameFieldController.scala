@@ -28,6 +28,8 @@ class GameFieldController(
 
   private var gameField = GameField(Player.Cross, dimensions)
 
+  def setPos(posX: Int, posY: Int, player: Player): GameFieldController.Result = setPos(GridPosition(posX, posY), player)
+
   def setPos(pos: GridPosition, player: Player): GameFieldController.Result = {
     val result = setPosInGrid(gameField, pos, player)
     gameField = result.field
