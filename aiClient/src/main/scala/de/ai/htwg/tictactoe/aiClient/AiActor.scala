@@ -28,7 +28,7 @@ import grizzled.slf4j.Logging
 
 
 object AiActor {
-  def props() = Props(new AiActor(List(), LearningProcessorConfiguration(EpsGreedyConfiguration(), QLearningConfiguration())))
+  def props(dimensions: Int) = Props(new AiActor(List(), LearningProcessorConfiguration(dimensions, EpsGreedyConfiguration(), QLearningConfiguration())))
 
   def props(watchers: List[ActorRef], properties: LearningProcessorConfiguration) = Props(new AiActor(watchers, properties))
 
@@ -38,8 +38,9 @@ object AiActor {
   case class UpdateTrainingState(training: Boolean)
 
   case class LearningProcessorConfiguration(
+      dimensions: Int,
       policyProperties: PolicyConfiguration,
-      qLearningProperties: QLearningConfiguration
+      qLearningProperties: QLearningConfiguration,
   )
 }
 
@@ -61,8 +62,9 @@ class AiActor private(watchers: List[ActorRef], properties: LearningProcessorCon
         // long, blocking initialisation calls in actors can lead to problems.
         // execute in another thread and send to self.
         val net = TTTLearningProcessor(
+          properties.dimensions,
           policyProperties = properties.policyProperties,
-          qLearningProperties = properties.qLearningProperties
+          qLearningProperties = properties.qLearningProperties,
         )
         self ! InitNet(net)
       }

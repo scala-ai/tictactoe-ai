@@ -18,6 +18,6 @@ object AiMain extends App {
   val clientMain = system.actorOf(UiMainActor.props(strategy.dimensions), "clientMain")
   val game = system.actorOf(GameControllerActor.props(Player.Cross, strategy), gameName)
   val cross = system.actorOf(PlayerUiActor.props(Player.Cross, clientMain, game, gameName))
-  val circle = system.actorOf(AiActor.props())
+  val circle = system.actorOf(AiActor.props(strategy.dimensions))
   circle ! RegisterGame(Player.Circle, game)
 }

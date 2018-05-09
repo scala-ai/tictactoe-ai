@@ -13,7 +13,7 @@ trait NeuralNet {
 object NeuralNet {
 
   trait Factory {
-    def apply(): NeuralNet
+    def apply(dimensions: Int): NeuralNet
 
     def deserialize(string: String): NeuralNet
 

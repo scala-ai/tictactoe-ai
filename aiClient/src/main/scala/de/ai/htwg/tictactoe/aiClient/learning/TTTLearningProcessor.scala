@@ -46,8 +46,9 @@ class TTTLearningProcessor(
 
 object TTTLearningProcessor {
   def apply(
+      dimensions: Int,
       policyProperties: PolicyConfiguration,
-      qLearningProperties: QLearningConfiguration
+      qLearningProperties: QLearningConfiguration,
   ): TTTLearningProcessor = new TTTLearningProcessor(
     QLearning[TTTState, TTTAction, TTTEpochResult](
       policy = policyProperties match {
@@ -55,7 +56,7 @@ object TTTLearningProcessor {
         case c: ExplorationStepConfiguration => ExplorationStep[TTTState, TTTAction](c)
       },
       rewardCalculator = TTTRewardCalculator(),
-      neuralNet = TTTNeuralNet(),
+      neuralNet = TTTNeuralNet(dimensions),
       transitionHistory = TransitionHistoryImpl[TTTAction, TTTState](),
       transitionFactory = TTTTransition,
       actionSpace = TTTActionSpace(),
