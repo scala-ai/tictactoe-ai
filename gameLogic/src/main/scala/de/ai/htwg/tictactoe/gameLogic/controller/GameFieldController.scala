@@ -19,14 +19,15 @@ object GameFieldController {
 }
 
 class GameFieldController(
-    val strategyBuilder: TTTWinStrategyBuilder
+    val strategyBuilder: TTTWinStrategyBuilder,
+    val startingPlayer: Player,
 ) extends mutable.Publisher[GameFieldController.Result] {
   override type Pub = this.type
   private val res = GameFieldController.Result
-  val dimensions = 4
+  val dimensions: Int = strategyBuilder.dimensions
   val strategy: Map[GridPosition, List[TTTWinStrategy]] = strategyBuilder.allWinStrategyCheckerPerPos
 
-  private var gameField = GameField(Player.Cross, dimensions)
+  private var gameField = GameField(startingPlayer, dimensions)
 
   def setPos(posX: Int, posY: Int, player: Player): GameFieldController.Result = setPos(GridPosition(posX, posY), player)
 

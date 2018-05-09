@@ -11,10 +11,11 @@ import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
 import de.ai.htwg.tictactoe.clientConnection.util.DelegatedPartialFunction
 
 object GameControllerActor {
-  def props(dimensions: Int, startingPlayer: Player) = Props(new GameControllerActor(dimensions, startingPlayer))
+  def props(startingPlayer: Player, strategyBuilder: TTTWinStrategyBuilder) =
+    Props(new GameControllerActor(startingPlayer, strategyBuilder))
 }
 
-class GameControllerActor private(dimensions: Int, startingPlayer: Player) extends Actor with Stash {
+class GameControllerActor private(startingPlayer: Player, strategyBuilder: TTTWinStrategyBuilder) extends Actor with Stash {
 
   private class SubscriberList(var list: List[ActorRef] = Nil) {
     def !!(msg: Any): Unit = list.foreach { r => r ! msg }
@@ -24,16 +25,16 @@ class GameControllerActor private(dimensions: Int, startingPlayer: Player) exten
   }
   private class PlayerList(val player: Player) extends SubscriberList
 
-  override def receive: Receive = new Initialized(GameField(startingPlayer, dimensions))
+  override def receive: Receive = new Playing(GameField(startingPlayer, strategyBuilder.dimensions))
 
-  private class Initialized(
+  private class Playing(
       var state: GameField,
   ) extends DelegatedPartialFunction[Any, Unit] {
     unstashAll()
     private val observerList: SubscriberList = new SubscriberList()
     private val playerListCircle: PlayerList = new PlayerList(Player.Circle)
     private val playerListCross: PlayerList = new PlayerList(Player.Cross)
-    private val gameFieldController = new GameFieldController(TTTWinStrategy4xBuilder)
+    private val gameFieldController = new GameFieldController(strategyBuilder, startingPlayer)
 
     override def pf: PartialFunction[Any, Unit] = {
       case GameControllerMessages.SetPos(pos) if playerListCircle.contains(sender()) => handleSelectPosition(Player.Circle, pos)

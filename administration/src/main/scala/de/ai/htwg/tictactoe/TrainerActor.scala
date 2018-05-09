@@ -18,17 +18,19 @@ import de.ai.htwg.tictactoe.clientConnection.messages.GameControllerMessages
 import de.ai.htwg.tictactoe.clientConnection.model.Player
 import de.ai.htwg.tictactoe.clientConnection.util.DelegatedPartialFunction
 import de.ai.htwg.tictactoe.gameLogic.controller.GameControllerActor
+import de.ai.htwg.tictactoe.gameLogic.controller.TTTWinStrategy4xBuilder
+import de.ai.htwg.tictactoe.gameLogic.controller.TTTWinStrategyBuilder
 import de.ai.htwg.tictactoe.logicClient.LogicPlayerActor
 import de.ai.htwg.tictactoe.playerClient.PlayerUiActor
 import grizzled.slf4j.Logging
 
 object TrainerActor {
-  def props(dimensions: Int, clientMain: ActorRef) = Props(new TrainerActor(dimensions, clientMain))
+  def props(strategyBuilder: TTTWinStrategyBuilder, clientMain: ActorRef) = Props(new TrainerActor(strategyBuilder, clientMain))
 
   case class StartTraining(count: Int)
 }
 
-class TrainerActor(dimensions: Int, clientMain: ActorRef) extends Actor with Stash with Logging {
+class TrainerActor(strategyBuilder: TTTWinStrategyBuilder, clientMain: ActorRef) extends Actor with Stash with Logging {
   private type DelegateReceive = DelegatedPartialFunction[Any, Unit]
 
   private val epsGreedyConfiguration = EpsGreedyConfiguration(
@@ -81,7 +83,7 @@ class TrainerActor(dimensions: Int, clientMain: ActorRef) extends Actor with Sta
 
     def doTraining(circle: ActorRef, cross: ActorRef): ActorRef = {
       info(s"Train epoch ${totalEpochs - remainingEpochs}")
-      val game = context.actorOf(GameControllerActor.props(dimensions, Player.Cross), s"game-$remainingEpochs")
+      val game = context.actorOf(GameControllerActor.props(Player.Cross, strategyBuilder), s"game-$remainingEpochs")
       // must be sent twice, cause we don't know the player type
       circle ! AiActor.UpdateTrainingState(true)
       cross ! AiActor.UpdateTrainingState(true)
@@ -144,7 +146,7 @@ class TrainerActor(dimensions: Int, clientMain: ActorRef) extends Actor with Sta
       val ai = trainedActors(random.nextInt(trainedActors.size))
       // update actor state to non training
       ai ! AiActor.UpdateTrainingState(false)
-      val game = context.actorOf(GameControllerActor.props(dimensions, Player.Cross), gameName)
+      val game = context.actorOf(GameControllerActor.props(Player.Cross, strategyBuilder), gameName)
       game ! GameControllerMessages.RegisterObserver
       val p = if (random.nextBoolean()) Player.Cross else Player.Circle
 
