@@ -5,6 +5,8 @@ import scala.collection.mutable
 import de.ai.htwg.tictactoe.clientConnection.model.GameField
 import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
 import de.ai.htwg.tictactoe.clientConnection.model.Player
+import de.ai.htwg.tictactoe.clientConnection.model.strategy.TTTWinStrategy
+import de.ai.htwg.tictactoe.clientConnection.model.strategy.TTTWinStrategyBuilder
 
 object GameFieldController {
   sealed trait Result {

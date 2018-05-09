@@ -16,10 +16,10 @@ import de.ai.htwg.tictactoe.aiClient.learning.core.policy.ExplorationStepConfigu
 import de.ai.htwg.tictactoe.clientConnection.messages.RegisterGame
 import de.ai.htwg.tictactoe.clientConnection.messages.GameControllerMessages
 import de.ai.htwg.tictactoe.clientConnection.model.Player
+import de.ai.htwg.tictactoe.clientConnection.model.strategy.TTTWinStrategy4xBuilder
+import de.ai.htwg.tictactoe.clientConnection.model.strategy.TTTWinStrategyBuilder
 import de.ai.htwg.tictactoe.clientConnection.util.DelegatedPartialFunction
 import de.ai.htwg.tictactoe.gameLogic.controller.GameControllerActor
-import de.ai.htwg.tictactoe.gameLogic.controller.TTTWinStrategy4xBuilder
-import de.ai.htwg.tictactoe.gameLogic.controller.TTTWinStrategyBuilder
 import de.ai.htwg.tictactoe.logicClient.LogicPlayerActor
 import de.ai.htwg.tictactoe.playerClient.PlayerUiActor
 import grizzled.slf4j.Logging

@@ -8,6 +8,8 @@ import de.ai.htwg.tictactoe.clientConnection.messages.GameControllerMessages
 import de.ai.htwg.tictactoe.clientConnection.model.Player
 import de.ai.htwg.tictactoe.clientConnection.model.GameField
 import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
+import de.ai.htwg.tictactoe.clientConnection.model.strategy.TTTWinStrategy4xBuilder
+import de.ai.htwg.tictactoe.clientConnection.model.strategy.TTTWinStrategyBuilder
 import de.ai.htwg.tictactoe.clientConnection.util.DelegatedPartialFunction
 
 object GameControllerActor {
