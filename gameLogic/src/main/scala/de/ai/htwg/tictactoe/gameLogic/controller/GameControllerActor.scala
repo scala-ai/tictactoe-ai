@@ -13,7 +13,7 @@ import akka.pattern.ask
 import akka.util.Timeout
 import de.ai.htwg.tictactoe.clientConnection.messages.GameControllerMessages
 import de.ai.htwg.tictactoe.clientConnection.model.GameField
-import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
+import de.ai.htwg.tictactoe.clientConnection.model.GridPositionOLD
 import de.ai.htwg.tictactoe.clientConnection.model.Player
 import de.ai.htwg.tictactoe.clientConnection.util.DelegatedPartialFunction
 import de.ai.htwg.tictactoe.gameLogic.controller.GameFieldControllerActor.SelectPositionAck
@@ -33,7 +33,7 @@ class GameControllerActor private(dimensions: Int, startingPlayer: Player) exten
   }
   private class PlayerList(val player: Player) extends SubscriberList
 
-  private case class PositionSelected(p: Player, pos: GridPosition, state: GameField, returnCode: RetCode, sender: ActorRef)
+  private case class PositionSelected(p: Player, pos: GridPositionOLD, state: GameField, returnCode: RetCode, sender: ActorRef)
 
   private val RetCode = GameFieldControllerActor.RetCode
 
@@ -109,7 +109,7 @@ class GameControllerActor private(dimensions: Int, startingPlayer: Player) exten
       context.become(new GameFinished(winner, state))
     }
 
-    private def handleSelectPosAck(retCode: GameFieldControllerActor.RetCode, pos: GridPosition, player: Player, sender: ActorRef): Unit = retCode match {
+    private def handleSelectPosAck(retCode: GameFieldControllerActor.RetCode, pos: GridPositionOLD, player: Player, sender: ActorRef): Unit = retCode match {
       case RetCode.PositionAlreadySelected => sender ! GameControllerMessages.PosAlreadySet(pos)
       case RetCode.NotThisPlayersTurn => sender ! GameControllerMessages.NotYourTurn(pos)
       // this is an edge case that should rarely if ever happen
@@ -123,7 +123,7 @@ class GameControllerActor private(dimensions: Int, startingPlayer: Player) exten
         playerToList(Player.other(player)) !! GameControllerMessages.YourTurn(state)
     }
 
-    private def handleSelectPosition(player: Player, pos: GridPosition): Unit = {
+    private def handleSelectPosition(player: Player, pos: GridPositionOLD): Unit = {
       val s = sender()
       implicit val timeout: Timeout = Timeout(200, TimeUnit.MILLISECONDS)
       implicit val executionContext: ExecutionContextExecutor = context.dispatcher

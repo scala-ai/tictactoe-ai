@@ -2,7 +2,7 @@ package de.ai.htwg.tictactoe.clientConnection.model.format
 
 import de.ai.htwg.tictactoe.clientConnection.model.GameField
 import de.ai.htwg.tictactoe.clientConnection.model.Player
-import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
+import de.ai.htwg.tictactoe.clientConnection.model.GridPositionOLD
 import play.api.libs.json.OFormat
 import play.api.libs.json.JsObject
 import play.api.libs.json.JsValue
@@ -14,7 +14,7 @@ object GameFieldFormat extends OFormat[GameField] {
 
   private val posLit = "pos"
   private val playerLit = "player"
-  private def writeGameFieldEntry(pair: (GridPosition, Player)): JsObject = {
+  private def writeGameFieldEntry(pair: (GridPositionOLD, Player)): JsObject = {
     val (pos, p) = pair
     Json.obj(
       posLit -> GridPositionFormat.writes(pos),
@@ -22,7 +22,7 @@ object GameFieldFormat extends OFormat[GameField] {
     )
   }
 
-  private def readGameFieldEntry(dimensions: Int): Reads[(GridPosition, Player)] = Reads { js =>
+  private def readGameFieldEntry(dimensions: Int): Reads[(GridPositionOLD, Player)] = Reads { js =>
     val posReads = GridPositionFormat(dimensions)
     for {
       pos <- js.\(posLit).validate(posReads)

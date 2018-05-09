@@ -5,13 +5,13 @@ import scala.annotation.tailrec
 class GameField private[model](
     private[model] val current: Player,
     val dimensions: Int,
-    private[model] val gameField: Map[GridPosition, Player] = Map.empty,
+    private[model] val gameField: Map[GridPositionOLD, Player] = Map.empty,
     val isFinished: Boolean = false,
 ) {
 
-  val posBuilder = GridPosition(dimensions)
+  val posBuilder = GridPositionOLD(dimensions)
 
-  def posIsSet(pos: GridPosition): Boolean = gameField.contains(pos)
+  def posIsSet(pos: GridPositionOLD): Boolean = gameField.contains(pos)
 
   def isCurrentPlayer(p: Player): Boolean = p == current
 
@@ -19,7 +19,7 @@ class GameField private[model](
     setPos(posBuilder(x, y))
   }
 
-  def setPos(pos: GridPosition): GameField = {
+  def setPos(pos: GridPositionOLD): GameField = {
     require(!isFinished, "Game is already finished") // FIXME solve in return type. Don't throw an exception here.
     val updatedGameField = this.gameField + (pos -> current)
     val finished = pos.buildConnectedCombinations.exists(checkIsWinCondition(updatedGameField)) ||
@@ -32,7 +32,7 @@ class GameField private[model](
     )
   }
 
-  private def checkIsWinCondition(updatedGameField: Map[GridPosition, Player])(list: List[GridPosition]): Boolean = {
+  private def checkIsWinCondition(updatedGameField: Map[GridPositionOLD, Player])(list: List[GridPositionOLD]): Boolean = {
     @tailrec def checkLengthMaxConnectedList(playerList: List[Option[Player]], building: Int, longest: Int): Int = playerList match {
       case Nil => math.max(longest, building)
       case Some(this.current) :: tail => checkLengthMaxConnectedList(tail, building + 1, longest)
@@ -42,9 +42,9 @@ class GameField private[model](
     checkLengthMaxConnectedList(list.map(updatedGameField.get), 0, 0) >= GameField.noConnectedFieldRequiredToWin
   }
 
-  def getAllEmptyPos: List[GridPosition] = getAllEmptyPos(gameField)
+  def getAllEmptyPos: List[GridPositionOLD] = getAllEmptyPos(gameField)
 
-  private def getAllEmptyPos(gf: Map[GridPosition, Player]): List[GridPosition] = {
+  private def getAllEmptyPos(gf: Map[GridPositionOLD, Player]): List[GridPositionOLD] = {
     val positions = for {
       x <- 0 until dimensions
       y <- 0 until dimensions
@@ -59,11 +59,11 @@ class GameField private[model](
 
   def allPosSet(): Boolean = allPosSet(gameField)
 
-  private def allPosSet(gameField: Map[GridPosition, Player]): Boolean = gameField.size >= dimensions * dimensions
+  private def allPosSet(gameField: Map[GridPositionOLD, Player]): Boolean = gameField.size >= dimensions * dimensions
 
-  def getPos(pos: GridPosition): Option[Player] = gameField.get(pos)
+  def getPos(pos: GridPositionOLD): Option[Player] = gameField.get(pos)
 
-  def foreach[U](func: (GridPosition, Player) => U): Unit = gameField.foreach(t => func(t._1, t._2))
+  def foreach[U](func: (GridPositionOLD, Player) => U): Unit = gameField.foreach(t => func(t._1, t._2))
 
   def fieldHash: Int = gameField
     .map(g => (g._1.x, g._1.y, g._2))
@@ -74,7 +74,7 @@ class GameField private[model](
 object GameField {
   private val noConnectedFieldRequiredToWin = 4
 
-  private[GameField] def isWinCondition(gameField: Map[GridPosition, Player], current: Player)(list: List[GridPosition]): Boolean = {
+  private[GameField] def isWinCondition(gameField: Map[GridPositionOLD, Player], current: Player)(list: List[GridPositionOLD]): Boolean = {
     list.flatMap(gameField.get).count(player => player == current) == GameField.noConnectedFieldRequiredToWin
   }
 

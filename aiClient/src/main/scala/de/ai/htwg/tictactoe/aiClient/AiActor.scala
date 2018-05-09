@@ -21,7 +21,7 @@ import de.ai.htwg.tictactoe.aiClient.learning.core.policy.PolicyConfiguration
 import de.ai.htwg.tictactoe.clientConnection.messages.GameControllerMessages
 import de.ai.htwg.tictactoe.clientConnection.messages.RegisterGame
 import de.ai.htwg.tictactoe.clientConnection.model.GameField
-import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
+import de.ai.htwg.tictactoe.clientConnection.model.GridPositionOLD
 import de.ai.htwg.tictactoe.clientConnection.model.Player
 import de.ai.htwg.tictactoe.clientConnection.util.DelegatedPartialFunction
 import grizzled.slf4j.Logging
@@ -107,8 +107,8 @@ class AiActor private(watchers: List[ActorRef], properties: LearningProcessorCon
     override def pf: Receive = {
       case GameControllerMessages.GameUpdated(_) => trace("game updated") // not interesting
       case GameControllerMessages.GameFinished(_, _) => trace("game finished") // not interesting
-      case GameControllerMessages.PosAlreadySet(_: GridPosition) => error(s"$currentPlayer: Pos already set")
-      case GameControllerMessages.NotYourTurn(_: GridPosition) => error(s"$currentPlayer: Not your turn")
+      case GameControllerMessages.PosAlreadySet(_: GridPositionOLD) => error(s"$currentPlayer: Pos already set")
+      case GameControllerMessages.NotYourTurn(_: GridPositionOLD) => error(s"$currentPlayer: Not your turn")
       case GameControllerMessages.YourTurn(gf: GameField) => doGameAction(gf, sender())
       case UpdateTrainingState(b) => training = b
       case GameControllerMessages.YourResult(_, result) =>

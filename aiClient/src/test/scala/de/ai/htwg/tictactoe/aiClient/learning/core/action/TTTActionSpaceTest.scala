@@ -4,7 +4,7 @@ import de.ai.htwg.tictactoe.aiClient.learning.TTTAction
 import de.ai.htwg.tictactoe.aiClient.learning.TTTActionSpace
 import de.ai.htwg.tictactoe.aiClient.learning.TTTState
 import de.ai.htwg.tictactoe.clientConnection.model.GameField
-import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
+import de.ai.htwg.tictactoe.clientConnection.model.GridPositionOLD
 import de.ai.htwg.tictactoe.clientConnection.model.Player
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers
@@ -15,7 +15,7 @@ class TTTActionSpaceTest extends FreeSpec with Matchers {
     "should list all empty fields in a given playground as action" in {
 
       val gameField = {
-        val builder = GridPosition(4)
+        val builder = GridPositionOLD(4)
         GameField(Player.Circle, 4)
           .setPos(builder(2, 0)) // circle
           .setPos(builder(0, 0)) // cross

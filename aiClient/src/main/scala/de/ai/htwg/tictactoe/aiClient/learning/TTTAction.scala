@@ -1,12 +1,12 @@
 package de.ai.htwg.tictactoe.aiClient.learning
 
 import de.ai.htwg.tictactoe.aiClient.learning.core.action.Action
-import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
+import de.ai.htwg.tictactoe.clientConnection.model.GridPositionOLD
 import org.nd4j.linalg.api.ndarray.INDArray
 import org.nd4j.linalg.factory.Nd4j
 
 case class TTTAction(
-    coordinate: GridPosition,
+    coordinate: GridPositionOLD,
     dimensions: Int
 ) extends Action {
   override def asVector: INDArray =

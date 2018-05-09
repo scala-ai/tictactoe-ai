@@ -3,7 +3,7 @@ package de.ai.htwg.tictactoe.gameLogic.controller
 import akka.actor.Actor
 import akka.actor.Props
 import de.ai.htwg.tictactoe.clientConnection.model.GameField
-import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
+import de.ai.htwg.tictactoe.clientConnection.model.GridPositionOLD
 import de.ai.htwg.tictactoe.clientConnection.model.Player
 import de.ai.htwg.tictactoe.gameLogic.controller.GameFieldControllerActor.SelectPosition
 import de.ai.htwg.tictactoe.gameLogic.controller.GameFieldControllerActor.RetCode.GameAlreadyFinished
@@ -17,7 +17,7 @@ object GameFieldControllerActor {
 
   case object GetGrid
   case class GetGridAck(gameField: GameField)
-  case class SelectPosition(p: Player, pos: GridPosition)
+  case class SelectPosition(p: Player, pos: GridPositionOLD)
 
   case class SelectPositionAck(state: GameField, returnCode: RetCode)
 

@@ -8,21 +8,21 @@ import akka.actor.Actor
 import akka.actor.ActorRef
 import de.ai.htwg.tictactoe.clientConnection.model.GameField
 import de.ai.htwg.tictactoe.clientConnection.model.Player
-import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
+import de.ai.htwg.tictactoe.clientConnection.model.GridPositionOLD
 
 object GameUiActor {
   def props(name: String, dimensions: Int) = Props(new GameUiActor(name, dimensions))
 
   case class PrintField(gameField: GameField)
   case object Clear
-  case class SubscribeToMouseEvents(msgFactory: GridPosition => Any)
+  case class SubscribeToMouseEvents(msgFactory: GridPositionOLD => Any)
   case object Unsubscribe
 }
 
 private class GameUiActor(name: String, dimensions: Int) extends Actor {
   private case class SetStage()
 
-  private case class Subscriber(actorRef: ActorRef, msgFactory: GridPosition => Any)
+  private case class Subscriber(actorRef: ActorRef, msgFactory: GridPositionOLD => Any)
 
   private val futStage = GameUiStage(name, dimensions, handleMouseEvent)
   // the overhead for handling this completely async is a lot more than simply sleeping once.
@@ -35,7 +35,7 @@ private class GameUiActor(name: String, dimensions: Int) extends Actor {
   stage.show()
 
 
-  private def handleMouseEvent(pos: GridPosition): Unit = {
+  private def handleMouseEvent(pos: GridPositionOLD): Unit = {
     if (field.flatMap(_.getPos(pos)).isEmpty) {
       listeners.foreach { sub =>
         sub.actorRef ! sub.msgFactory(pos)

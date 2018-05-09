@@ -12,7 +12,7 @@ import akka.pattern.ask
 import akka.pattern.gracefulStop
 import akka.util.Timeout
 import de.ai.htwg.tictactoe.clientConnection.model.Player
-import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
+import de.ai.htwg.tictactoe.clientConnection.model.GridPositionOLD
 import de.ai.htwg.tictactoe.gameLogic.controller.GameFieldControllerActor
 import de.ai.htwg.tictactoe.gameLogic.controller.GameFieldControllerActor.SelectPosition
 import de.ai.htwg.tictactoe.gameLogic.controller.GameFieldControllerActor.SelectPositionAck
@@ -23,7 +23,7 @@ class GameTest extends GameLogicTestSpec[ActorRef] {
   implicit val timeout: Timeout = Timeout(duration)
   implicit val context: ExecutionContextExecutor = system.dispatcher
   private val dimensions = 4
-  private val posBuilder = GridPosition(dimensions)
+  private val posBuilder = GridPositionOLD(dimensions)
 
   private val GFCA = GameFieldControllerActor
 

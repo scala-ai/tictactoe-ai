@@ -4,7 +4,7 @@ import scala.collection.JavaConverters
 import scala.concurrent.Promise
 import scala.concurrent.Future
 
-import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
+import de.ai.htwg.tictactoe.clientConnection.model.GridPositionOLD
 import scalafx.geometry.Orientation
 import scalafx.scene.Node
 import scalafx.scene.Scene
@@ -30,7 +30,7 @@ object GameUiStage {
     def clear(): Unit
   }
 
-  def apply(name: String, dimensions: Int, onMouseClicked: GridPosition => Unit): Future[GameUiStage] = {
+  def apply(name: String, dimensions: Int, onMouseClicked: GridPositionOLD => Unit): Future[GameUiStage] = {
     val p = Promise[GameUiStage]()
     Platform.runLater(p.success(new GameUiStage(name, dimensions, onMouseClicked)))
 
@@ -39,9 +39,9 @@ object GameUiStage {
 
 }
 
-class GameUiStage private(name: String, dimensions: Int, onMouseClicked: GridPosition => Unit) {
+class GameUiStage private(name: String, dimensions: Int, onMouseClicked: GridPositionOLD => Unit) {
 
-  private val posBuilder = GridPosition(dimensions)
+  private val posBuilder = GridPositionOLD(dimensions)
   private val anchor = new AnchorPane
 
   private val stage = new Stage {
@@ -218,8 +218,8 @@ class GameUiStage private(name: String, dimensions: Int, onMouseClicked: GridPos
       uiElem.clear()
     }
   }
-  def circle(pos: GridPosition): GameUiStage.UIElem = circles(pos)
-  def cross(pos: GridPosition): GameUiStage.UIElem = crosses(pos)
+  def circle(pos: GridPositionOLD): GameUiStage.UIElem = circles(pos)
+  def cross(pos: GridPositionOLD): GameUiStage.UIElem = crosses(pos)
 
   def show(): Unit = {
     Platform.runLater(

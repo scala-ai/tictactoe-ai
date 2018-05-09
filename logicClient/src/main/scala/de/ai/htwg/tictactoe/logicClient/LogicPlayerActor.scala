@@ -8,7 +8,7 @@ import akka.actor.Props
 import de.ai.htwg.tictactoe.clientConnection.messages.GameControllerMessages
 import de.ai.htwg.tictactoe.clientConnection.messages.RegisterGame
 import de.ai.htwg.tictactoe.clientConnection.model.GameField
-import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
+import de.ai.htwg.tictactoe.clientConnection.model.GridPositionOLD
 import de.ai.htwg.tictactoe.clientConnection.model.Player
 import de.ai.htwg.tictactoe.logicClient.LogicPlayerActor.PlayerReady
 import grizzled.slf4j.Logging
@@ -36,8 +36,8 @@ class LogicPlayerActor private(random: Random, watchers: List[ActorRef]) extends
 
     case GameControllerMessages.GameUpdated(_) => trace("LogicPlayer: Game updated") // not interesting
     case GameControllerMessages.GameFinished(_, _) => trace("LogicPlayer: Game finished") // not interesting
-    case GameControllerMessages.PosAlreadySet(_: GridPosition) => error(s"LogicPlayer: Pos already set")
-    case GameControllerMessages.NotYourTurn(_: GridPosition) => error(s"LogicPlayer: Not your turn")
+    case GameControllerMessages.PosAlreadySet(_: GridPositionOLD) => error(s"LogicPlayer: Pos already set")
+    case GameControllerMessages.NotYourTurn(_: GridPositionOLD) => error(s"LogicPlayer: Not your turn")
     case GameControllerMessages.YourTurn(gf: GameField) => doGameAction(gameScope, gf, sender())
 
     case GameControllerMessages.YourResult(_, result) =>
