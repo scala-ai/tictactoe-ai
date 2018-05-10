@@ -78,7 +78,6 @@ class AiActor private(watchers: List[ActorRef], properties: LearningProcessorCon
         register = Some(r)
         probeInit()
       case UpdateTrainingState(b) => training = b
-      case SaveState => learningUnit.foreach(_.persist())
 
       case _ => stash()
     }
