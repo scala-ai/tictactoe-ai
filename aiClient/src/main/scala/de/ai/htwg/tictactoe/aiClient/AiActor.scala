@@ -10,7 +10,6 @@ import akka.actor.Stash
 import de.ai.htwg.tictactoe.aiClient.AiActor.LearningProcessorConfiguration
 import de.ai.htwg.tictactoe.aiClient.AiActor.SaveState
 import de.ai.htwg.tictactoe.aiClient.AiActor.TrainingEpochResult
-import de.ai.htwg.tictactoe.aiClient.AiActor.TrainingFinished
 import de.ai.htwg.tictactoe.aiClient.AiActor.UpdateTrainingState
 import de.ai.htwg.tictactoe.aiClient.learning.TTTEpochResult
 import de.ai.htwg.tictactoe.aiClient.learning.TTTLearningProcessor
@@ -19,6 +18,7 @@ import de.ai.htwg.tictactoe.aiClient.learning.core.QLearningConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.policy.EpsGreedyConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.policy.PolicyConfiguration
 import de.ai.htwg.tictactoe.clientConnection.messages.GameControllerMessages
+import de.ai.htwg.tictactoe.clientConnection.messages.PlayerReady
 import de.ai.htwg.tictactoe.clientConnection.messages.RegisterGame
 import de.ai.htwg.tictactoe.clientConnection.model.GameField
 import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
@@ -32,7 +32,6 @@ object AiActor {
 
   def props(watchers: List[ActorRef], properties: LearningProcessorConfiguration) = Props(new AiActor(watchers, properties))
 
-  case object TrainingFinished
   case object SaveState
   case class TrainingEpochResult(result: GameControllerMessages.GameResult)
   case class UpdateTrainingState(training: Boolean)
@@ -49,8 +48,8 @@ class AiActor private(watchers: List[ActorRef], properties: LearningProcessorCon
   override def receive: Receive = new PreInitialized
 
   private class PreInitialized(
-      var learningUnit: Option[TTTLearningProcessor] = None,
-      var training: Boolean = true
+      private var learningUnit: Option[TTTLearningProcessor] = None,
+      private var training: Boolean = true
   ) extends DelegatedPartialFunction[Any, Unit] {
     case class InitNet(net: TTTLearningProcessor)
 
@@ -92,10 +91,10 @@ class AiActor private(watchers: List[ActorRef], properties: LearningProcessorCon
   }
 
   private class Initialized(
-      var learningUnit: TTTLearningProcessor,
-      val currentPlayer: Player,
-      val gameActor: ActorRef,
-      var training: Boolean
+      private var learningUnit: TTTLearningProcessor,
+      private val currentPlayer: Player,
+      private val gameActor: ActorRef,
+      private var training: Boolean
   ) extends DelegatedPartialFunction[Any, Unit] {
 
     currentPlayer match {
@@ -104,6 +103,7 @@ class AiActor private(watchers: List[ActorRef], properties: LearningProcessorCon
     }
 
     debug(s"AiPlayer: Ready to play")
+    watchers.foreach(_ ! PlayerReady)
 
     override def pf: Receive = {
       case GameControllerMessages.GameUpdated(_) => trace("game updated") // not interesting
@@ -122,7 +122,6 @@ class AiActor private(watchers: List[ActorRef], properties: LearningProcessorCon
         watchers.foreach(_ ! TrainingEpochResult(result))
         learningUnit = learningUnit.trainResult(epochResult)
         context.become(new PreInitialized(Some(learningUnit), training))
-        watchers.foreach(_ ! TrainingFinished)
       case SaveState => learningUnit.persist()
     }
 

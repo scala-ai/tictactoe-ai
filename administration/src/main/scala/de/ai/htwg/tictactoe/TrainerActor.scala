@@ -59,8 +59,8 @@ class TrainerActor(strategyBuilder: TTTWinStrategyBuilder, clientMain: ActorRef)
     override def pf: PartialFunction[Any, Unit] = {
       case StartTraining(epochs) =>
         if (epochs < 0) {
-          error(s"cannot train vor less than 1 epoch: $epochs")
-          throw new IllegalStateException(s"cannot train vor less than 1 epoch: $epochs")
+          error(s"cannot train less than 1 epoch: $epochs")
+          throw new IllegalStateException(s"cannot train less than 1 epoch: $epochs")
         }
 
         info(s"Start training with $epochs epochs")
@@ -99,7 +99,6 @@ class TrainerActor(strategyBuilder: TTTWinStrategyBuilder, clientMain: ActorRef)
     }
 
     override def pf: PartialFunction[Any, Unit] = {
-      case AiActor.TrainingFinished => handlePlayerReady(sender())
       case PlayerReady => handlePlayerReady(sender())
     }
 
