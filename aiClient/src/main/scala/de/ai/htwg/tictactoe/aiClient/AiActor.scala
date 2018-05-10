@@ -103,7 +103,7 @@ class AiActor private(watchers: List[ActorRef], properties: LearningProcessorCon
       case Player.Cross => gameActor ! GameControllerMessages.RegisterCross
     }
 
-    debug(s"$currentPlayer: ai player is ready to play")
+    debug(s"AiPlayer: Ready to play")
 
     override def pf: Receive = {
       case GameControllerMessages.GameUpdated(_) => trace("game updated") // not interesting
@@ -113,7 +113,7 @@ class AiActor private(watchers: List[ActorRef], properties: LearningProcessorCon
       case GameControllerMessages.YourTurn(gf: GameField) => doGameAction(gf, sender())
       case UpdateTrainingState(b) => training = b
       case GameControllerMessages.YourResult(_, result) =>
-        debug(s"$currentPlayer: game finished, result: $result")
+        debug(s"AiPlayer: Game finished, result: $result")
         val epochResult = result match {
           case GameControllerMessages.GameWon => TTTEpochResult.won
           case GameControllerMessages.GameLost => TTTEpochResult.lost

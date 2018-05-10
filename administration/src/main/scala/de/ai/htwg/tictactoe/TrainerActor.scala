@@ -14,12 +14,13 @@ import de.ai.htwg.tictactoe.aiClient.learning.core.QLearningConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.policy.EpsGreedyConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.policy.ExplorationStepConfiguration
 import de.ai.htwg.tictactoe.clientConnection.messages.GameControllerMessages
+import de.ai.htwg.tictactoe.clientConnection.messages.PlayerReady
 import de.ai.htwg.tictactoe.clientConnection.messages.RegisterGame
 import de.ai.htwg.tictactoe.clientConnection.model.Player
 import de.ai.htwg.tictactoe.clientConnection.model.strategy.TTTWinStrategyBuilder
 import de.ai.htwg.tictactoe.clientConnection.util.DelegatedPartialFunction
 import de.ai.htwg.tictactoe.gameLogic.controller.GameControllerActor
-import de.ai.htwg.tictactoe.logicClient.LogicPlayerActor
+import de.ai.htwg.tictactoe.logicClient.RandomPlayerActor
 import de.ai.htwg.tictactoe.playerClient.PlayerUiActor
 import grizzled.slf4j.Logging
 
@@ -31,16 +32,17 @@ object TrainerActor {
 
 class TrainerActor(strategyBuilder: TTTWinStrategyBuilder, clientMain: ActorRef) extends Actor with Stash with Logging {
   private type DelegateReceive = DelegatedPartialFunction[Any, Unit]
+  private val random = new Random(1L)
 
   private val epsGreedyConfiguration = EpsGreedyConfiguration(
     minEpsilon = 0.75f,
     nbEpochVisits = 4000000,
-    random = Random
+    random = new Random(2L)
   )
   private val explorationStepConfiguration = ExplorationStepConfiguration(
     minEpsilon = 0.2f,
     nbStepVisits = 1000,
-    random = Random
+    random = new Random(2L)
   )
   private val properties = LearningProcessorConfiguration(
     strategyBuilder.dimensions,
@@ -79,7 +81,8 @@ class TrainerActor(strategyBuilder: TTTWinStrategyBuilder, clientMain: ActorRef)
 
     var currentGame: ActorRef = doTraining(
       aiActor,
-      context.actorOf(LogicPlayerActor.props(strategyBuilder, new Random(5L), List(self)))
+      context.actorOf(RandomPlayerActor.props(new Random(2L), List(self)))
+      //context.actorOf(LogicPlayerActor.props(strategyBuilder, new Random(5L), List(self)))
       //context.actorOf(AiActor.props(List(self), properties))
     )
 
@@ -97,7 +100,7 @@ class TrainerActor(strategyBuilder: TTTWinStrategyBuilder, clientMain: ActorRef)
 
     override def pf: PartialFunction[Any, Unit] = {
       case AiActor.TrainingFinished => handlePlayerReady(sender())
-      case LogicPlayerActor.PlayerReady => handlePlayerReady(sender())
+      case PlayerReady => handlePlayerReady(sender())
     }
 
     private def handlePlayerReady(sender: ActorRef): Unit = {
@@ -139,7 +142,6 @@ class TrainerActor(strategyBuilder: TTTWinStrategyBuilder, clientMain: ActorRef)
     case class CurrentPlayerGame(player: ActorRef, game: ActorRef)
     var testGameNumber = 0
     val gameName = s"testGame - $testGameNumber"
-    val random = new Random()
     var state: CurrentPlayerGame = runTestGame()
 
     def runTestGame(): CurrentPlayerGame = {

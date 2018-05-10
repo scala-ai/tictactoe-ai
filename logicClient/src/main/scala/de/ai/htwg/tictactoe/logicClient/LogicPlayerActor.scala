@@ -6,18 +6,16 @@ import akka.actor.Actor
 import akka.actor.ActorRef
 import akka.actor.Props
 import de.ai.htwg.tictactoe.clientConnection.messages.GameControllerMessages
+import de.ai.htwg.tictactoe.clientConnection.messages.PlayerReady
 import de.ai.htwg.tictactoe.clientConnection.messages.RegisterGame
 import de.ai.htwg.tictactoe.clientConnection.model.GameField
 import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
 import de.ai.htwg.tictactoe.clientConnection.model.Player
 import de.ai.htwg.tictactoe.clientConnection.model.strategy.TTTWinStrategyBuilder
-import de.ai.htwg.tictactoe.logicClient.LogicPlayerActor.PlayerReady
 import grizzled.slf4j.Logging
 
 object LogicPlayerActor {
   def props(strategyBuilder: TTTWinStrategyBuilder, random: Random, watchers: List[ActorRef]) = Props(new LogicPlayerActor(strategyBuilder, random, watchers))
-
-  case object PlayerReady
 }
 
 class LogicPlayerActor private(strategyBuilder: TTTWinStrategyBuilder, random: Random, watchers: List[ActorRef]) extends Actor with Logging {
@@ -71,7 +69,7 @@ class LogicPlayerActor private(strategyBuilder: TTTWinStrategyBuilder, random: R
     val newGameScope = GameScope(possibleWinActions(random.nextInt(possibleWinActions.size)).list)
     context.become(actorContext(newGameScope))
     debug(s"New game scope: ${newGameScope.todo}")
-    debug("logicPlayer is ready to play")
+    debug("LogicPlayer: Ready to play")
   }
 
   private val possibleWinActions = strategyBuilder.listAllWinStrategies
