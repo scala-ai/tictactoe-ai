@@ -5,6 +5,8 @@ import java.nio.file.Paths
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
+import scala.io.Source
+
 import de.ai.htwg.tictactoe.aiClient.learning.core.QLearning
 import de.ai.htwg.tictactoe.aiClient.learning.core.QLearningConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.policy.EpsGreedy
@@ -41,6 +43,16 @@ class TTTLearningProcessor(
     val file = Paths.get(fileName)
     Files.createDirectories(file.getParent)
     Files.write(file, serializedNet.getBytes("UTF-8"))
+  }
+
+  def load(): TTTLearningProcessor = {
+    val fileName = s"nets/2018-05-08-16-47-13-499.network"
+    debug(s"Load current neural network from $fileName")
+    val file = Source.fromFile(fileName, "UTF-8")
+      .getLines()
+      .mkString("#")
+    val deserializeNet = TTTQTable.deserialize(file)
+    new TTTLearningProcessor(learning = learning.copy(neuralNet = deserializeNet))
   }
 }
 

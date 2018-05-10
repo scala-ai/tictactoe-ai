@@ -25,12 +25,30 @@ class TTTQTable private(data: mutable.Map[Int, Double]) extends NeuralNet with L
   override def train(input: INDArray, output: INDArray): Unit = data.put(input.hashCode(), output.getDouble(0))
 
   override def serialize(): String = data.map((k) => k._1 + ":" + k._2).mkString("\n")
-  
+
   private def toArray(value: Double): INDArray = Nd4j.valueArrayOf(dimensions, dimensions, value)
 }
 
 object TTTQTable extends NeuralNet.Factory {
   override def apply(): NeuralNet = new TTTQTable(mutable.Map())
 
-  override def deserialize(string: String): NeuralNet = ???
+  override def deserialize(string: String): NeuralNet = {
+    val resultMap: mutable.Map[Int, Double] = mutable.Map()
+    var key = ""
+    var value = ""
+    var s = true
+    string
+      .foreach {
+        case ':' =>
+          s = false
+        case '#' =>
+          resultMap.put(key.toInt, value.toDouble)
+          key = ""
+          value = ""
+          s = true
+        case a if s => key += a
+        case a if !s => value += a
+      }
+    new TTTQTable(resultMap)
+  }
 }
