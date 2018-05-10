@@ -74,9 +74,11 @@ class TrainerActor(strategyBuilder: TTTWinStrategyBuilder, clientMain: ActorRef)
     var remainingEpochs: Int = totalEpochs
     private var readyActors: List[ActorRef] = Nil
     private val watcherActor = context.actorOf(WatcherActor.props())
+    private val aiActor = context.actorOf(AiActor.props(List(self, watcherActor), properties))
+
 
     var currentGame: ActorRef = doTraining(
-      context.actorOf(AiActor.props(List(self, watcherActor), properties)),
+      aiActor,
       context.actorOf(LogicPlayerActor.props(strategyBuilder, new Random(5L), List(self)))
       //context.actorOf(AiActor.props(List(self), properties))
     )
@@ -119,7 +121,7 @@ class TrainerActor(strategyBuilder: TTTWinStrategyBuilder, clientMain: ActorRef)
             readyActors = sender :: first :: Nil
             first ! AiActor.SaveState
             sender ! AiActor.SaveState
-            context.become(new RunTestGames(readyActors.toVector))
+            context.become(new RunTestGames(Vector(aiActor)))
             watcherActor ! WatcherActor.PrintCSV(100)
             info {
               val time = System.currentTimeMillis() - start
