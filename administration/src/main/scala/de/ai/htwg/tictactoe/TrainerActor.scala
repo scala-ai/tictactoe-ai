@@ -13,8 +13,8 @@ import de.ai.htwg.tictactoe.aiClient.AiActor.LearningProcessorConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.QLearningConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.policy.EpsGreedyConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.policy.ExplorationStepConfiguration
-import de.ai.htwg.tictactoe.clientConnection.messages.RegisterGame
 import de.ai.htwg.tictactoe.clientConnection.messages.GameControllerMessages
+import de.ai.htwg.tictactoe.clientConnection.messages.RegisterGame
 import de.ai.htwg.tictactoe.clientConnection.model.Player
 import de.ai.htwg.tictactoe.clientConnection.model.strategy.TTTWinStrategyBuilder
 import de.ai.htwg.tictactoe.clientConnection.util.DelegatedPartialFunction
@@ -46,8 +46,8 @@ class TrainerActor(strategyBuilder: TTTWinStrategyBuilder, clientMain: ActorRef)
     strategyBuilder.dimensions,
     epsGreedyConfiguration,
     QLearningConfiguration(
-      alpha = 0.8,
-      gamma = 0.6
+      alpha = 0.1,
+      gamma = 0.5
     )
   )
 
@@ -78,7 +78,7 @@ class TrainerActor(strategyBuilder: TTTWinStrategyBuilder, clientMain: ActorRef)
     var currentGame: ActorRef = doTraining(
       context.actorOf(AiActor.props(List(self, watcherActor), properties)),
       context.actorOf(LogicPlayerActor.props(strategyBuilder, new Random(5L), List(self)))
-      // context.actorOf(AiActor.props(List(self), properties))
+      //context.actorOf(AiActor.props(List(self), properties))
     )
 
     def doTraining(circle: ActorRef, cross: ActorRef): ActorRef = {

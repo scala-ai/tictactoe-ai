@@ -43,9 +43,9 @@ class TTTNeuralNet private(val model: MultiLayerNetwork) extends NeuralNet with 
 
 object TTTNeuralNet extends NeuralNet.Factory {
   private val seed = 5
-  private val hiddenNodes1 = 32
-  private val hiddenNodes2 = 32
-  private val hiddenNodes3 = 32
+  private val hiddenNodes1 = 27
+  private val hiddenNodes2 = 27
+  private val hiddenNodes3 = 27
   private val outputNodes = 1 // q value
 
   override def apply(dimensions: Int): NeuralNet = {
