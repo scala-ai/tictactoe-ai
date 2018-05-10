@@ -44,7 +44,7 @@ class TTTStateTest extends FreeSpec with Matchers {
         stateAsVector.getRow(4) shouldBe Nd4j.create(Array(1.0, 1.0, -1.0, 1.0, -1.0), Array(1, 5), 'c')
       }
       "for a 5x5 playground with other player's turn" in {
-        // cross player's turn
+        // circle player's turn
         val gameFieldCross = gameField.setPos(1, 0)
         val state = TTTState(gameFieldCross)
         val stateAsVector = state.asVector
@@ -52,8 +52,8 @@ class TTTStateTest extends FreeSpec with Matchers {
         stateAsVector.rows() shouldBe 5
         stateAsVector.columns() shouldBe 5
         stateAsVector.getRow(0) shouldBe Nd4j.create(Array(-1.0, -1.0, 1.0, -1.0, 1.0), Array(1, 5), 'c')
-        stateAsVector.getRow(1) shouldBe Nd4j.create(Array(1.0, 0.0, 1.0, 0.0, 1.0), Array(1, 5), 'c')
-        stateAsVector.getRow(2) shouldBe Nd4j.create(Array(-1.0, 0.0, 0.0, 0.0, 0.0), Array(1, 5), 'c')
+        stateAsVector.getRow(1) shouldBe Nd4j.create(Array(-1.0, 0.0, 1.0, 0.0, 1.0), Array(1, 5), 'c')
+        stateAsVector.getRow(2) shouldBe Nd4j.create(Array(-1.0, 0.0, 0.0, 0.0, 1.0), Array(1, 5), 'c')
         stateAsVector.getRow(3) shouldBe Nd4j.create(Array(-1.0, 0.0, 1.0, 0.0, 1.0), Array(1, 5), 'c')
         stateAsVector.getRow(4) shouldBe Nd4j.create(Array(-1.0, -1.0, 1.0, -1.0, 1.0), Array(1, 5), 'c')
       }
