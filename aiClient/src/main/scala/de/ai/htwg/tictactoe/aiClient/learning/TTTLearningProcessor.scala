@@ -20,13 +20,13 @@ class TTTLearningProcessor(
 ) extends Logging {
 
   def getTrainingDecision(state: TTTState): (TTTAction, TTTLearningProcessor) = {
-    debug(s"Ask for training decision")
+    trace(s"Ask for training decision")
     val (newLearning, action) = learning.getTrainingDecision(state)
     (action, new TTTLearningProcessor(learning = newLearning))
   }
 
   def getBestDecision(state: TTTState): (TTTAction, TTTLearningProcessor) = {
-    debug(s"Ask for best decision")
+    trace(s"Ask for best decision")
     val (newLearning, action) = learning.getBestDecision(state)
     (action, new TTTLearningProcessor(learning = newLearning))
   }

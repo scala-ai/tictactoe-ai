@@ -101,7 +101,7 @@ class TrainerActor(strategyBuilder: TTTWinStrategyBuilder, clientMain: ActorRef)
     }
 
     private def handlePlayerReady(sender: ActorRef): Unit = {
-      debug(s"training finished message (ready = ${readyActors.size})")
+      trace(s"training finished message (ready = ${readyActors.size})")
       readyActors match {
         case Nil =>
           readyActors = sender :: Nil

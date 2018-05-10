@@ -46,10 +46,12 @@ case class QLearning[S <: State, A <: Action, R <: EpochResult](
   }
 
   private def calcBestAction(state: S, possibleActions: List[A]): A = {
+    debug(s"Request action in state \n${state.asVector}")
     val ratedActions = possibleActions
       .map(a => {
         val input = Nd4j.concat(1, state.asVector, a.asVector)
         val result = neuralNet.calc(input).getDouble(0)
+        debug(s"Action: $a => $result")
         assert(!result.isNaN)
         (a, result)
       })
@@ -65,7 +67,7 @@ case class QLearning[S <: State, A <: Action, R <: EpochResult](
     transitionHistory
       .reverseTransitions()
       .foldLeft(epochReward)((futureQVal, transition) => {
-        debug("train transition " + transition.action)
+        trace("train transition " + transition.action)
 
         val state = transition.observation
         val action = transition.action
