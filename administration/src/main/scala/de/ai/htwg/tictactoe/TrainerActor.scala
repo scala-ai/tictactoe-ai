@@ -54,7 +54,7 @@ class TrainerActor(strategyBuilder: TTTWinStrategyBuilder, clientMain: ActorRef)
       gamma = 0.5
     )
   )
-  //private val watcherActor = context.actorOf(WatcherActor.props())
+  private val watcherActor = context.actorOf(WatcherActor.props())
   private val aiActor = context.actorOf(AiActor.props(List(self), properties))
   private val randomPlayer = context.actorOf(RandomPlayerActor.props(random, List(self)))
   private val logicPlayer = context.actorOf(LogicPlayerActor.props(strategyBuilder, random, List(self)))
@@ -127,7 +127,7 @@ class TrainerActor(strategyBuilder: TTTWinStrategyBuilder, clientMain: ActorRef)
             first ! AiActor.SaveState
             sender ! AiActor.SaveState
             context.become(new RunUiGames(Vector(aiActor)))
-            //watcherActor ! WatcherActor.PrintCSV(100)
+            watcherActor ! WatcherActor.PrintCSV(100)
             info {
               val time = System.currentTimeMillis() - start
               val ms = time % 1000
@@ -184,6 +184,7 @@ class TrainerActor(strategyBuilder: TTTWinStrategyBuilder, clientMain: ActorRef)
       testGameNumber -= 1
       if (testGameNumber < 0) {
         info(s"$epochs: + $wonGames  - $lostGames  o $drawGames => ${(wonGames + drawGames).toFloat / (wonGames + lostGames + drawGames)} %")
+        watcherActor ! WatcherActor.EpochResult(epochs, wonGames, lostGames, drawGames)
         context.become(new Training(epochs - 1))
       } else {
         state = runTestGame()

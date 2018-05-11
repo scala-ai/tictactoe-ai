@@ -4,50 +4,30 @@ import scala.collection.mutable.ListBuffer
 
 import akka.actor.Actor
 import akka.actor.Props
-import de.ai.htwg.tictactoe.aiClient.AiActor
-import de.ai.htwg.tictactoe.clientConnection.messages.GameControllerMessages
+import de.ai.htwg.tictactoe.WatcherActor.EpochResult
 import grizzled.slf4j.Logging
 
 
 object WatcherActor {
   def props() = Props(new WatcherActor())
 
+  case class EpochResult(epoch: Int, won: Int, lost: Int, draw: Int)
   case class PrintCSV(epochsPerLine: Int)
 }
 class WatcherActor extends Actor with Logging {
 
-  private var epoch = 0
-  private val results: ListBuffer[GameControllerMessages.GameResult] = ListBuffer[GameControllerMessages.GameResult]()
+  private val results: ListBuffer[EpochResult] = ListBuffer()
 
   override def receive: Receive = {
-    case AiActor.TrainingEpochResult(result) =>
-      epoch += 1
-      results += result
-    //      info(s"$epoch - (+) $wonGames (0) $drawGames (-) $lostGames = ${(wonGames + drawGames).toFloat / (wonGames + lostGames + drawGames)}")
-
+    case r: EpochResult => results += r
     case WatcherActor.PrintCSV(epl) =>
       info("csv:\n" + buildCSV(epl)) // TODO write actual CSV
-
   }
 
   def buildCSV(epochsPerLine: Int): String = {
-    val lines: ListBuffer[String] = ListBuffer[String]()
-    lines += "epoch; wins; draws; losses; win percentage"
-    var wonGames = 0
-    var lostGames = 0
-    var drawGames = 0
-    var epoch = 0
-    results.foreach { gr =>
-      epoch += 1
-      gr match {
-        case GameControllerMessages.GameWon => wonGames += 1
-        case GameControllerMessages.GameDraw => drawGames += 1
-        case GameControllerMessages.GameLost => lostGames += 1
-      }
-      if (epoch % epochsPerLine == 0) {
-        lines += f"$epoch; $wonGames; $drawGames; $lostGames; ${(wonGames + drawGames).toDouble / epoch * 100}%2.2f%%"
-      }
-    }
-    lines.mkString("\n")
+    "epoch; wins; draws; losses; win percentage\n" +
+      results.map(r =>
+        f"${r.epoch}; ${r.won}; ${r.draw}; ${r.lost}; ${(r.won + r.draw).toFloat / (r.won + r.lost + r.draw)}%2.2f%%"
+      ).mkString("\n")
   }
 }
