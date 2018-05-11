@@ -20,6 +20,7 @@ import de.ai.htwg.tictactoe.clientConnection.model.Player
 import de.ai.htwg.tictactoe.clientConnection.model.strategy.TTTWinStrategyBuilder
 import de.ai.htwg.tictactoe.clientConnection.util.DelegatedPartialFunction
 import de.ai.htwg.tictactoe.gameLogic.controller.GameControllerActor
+import de.ai.htwg.tictactoe.logicClient.LogicPlayerActor
 import de.ai.htwg.tictactoe.logicClient.RandomPlayerActor
 import de.ai.htwg.tictactoe.playerClient.PlayerUiActor
 import grizzled.slf4j.Logging
@@ -33,16 +34,17 @@ object TrainerActor {
 class TrainerActor(strategyBuilder: TTTWinStrategyBuilder, clientMain: ActorRef) extends Actor with Stash with Logging {
   private type DelegateReceive = DelegatedPartialFunction[Any, Unit]
   private val random = new Random(1L)
+  private var start = 0L
 
   private val epsGreedyConfiguration = EpsGreedyConfiguration(
     minEpsilon = 0.75f,
     nbEpochVisits = 4000000,
-    random = new Random(2L)
+    random = random
   )
   private val explorationStepConfiguration = ExplorationStepConfiguration(
     minEpsilon = 0.2f,
     nbStepVisits = 1000,
-    random = new Random(2L)
+    random = random
   )
   private val properties = LearningProcessorConfiguration(
     strategyBuilder.dimensions,
@@ -52,6 +54,9 @@ class TrainerActor(strategyBuilder: TTTWinStrategyBuilder, clientMain: ActorRef)
       gamma = 0.5
     )
   )
+  private val watcherActor = context.actorOf(WatcherActor.props())
+  private val aiActor = context.actorOf(AiActor.props(List(self, watcherActor), properties))
+  private val randomPlayer = context.actorOf(RandomPlayerActor.props(random, List(self)))
 
   override def receive: Receive = PreInitialize
 
@@ -62,7 +67,7 @@ class TrainerActor(strategyBuilder: TTTWinStrategyBuilder, clientMain: ActorRef)
           error(s"cannot train less than 1 epoch: $epochs")
           throw new IllegalStateException(s"cannot train less than 1 epoch: $epochs")
         }
-
+        start = System.currentTimeMillis()
         info(s"Start training with $epochs epochs")
         context.become(new Training(epochs))
         unstashAll()
@@ -72,22 +77,16 @@ class TrainerActor(strategyBuilder: TTTWinStrategyBuilder, clientMain: ActorRef)
   }
 
   private class Training(val totalEpochs: Int) extends DelegateReceive {
-    val start: Long = System.currentTimeMillis()
-    var remainingEpochs: Int = totalEpochs
+    private var remainingEpochs: Int = totalEpochs
     private var readyActors: List[ActorRef] = Nil
-    private val watcherActor = context.actorOf(WatcherActor.props())
-    private val aiActor = context.actorOf(AiActor.props(List(self, watcherActor), properties))
-
 
     var currentGame: ActorRef = doTraining(
       aiActor,
-      context.actorOf(RandomPlayerActor.props(new Random(2L), List(self)))
-      //context.actorOf(LogicPlayerActor.props(strategyBuilder, new Random(5L), List(self)))
-      //context.actorOf(AiActor.props(List(self), properties))
+      randomPlayer
     )
 
     def doTraining(circle: ActorRef, cross: ActorRef): ActorRef = {
-      info(s"Train epoch ${totalEpochs - remainingEpochs}")
+      info(s"Train epoch $remainingEpochs")
       val game = context.actorOf(GameControllerActor.props(Player.Cross, strategyBuilder), s"game-$remainingEpochs")
       // must be sent twice, cause we don't know the player type
       circle ! AiActor.UpdateTrainingState(true)
@@ -115,15 +114,18 @@ class TrainerActor(strategyBuilder: TTTWinStrategyBuilder, clientMain: ActorRef)
             currentGame ! PoisonPill // FIXME turn into restart
             // this will mix who is circle and who is cross
             currentGame = doTraining(sender, first)
-            if (remainingEpochs % 500 == 0) {
+            if (remainingEpochs % 10000 == 0) {
               first ! AiActor.SaveState
               sender ! AiActor.SaveState
+            }
+            if (remainingEpochs % 500 == 0) {
+              context.become(new RunTestGames(Vector(aiActor), remainingEpochs))
             }
           } else {
             readyActors = sender :: first :: Nil
             first ! AiActor.SaveState
             sender ! AiActor.SaveState
-            context.become(new RunTestGames(Vector(aiActor)))
+            context.become(new RunUiGames(Vector(aiActor)))
             watcherActor ! WatcherActor.PrintCSV(100)
             info {
               val time = System.currentTimeMillis() - start
@@ -137,13 +139,55 @@ class TrainerActor(strategyBuilder: TTTWinStrategyBuilder, clientMain: ActorRef)
     }
   }
 
-  private class RunTestGames(val trainedActors: Vector[ActorRef]) extends DelegateReceive {
-    case class CurrentPlayerGame(player: ActorRef, game: ActorRef)
-    var testGameNumber = 0
-    val gameName = s"testGame - $testGameNumber"
-    var state: CurrentPlayerGame = runTestGame()
+  private class RunTestGames(val trainedActors: Vector[ActorRef], val epochs: Int) extends DelegateReceive {
+    case class CurrentPlayerGame(game: ActorRef)
+    private var testGameNumber = 50
+    private var readyActors: List[ActorRef] = Nil
+    private var state: CurrentPlayerGame = runTestGame()
 
     def runTestGame(): CurrentPlayerGame = {
+      val gameName = s"testGame-$epochs-$testGameNumber"
+      val ai = trainedActors(random.nextInt(trainedActors.size))
+      // update actor state to non training
+      ai ! AiActor.UpdateTrainingState(false)
+      val game = context.actorOf(GameControllerActor.props(Player.Cross, strategyBuilder), gameName)
+      game ! GameControllerMessages.RegisterObserver
+      val p = if (random.nextBoolean()) Player.Cross else Player.Circle
+      info(s"Start test run: $epochs - $testGameNumber")
+      val player = context.actorOf(LogicPlayerActor.props(strategyBuilder, random, List(self)))
+      ai ! RegisterGame(Player.other(p), game)
+      player ! RegisterGame(p, game)
+      CurrentPlayerGame(game)
+    }
+
+    override def pf: PartialFunction[Any, Unit] = {
+      case PlayerReady => readyActors match {
+        case Nil =>
+          readyActors = sender() :: Nil
+        case _ :: _ =>
+          readyActors = sender() :: readyActors
+          handleGameFinish(sender())
+      }
+      case GameControllerMessages.GameFinished(_, _) =>
+        sender() ! PoisonPill
+    }
+
+    private def handleGameFinish(sender: ActorRef): Unit = {
+      testGameNumber -= 1
+      if (testGameNumber < 0) {
+        context.become(new Training(epochs - 1))
+      } else {
+        state = runTestGame()
+      }
+    }
+  }
+
+  private class RunUiGames(val trainedActors: Vector[ActorRef]) extends DelegateReceive {
+    case class CurrentPlayerGame(player: ActorRef, game: ActorRef)
+    var testGameNumber = 0
+    var state: CurrentPlayerGame = runUiGame()
+
+    def runUiGame(): CurrentPlayerGame = {
       info(s"Start test run. ")
       val gameName = s"testGame-$testGameNumber"
       val ai = trainedActors(random.nextInt(trainedActors.size))
@@ -172,7 +216,7 @@ class TrainerActor(strategyBuilder: TTTWinStrategyBuilder, clientMain: ActorRef)
         state.game ! PoisonPill
         state.player ! PlayerUiActor.Euthanize
         testGameNumber += 1
-        state = runTestGame()
+        state = runUiGame()
     }
   }
 
