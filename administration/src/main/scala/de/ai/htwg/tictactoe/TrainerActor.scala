@@ -127,7 +127,7 @@ class TrainerActor(strategyBuilder: TTTWinStrategyBuilder, clientMain: ActorRef)
             first ! AiActor.SaveState
             sender ! AiActor.SaveState
             context.become(new RunUiGames(Vector(aiActor)))
-            watcherActor ! WatcherActor.PrintCSV(100)
+            //watcherActor ! WatcherActor.PrintCSV(100)
             info {
               val time = System.currentTimeMillis() - start
               val ms = time % 1000
