@@ -33,7 +33,7 @@ class WatcherActor extends Actor with Logging {
 
   def buildCSV(epochsPerLine: Int): String =
     "epoch; wins; draws; losses; win percentage\n" +
-      results.map(r =>
+      results.reverse.map(r =>
         f"${r.epoch}; ${r.won}; ${r.draw}; ${r.lost}; ${(r.won + r.draw).toFloat / (r.won + r.lost + r.draw)}%2.2f%%"
       ).mkString("\n")
 
