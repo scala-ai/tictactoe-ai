@@ -54,9 +54,10 @@ class TrainerActor(strategyBuilder: TTTWinStrategyBuilder, clientMain: ActorRef)
       gamma = 0.5
     )
   )
-  private val watcherActor = context.actorOf(WatcherActor.props())
-  private val aiActor = context.actorOf(AiActor.props(List(self, watcherActor), properties))
+  //private val watcherActor = context.actorOf(WatcherActor.props())
+  private val aiActor = context.actorOf(AiActor.props(List(self), properties))
   private val randomPlayer = context.actorOf(RandomPlayerActor.props(random, List(self)))
+  private val logicPlayer = context.actorOf(LogicPlayerActor.props(strategyBuilder, random, List(self)))
 
   override def receive: Receive = PreInitialize
 
@@ -86,7 +87,7 @@ class TrainerActor(strategyBuilder: TTTWinStrategyBuilder, clientMain: ActorRef)
     )
 
     def doTraining(circle: ActorRef, cross: ActorRef): ActorRef = {
-      info(s"Train epoch $remainingEpochs")
+      debug(s"Train epoch $remainingEpochs")
       val game = context.actorOf(GameControllerActor.props(Player.Cross, strategyBuilder), s"game-$remainingEpochs")
       // must be sent twice, cause we don't know the player type
       circle ! AiActor.UpdateTrainingState(true)
@@ -118,7 +119,7 @@ class TrainerActor(strategyBuilder: TTTWinStrategyBuilder, clientMain: ActorRef)
               first ! AiActor.SaveState
               sender ! AiActor.SaveState
             }
-            if (remainingEpochs % 500 == 0) {
+            if (remainingEpochs % 200 == 0) {
               context.become(new RunTestGames(Vector(aiActor), remainingEpochs))
             }
           } else {
@@ -141,22 +142,24 @@ class TrainerActor(strategyBuilder: TTTWinStrategyBuilder, clientMain: ActorRef)
 
   private class RunTestGames(val trainedActors: Vector[ActorRef], val epochs: Int) extends DelegateReceive {
     case class CurrentPlayerGame(game: ActorRef)
-    private var testGameNumber = 50
+    private var testGameNumber = 100
     private var readyActors: List[ActorRef] = Nil
     private var state: CurrentPlayerGame = runTestGame()
+    private var wonGames = 0
+    private var lostGames = 0
+    private var drawGames = 0
 
     def runTestGame(): CurrentPlayerGame = {
       val gameName = s"testGame-$epochs-$testGameNumber"
       val ai = trainedActors(random.nextInt(trainedActors.size))
       // update actor state to non training
       ai ! AiActor.UpdateTrainingState(false)
-      val game = context.actorOf(GameControllerActor.props(Player.Cross, strategyBuilder), gameName)
-      game ! GameControllerMessages.RegisterObserver
       val p = if (random.nextBoolean()) Player.Cross else Player.Circle
-      info(s"Start test run: $epochs - $testGameNumber")
-      val player = context.actorOf(LogicPlayerActor.props(strategyBuilder, random, List(self)))
-      ai ! RegisterGame(Player.other(p), game)
-      player ! RegisterGame(p, game)
+      val game = context.actorOf(GameControllerActor.props(p, strategyBuilder), gameName)
+      game ! GameControllerMessages.RegisterObserver
+      debug(s"Start test run: $epochs - $testGameNumber")
+      ai ! RegisterGame(Player.Cross, game)
+      logicPlayer ! RegisterGame(Player.Circle, game)
       CurrentPlayerGame(game)
     }
 
@@ -168,13 +171,19 @@ class TrainerActor(strategyBuilder: TTTWinStrategyBuilder, clientMain: ActorRef)
           readyActors = sender() :: readyActors
           handleGameFinish(sender())
       }
-      case GameControllerMessages.GameFinished(_, _) =>
+      case GameControllerMessages.GameFinished(_, winner) =>
+        winner match {
+          case Some(Player.Cross) => wonGames += 1
+          case Some(Player.Circle) => lostGames += 1
+          case None => drawGames += 1
+        }
         sender() ! PoisonPill
     }
 
     private def handleGameFinish(sender: ActorRef): Unit = {
       testGameNumber -= 1
       if (testGameNumber < 0) {
+        info(s"$epochs: + $wonGames  - $lostGames  o $drawGames => ${(wonGames + drawGames).toFloat / (wonGames + lostGames + drawGames)} %")
         context.become(new Training(epochs - 1))
       } else {
         state = runTestGame()
