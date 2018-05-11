@@ -36,7 +36,7 @@ class TrainerActor(strategyBuilder: TTTWinStrategyBuilder, clientMain: ActorRef)
   private val random = new Random(1L)
   private var start = 0L
   // unique training id for a whole training execution run
-  private val trainingId = random.alphanumeric.take(6).mkString
+  private val trainingId = Random.alphanumeric.take(6).mkString
 
   private val epsGreedyConfiguration = EpsGreedyConfiguration(
     minEpsilon = 0.75f,
