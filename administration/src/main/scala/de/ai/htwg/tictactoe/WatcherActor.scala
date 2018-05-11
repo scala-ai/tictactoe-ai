@@ -1,5 +1,10 @@
 package de.ai.htwg.tictactoe
 
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+
 import scala.collection.mutable.ListBuffer
 
 import akka.actor.Actor
@@ -21,13 +26,24 @@ class WatcherActor extends Actor with Logging {
   override def receive: Receive = {
     case r: EpochResult => results += r
     case WatcherActor.PrintCSV(epl) =>
-      info("csv:\n" + buildCSV(epl)) // TODO write actual CSV
+      val csvString = buildCSV(epl)
+      debug("csv:\n" + csvString)
+      writeToFile(csvString)
   }
 
-  def buildCSV(epochsPerLine: Int): String = {
+  def buildCSV(epochsPerLine: Int): String =
     "epoch; wins; draws; losses; win percentage\n" +
       results.map(r =>
         f"${r.epoch}; ${r.won}; ${r.draw}; ${r.lost}; ${(r.won + r.draw).toFloat / (r.won + r.lost + r.draw)}%2.2f%%"
       ).mkString("\n")
+
+
+  def writeToFile(csvString: String): Unit = {
+    val now = LocalDateTime.now.format(DateTimeFormatter.ofPattern("YYYY-MM-dd-HH-mm-ss-SSS"))
+    val fileName = s"results/$now.training.csv"
+    debug(s"Save training results to $fileName")
+    val file = Paths.get(fileName)
+    Files.createDirectories(file.getParent)
+    Files.write(file, csvString.getBytes("UTF-8"))
   }
 }

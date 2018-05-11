@@ -19,3 +19,5 @@ project/plugins/project/
 
 # application specific
 nets/
+logs/
+results/
