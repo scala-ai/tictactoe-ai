@@ -30,7 +30,7 @@ class TTTQTable private(data: mutable.Map[Int, Double]) extends NeuralNet with L
 }
 
 object TTTQTable extends NeuralNet.Factory {
-  override def apply(): NeuralNet = new TTTQTable(mutable.Map())
+  override def apply(dimensions: Int): NeuralNet = new TTTQTable(mutable.Map())
 
   override def deserialize(string: String): NeuralNet = {
     val resultMap: mutable.Map[Int, Double] = mutable.Map()

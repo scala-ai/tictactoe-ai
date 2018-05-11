@@ -197,19 +197,15 @@ class TrainerActor(strategyBuilder: TTTWinStrategyBuilder, clientMain: ActorRef)
     var state: CurrentPlayerGame = runUiGame()
 
     def runUiGame(): CurrentPlayerGame = {
-      info(s"Start test run. ")
       val gameName = s"testGame-$testGameNumber"
       val ai = trainedActors(random.nextInt(trainedActors.size))
       // update actor state to non training
       ai ! AiActor.UpdateTrainingState(false)
-      val game = context.actorOf(GameControllerActor.props(Player.Cross, strategyBuilder), gameName)
-      game ! GameControllerMessages.RegisterObserver
       val p = if (random.nextBoolean()) Player.Cross else Player.Circle
-
-      info(s"Start test run. player is: $p")
-
-      val player = context.actorOf(PlayerUiActor.props(p, clientMain, game, gameName))
-      ai ! RegisterGame(Player.other(p), game)
+      val game = context.actorOf(GameControllerActor.props(p, strategyBuilder), gameName)
+      game ! GameControllerMessages.RegisterObserver
+      val player = context.actorOf(PlayerUiActor.props(Player.Circle, clientMain, game, gameName))
+      ai ! RegisterGame(Player.Cross, game)
       CurrentPlayerGame(player, game)
     }
 
@@ -217,8 +213,9 @@ class TrainerActor(strategyBuilder: TTTWinStrategyBuilder, clientMain: ActorRef)
       case GameControllerMessages.GameFinished(_, winner) =>
         info {
           winner match {
-            case Some(player) => s"winner: $player"
-            case None => "game drawn"
+            case Some(Player.Cross) => s"AI-Player wins"
+            case Some(Player.Circle) => s"Human-Player wins"
+            case None => "No winner in this game"
           }
         }
         // FIXME turn into restart
