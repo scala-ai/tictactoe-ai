@@ -1,29 +1,34 @@
 package de.ai.htwg.tictactoe.clientConnection.fxUI
 
 import scala.collection.JavaConverters
-import scala.concurrent.Promise
 import scala.concurrent.Future
+import scala.concurrent.Promise
 
 import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
+import scalafx.Includes._
+import scalafx.application.Platform
+import scalafx.beans.property.ReadOnlyDoubleProperty
 import scalafx.geometry.Orientation
+import scalafx.geometry.Pos
 import scalafx.scene.Node
 import scalafx.scene.Scene
+import scalafx.scene.control.Label
 import scalafx.scene.control.Separator
 import scalafx.scene.input.MouseEvent
 import scalafx.scene.layout.AnchorPane
+import scalafx.scene.paint.Color.Green
 import scalafx.scene.paint.Color.Red
 import scalafx.scene.paint.Color.Transparent
-import scalafx.scene.paint.Color.Green
-import scalafx.scene.shape.Polygon
 import scalafx.scene.shape.Circle
+import scalafx.scene.shape.Polygon
 import scalafx.stage.Stage
-import scalafx.Includes._
-import scalafx.application.Platform
 
 
 object GameUiStage {
-  val defaultAppWidth: Double = 500
-  val defaultAppHeight: Double = 500
+  val defaultAppSize: Double = 500
+  val minAppSize: Double = 150
+
+  val borderSize: Double = 50
 
   trait UIElem {
     def set(): Unit
@@ -44,37 +49,82 @@ class GameUiStage private(name: String, dimensions: Int, onMouseClicked: GridPos
   private val anchor = new AnchorPane
 
   private val stage = new Stage {
+    minHeight = GameUiStage.minAppSize
+    minWidth = GameUiStage.minAppSize
     title = name
-    scene = new Scene(GameUiStage.defaultAppWidth, GameUiStage.defaultAppHeight) {
+    scene = new Scene(GameUiStage.defaultAppSize, GameUiStage.defaultAppSize) {
       root = anchor
 
       onMouseClicked = handleMouseClickedEvent _
 
-
-      for (i <- 0 to dimensions + 1) {
-        val mod = i.toDouble / dimensions.toDouble
-        val line = Separator(Orientation.Vertical)
-        anchor.children += line
-        AnchorPane.setBottomAnchor(line, 0)
-        AnchorPane.setTopAnchor(line, 0)
-        AnchorPane.setLeftAnchor(line, mod * GameUiStage.defaultAppWidth)
-        anchor.width.onChange {
-          AnchorPane.setLeftAnchor(line, mod * anchor.width.value)
+      def sizeElement(mod: Double, size: ReadOnlyDoubleProperty)(setAnchor: Double => Unit): Unit = {
+        def calc(size: Double): Double = mod * (size - GameUiStage.borderSize) + GameUiStage.borderSize
+        setAnchor(calc(GameUiStage.defaultAppSize))
+        size.onChange {
+          setAnchor(calc(size.value))
         }
       }
 
-      for (i <- 0 to dimensions + 1) {
-        val mod = i.toDouble / dimensions.toDouble
+      def createVerticalLine(mod: Double): Unit = {
+        val line: Separator = Separator(Orientation.Vertical)
+        anchor.children += line
+        AnchorPane.setBottomAnchor(line, 0)
+        AnchorPane.setTopAnchor(line, 0)
+        sizeElement(mod, anchor.width) { width =>
+          AnchorPane.setLeftAnchor(line, width)
+        }
+      }
+
+      def createHorizontalLine(mod: Double): Unit = {
         val line = Separator(Orientation.Horizontal)
         anchor.children += line
         AnchorPane.setLeftAnchor(line, 0)
         AnchorPane.setRightAnchor(line, 0)
-        AnchorPane.setTopAnchor(line, mod * GameUiStage.defaultAppHeight)
-        anchor.height.onChange {
-          AnchorPane.setTopAnchor(line, mod * anchor.height.value)
+        sizeElement(mod, anchor.height) { height =>
+          AnchorPane.setTopAnchor(line, height)
         }
       }
 
+      def createLine(
+          mod: Double,
+          orientation: Orientation,
+          size: ReadOnlyDoubleProperty,
+          dynAnchor: (Node, Double) => Unit,
+          setAchors: (Node, Double) => Unit*
+      ): Unit = {
+        val line = Separator(orientation)
+        anchor.children += line
+        setAchors.foreach(_ (line, 0))
+        sizeElement(mod, size) { pos =>
+          dynAnchor(line, pos)
+        }
+      }
+
+      def createLabel(i: Int, size: ReadOnlyDoubleProperty, setAnchor: (Node, Double) => Unit, dynAnchor: (Node, Double) => Unit): Unit = {
+        val label = new Label(s"$i") {
+          alignment = Pos.Center
+          prefWidth = 20.0
+          scaleX = 3
+          scaleY = 3
+        }
+        anchor.children += label
+        setAnchor(label, 10.0)
+        val mod = (i.toDouble + 0.5) / dimensions.toDouble
+        sizeElement(mod, size) { pos =>
+          dynAnchor(label, pos)
+        }
+      }
+
+      for (i <- 0 until dimensions) {
+        createLabel(i, anchor.height, AnchorPane.setLeftAnchor, AnchorPane.setTopAnchor)
+        createLabel(i, anchor.width, AnchorPane.setTopAnchor, AnchorPane.setLeftAnchor)
+      }
+
+      for (i <- 0 to dimensions + 1) {
+        val mod = i.toDouble / dimensions.toDouble
+        createLine(mod, Orientation.Vertical, anchor.width, AnchorPane.setLeftAnchor, AnchorPane.setBottomAnchor, AnchorPane.setTopAnchor)
+        createLine(mod, Orientation.Horizontal, anchor.height, AnchorPane.setTopAnchor, AnchorPane.setLeftAnchor, AnchorPane.setRightAnchor)
+      }
 
     }
   }
@@ -111,14 +161,16 @@ class GameUiStage private(name: String, dimensions: Int, onMouseClicked: GridPos
   }
 
   private def createElem(x: Int, y: Int, elem: Node, offset: Double): UIElemImpl = {
-    def resize(width: Double, height: Double): Unit = {
+    def resize(unadjustedWidth: Double, unadjustedHeight: Double): Unit = {
+      val width = unadjustedWidth - GameUiStage.borderSize
+      val height = unadjustedHeight - GameUiStage.borderSize
       val minSize = Math.min(width, height) / dimensions
       val scale = minSize / 20
       elem.scaleX = scale
       elem.scaleY = scale
 
-      AnchorPane.setTopAnchor(elem, height / dimensions * (y + 0.5) - offset)
-      AnchorPane.setLeftAnchor(elem, width / dimensions * (x + 0.5) - offset)
+      AnchorPane.setTopAnchor(elem, height / dimensions * (y + 0.5) - offset + GameUiStage.borderSize)
+      AnchorPane.setLeftAnchor(elem, width / dimensions * (x + 0.5) - offset + GameUiStage.borderSize)
     }
 
     UIElemImpl(elem, resize)
@@ -227,7 +279,7 @@ class GameUiStage private(name: String, dimensions: Int, onMouseClicked: GridPos
   }
 
   def stop(): Unit = {
-    Platform.runLater{
+    Platform.runLater {
       stage.close()
     }
   }
