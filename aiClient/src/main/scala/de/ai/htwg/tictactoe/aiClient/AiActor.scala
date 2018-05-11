@@ -28,9 +28,11 @@ import grizzled.slf4j.Logging
 
 
 object AiActor {
-  def props(dimensions: Int) = Props(new AiActor(List(), LearningProcessorConfiguration(dimensions, EpsGreedyConfiguration(), QLearningConfiguration())))
+  def props(dimensions: Int, trainingId: String) =
+    Props(new AiActor(List(), LearningProcessorConfiguration(dimensions, EpsGreedyConfiguration(), QLearningConfiguration()), trainingId))
 
-  def props(watchers: List[ActorRef], properties: LearningProcessorConfiguration) = Props(new AiActor(watchers, properties))
+  def props(watchers: List[ActorRef], properties: LearningProcessorConfiguration, trainingId: String) =
+    Props(new AiActor(watchers, properties, trainingId))
 
   case object SaveState
   case class TrainingEpochResult(result: GameControllerMessages.GameResult)
@@ -43,7 +45,7 @@ object AiActor {
   )
 }
 
-class AiActor private(watchers: List[ActorRef], properties: LearningProcessorConfiguration) extends Actor with Stash with Logging {
+class AiActor private(watchers: List[ActorRef], properties: LearningProcessorConfiguration, trainingId: String) extends Actor with Stash with Logging {
 
   override def receive: Receive = new PreInitialized
 
@@ -122,7 +124,7 @@ class AiActor private(watchers: List[ActorRef], properties: LearningProcessorCon
         watchers.foreach(_ ! TrainingEpochResult(result))
         learningUnit = learningUnit.trainResult(epochResult)
         context.become(new PreInitialized(Some(learningUnit), training))
-      case SaveState => learningUnit.persist()
+      case SaveState => learningUnit.persist(trainingId)
     }
 
     private def doGameAction(gf: GameField, gameControllerActor: ActorRef): Unit = {

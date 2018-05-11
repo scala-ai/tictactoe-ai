@@ -35,6 +35,8 @@ class TrainerActor(strategyBuilder: TTTWinStrategyBuilder, clientMain: ActorRef)
   private type DelegateReceive = DelegatedPartialFunction[Any, Unit]
   private val random = new Random(1L)
   private var start = 0L
+  // unique training id for a whole training execution run
+  private val trainingId = random.alphanumeric.take(6).mkString
 
   private val epsGreedyConfiguration = EpsGreedyConfiguration(
     minEpsilon = 0.75f,
@@ -54,8 +56,8 @@ class TrainerActor(strategyBuilder: TTTWinStrategyBuilder, clientMain: ActorRef)
       gamma = 0.5
     )
   )
-  private val watcherActor = context.actorOf(WatcherActor.props())
-  private val aiActor = context.actorOf(AiActor.props(List(self), properties))
+  private val watcherActor = context.actorOf(WatcherActor.props(trainingId))
+  private val aiActor = context.actorOf(AiActor.props(List(self), properties, trainingId))
   private val randomPlayer = context.actorOf(RandomPlayerActor.props(random, List(self)))
   private val logicPlayer = context.actorOf(LogicPlayerActor.props(strategyBuilder, random, List(self)))
 
@@ -118,6 +120,7 @@ class TrainerActor(strategyBuilder: TTTWinStrategyBuilder, clientMain: ActorRef)
             if (remainingEpochs % 10000 == 0) {
               first ! AiActor.SaveState
               sender ! AiActor.SaveState
+              watcherActor ! WatcherActor.PrintCSV
             }
             if (remainingEpochs % 200 == 0) {
               context.become(new RunTestGames(Vector(aiActor), remainingEpochs))
@@ -127,7 +130,7 @@ class TrainerActor(strategyBuilder: TTTWinStrategyBuilder, clientMain: ActorRef)
             first ! AiActor.SaveState
             sender ! AiActor.SaveState
             context.become(new RunUiGames(Vector(aiActor)))
-            watcherActor ! WatcherActor.PrintCSV(100)
+            watcherActor ! WatcherActor.PrintCSV
             info {
               val time = System.currentTimeMillis() - start
               val ms = time % 1000

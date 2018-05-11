@@ -35,9 +35,9 @@ class TTTLearningProcessor(
 
   def trainResult(result: TTTEpochResult): TTTLearningProcessor = new TTTLearningProcessor(learning.trainHistory(result))
 
-  def persist(): Unit = {
+  def persist(trainingId: String): Unit = {
     val now = LocalDateTime.now.format(DateTimeFormatter.ofPattern("YYYY-MM-dd-HH-mm-ss-SSS"))
-    val fileName = s"nets/$now.network"
+    val fileName = s"nets/$trainingId.$now.network"
     debug(s"Save current neural network to $fileName")
     val serializedNet = learning.neuralNet.serialize()
     val file = Paths.get(fileName)
