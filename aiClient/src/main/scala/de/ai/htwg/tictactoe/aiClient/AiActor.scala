@@ -104,9 +104,6 @@ class AiActor private(watchers: List[ActorRef], properties: LearningProcessorCon
       case Player.Cross => gameActor ! GameControllerMessages.RegisterCross
     }
 
-    debug(s"AiPlayer: Ready to play")
-    watchers.foreach(_ ! PlayerReady)
-
     override def pf: Receive = {
       case GameControllerMessages.GameUpdated(_) => trace("game updated") // not interesting
       case GameControllerMessages.GameFinished(_, _) => trace("game finished") // not interesting
@@ -122,6 +119,8 @@ class AiActor private(watchers: List[ActorRef], properties: LearningProcessorCon
           case GameControllerMessages.GameDraw => TTTEpochResult.undecided
         }
         watchers.foreach(_ ! TrainingEpochResult(result))
+        debug(s"AiPlayer: Ready to play")
+        watchers.foreach(_ ! PlayerReady)
         learningUnit = learningUnit.trainResult(epochResult)
         context.become(new PreInitialized(Some(learningUnit), training))
       case SaveState => learningUnit.persist(trainingId)
