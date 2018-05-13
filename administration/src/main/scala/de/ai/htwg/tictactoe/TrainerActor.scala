@@ -56,10 +56,10 @@ class TrainerActor(strategyBuilder: TTTWinStrategyBuilder, clientMain: ActorRef)
       gamma = 0.3
     )
   )
-  private val watcherActor = context.actorOf(WatcherActor.props(trainingId))
-  private val aiActor = context.actorOf(AiActor.props(List(self), properties, trainingId))
-  private val randomPlayer = context.actorOf(RandomPlayerActor.props(random, List(self)))
-  private val logicPlayer = context.actorOf(LogicPlayerActor.props(strategyBuilder, random, List(self)))
+  private val watcherActor = context.actorOf(WatcherActor.props(trainingId), "watcherActor")
+  private val aiActor = context.actorOf(AiActor.props(List(self), properties, trainingId), "aiPlayer")
+  private val randomPlayer = context.actorOf(RandomPlayerActor.props(random, List(self)), "randomPlayer")
+  private val logicPlayer = context.actorOf(LogicPlayerActor.props(strategyBuilder, random, List(self)), "logicPlayer")
 
   override def receive: Receive = PreInitialize
 
