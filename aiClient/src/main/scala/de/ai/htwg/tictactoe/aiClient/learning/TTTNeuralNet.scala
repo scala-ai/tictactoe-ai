@@ -44,8 +44,9 @@ class TTTNeuralNet private(val model: MultiLayerNetwork) extends NeuralNet with 
 object TTTNeuralNet extends NeuralNet.Factory {
   private val seed = 5
   private val hiddenNodes1 = 64
-  private val hiddenNodes2 = 27
-  private val hiddenNodes3 = 27
+  private val hiddenNodes2 = 64
+  private val hiddenNodes3 = 64
+  private val hiddenNodes4 = 64
   private val outputNodes = 1 // q value
 
   override def apply(dimensions: Int): NeuralNet = {
@@ -85,11 +86,17 @@ object TTTNeuralNet extends NeuralNet.Factory {
           .weightInit(WeightInit.XAVIER)
           .activation(Activation.RELU)
           .build)
-        .layer(3, new OutputLayer.Builder(LossFunctions.LossFunction.MSE)
+        .layer(3, new DenseLayer.Builder()
+          .nIn(hiddenNodes3)
+          .nOut(hiddenNodes4)
+          .weightInit(WeightInit.XAVIER)
+          .activation(Activation.RELU)
+          .build)
+        .layer(4, new OutputLayer.Builder(LossFunctions.LossFunction.MSE)
           //.activation(Activation.SOFTMAX)
           //.activation(Activation.TANH)
           .activation(Activation.IDENTITY)
-          .nIn(hiddenNodes3)
+          .nIn(hiddenNodes4)
           .nOut(outputNodes)
           .weightInit(WeightInit.XAVIER)
           .build)

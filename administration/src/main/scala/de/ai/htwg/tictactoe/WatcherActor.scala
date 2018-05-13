@@ -35,7 +35,7 @@ class WatcherActor(trainingId: String) extends Actor with Logging {
     val totalEpochs = results.head.epoch
     "epoch; wins; draws; losses; win percentage\n" +
       results.map(r =>
-        f"${totalEpochs - r.epoch}; ${r.won}; ${r.draw}; ${r.lost}; ${(r.won + r.draw).toFloat / (r.won + r.lost + r.draw)}%2.2f%%"
+        f"${totalEpochs - r.epoch}; ${r.won}; ${r.draw}; ${r.lost}; ${(r.won + r.draw).toDouble / (r.won + r.lost + r.draw)}%2.7f%%"
       ).mkString("\n")
   }
 

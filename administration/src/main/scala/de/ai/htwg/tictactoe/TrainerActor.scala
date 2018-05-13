@@ -39,8 +39,8 @@ class TrainerActor(strategyBuilder: TTTWinStrategyBuilder, clientMain: ActorRef)
   private val trainingId = Random.alphanumeric.take(6).mkString
 
   private val epsGreedyConfiguration = EpsGreedyConfiguration(
-    minEpsilon = 0.75f,
-    nbEpochVisits = 4000000,
+    minEpsilon = 0.5f,
+    nbEpochVisits = 50000,
     random = random
   )
   private val explorationStepConfiguration = ExplorationStepConfiguration(
@@ -52,8 +52,8 @@ class TrainerActor(strategyBuilder: TTTWinStrategyBuilder, clientMain: ActorRef)
     strategyBuilder.dimensions,
     epsGreedyConfiguration,
     QLearningConfiguration(
-      alpha = 0.1,
-      gamma = 0.5
+      alpha = 0.03,
+      gamma = 0.3
     )
   )
   private val watcherActor = context.actorOf(WatcherActor.props(trainingId))
