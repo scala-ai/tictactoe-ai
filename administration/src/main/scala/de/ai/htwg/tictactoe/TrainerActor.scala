@@ -71,7 +71,7 @@ class TrainerActor(strategyBuilder: TTTWinStrategyBuilder, clientMain: ActorRef)
           throw new IllegalStateException(s"cannot train less than 1 epoch: $epochs")
         }
         start = System.currentTimeMillis()
-        info(s"Start training with $epochs epochs")
+        info(s"Start training $trainingId with $epochs epochs")
         context.become(new Training(epochs))
         unstashAll()
 
@@ -136,7 +136,7 @@ class TrainerActor(strategyBuilder: TTTWinStrategyBuilder, clientMain: ActorRef)
               val ms = time % 1000
               val secs = time / 1000 % 60
               val min = time / 1000 / 60
-              s"Training of $totalEpochs epochs finished after $min min $secs sec $ms ms."
+              s"Training $trainingId finished after $min min $secs sec $ms ms."
             }
           }
       }
