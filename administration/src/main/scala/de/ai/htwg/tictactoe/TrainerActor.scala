@@ -115,8 +115,7 @@ class TrainerActor(strategyBuilder: TTTWinStrategyBuilder, clientMain: ActorRef)
               sender ! AiActor.SaveState
               watcherActor ! WatcherActor.PrintCSV
             }
-            if (remainingEpochs % 5 == 0) {
-//            if (remainingEpochs % 200 == 0) {
+            if (remainingEpochs % 200 == 0) {
               context.become(new RunTestGames(aiActor, remainingEpochs))
             } else {
               currentGame = doTraining(sender, first)

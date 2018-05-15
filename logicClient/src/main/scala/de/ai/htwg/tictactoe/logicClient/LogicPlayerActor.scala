@@ -25,7 +25,7 @@ class LogicPlayerActor private(strategyBuilder: TTTWinStrategyBuilder, random: R
 
 
     case PlayerGameFinished(winner) =>
-      error(s"LogicPlayer: Game finished")
+      debug(s"LogicPlayer: Game finished")
       watchers.foreach(_ ! PlayerReady(winner))
   }
 
