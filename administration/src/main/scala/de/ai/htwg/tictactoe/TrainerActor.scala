@@ -186,7 +186,7 @@ class TrainerActor(strategyBuilder: TTTWinStrategyBuilder, clientMain: ActorRef)
     private def handleGameFinish(sender: ActorRef): Unit = {
       testGameNumber -= 1
       if (testGameNumber < 0) {
-        info(s"$epochs: + $wonGames  - $lostGames  o $drawGames => ${(wonGames + drawGames).toFloat * 100 / (wonGames + lostGames + drawGames)} %")
+        info(f"$epochs: + $wonGames  - $lostGames  o $drawGames => ${(wonGames + drawGames).toFloat * 100 / (wonGames + lostGames + drawGames)}%.2f%%")
         watcherActor ! WatcherActor.EpochResult(epochs, wonGames, lostGames, drawGames)
         context.become(new Training(epochs - 1))
       } else {
