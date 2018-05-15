@@ -87,7 +87,7 @@ class TrainerActor(strategyBuilder: TTTWinStrategyBuilder, clientMain: ActorRef)
     )
 
     def doTraining(circle: ActorRef, cross: ActorRef): GameFieldController = {
-      info(s"Train epoch $remainingEpochs")
+      debug(s"Train epoch $remainingEpochs")
       val gameFieldController = new GameFieldController(strategyBuilder, Player.Cross)
 
       circle ! messages.RegisterGame(Player.Circle, gameFieldController, training = true)
@@ -139,7 +139,7 @@ class TrainerActor(strategyBuilder: TTTWinStrategyBuilder, clientMain: ActorRef)
   }
 
   private class RunTestGames(val ai: ActorRef, val epochs: Int) extends DelegateReceive {
-    info(s"Running test games, epoch: $epochs")
+    trace(s"Running test games, epoch: $epochs")
     private var testGameNumber = 100
     private var readyActors: List[ActorRef] = Nil
     private var gameController: GameFieldController = runTestGame()
