@@ -4,4 +4,5 @@ lazy val logicClient = TicTacToeBuild.defaultProject(project).settings(
   )
 ).dependsOn(
   TicTacToeBuild.clientConnection,
+  TicTacToeBuild.gameLogic,
 )

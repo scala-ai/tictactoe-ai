@@ -4,7 +4,9 @@ import scala.collection.JavaConverters
 import scala.concurrent.Future
 import scala.concurrent.Promise
 
+import de.ai.htwg.tictactoe.clientConnection.model.GameField
 import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
+import de.ai.htwg.tictactoe.clientConnection.model.Player
 import scalafx.Includes._
 import scalafx.application.Platform
 import scalafx.beans.property.ReadOnlyDoubleProperty
@@ -35,16 +37,21 @@ object GameUiStage {
     def clear(): Unit
   }
 
-  def apply(name: String, dimensions: Int, onMouseClicked: GridPosition => Unit): Future[GameUiStage] = {
+  val onMouseClickedDefault: GridPosition => Unit = _ => ()
+
+
+  def apply(name: String, dimensions: Int): Future[GameUiStage] = {
     val p = Promise[GameUiStage]()
-    Platform.runLater(p.success(new GameUiStage(name, dimensions, onMouseClicked)))
+    Platform.runLater(p.success(new GameUiStage(name, dimensions)))
 
     p.future
   }
 
 }
 
-class GameUiStage private(name: String, dimensions: Int, onMouseClicked: GridPosition => Unit) {
+class GameUiStage private(name: String, dimensions: Int) {
+
+  private var onMouseClicked: GridPosition => Unit = GameUiStage.onMouseClickedDefault
 
   private val anchor = new AnchorPane
 
@@ -135,11 +142,11 @@ class GameUiStage private(name: String, dimensions: Int, onMouseClicked: GridPos
 
 
   private def handleMouseClickedEvent(me: MouseEvent): Unit = {
-    val cellWidth = anchor.width.value / dimensions
-    val cellHeight = anchor.height.value / dimensions
+    val cellWidth = (anchor.width.value - GameUiStage.borderSize) / dimensions
+    val cellHeight = (anchor.height.value - GameUiStage.borderSize) / dimensions
 
-    val x = math.floor(me.x / cellWidth).toInt
-    val y = math.floor(me.y / cellHeight).toInt
+    val x = math.floor((me.x - GameUiStage.borderSize) / cellWidth).toInt
+    val y = math.floor((me.y - GameUiStage.borderSize) / cellHeight).toInt
 
     val pos = GridPosition(x, y)
     onMouseClicked(pos)
@@ -284,5 +291,18 @@ class GameUiStage private(name: String, dimensions: Int, onMouseClicked: GridPos
     }
   }
 
+  def setOnMouseClicked(onMouseClicked: GridPosition => Unit): Unit = {
+    Platform.runLater {
+      this.onMouseClicked = onMouseClicked
+    }
+  }
+
+  def printField(field: GameField): Unit = {
+    clear()
+    field.foreach {
+      case (pos, Player.Cross) => cross(pos).set()
+      case (pos, Player.Circle) => circle(pos).set()
+    }
+  }
 
 }

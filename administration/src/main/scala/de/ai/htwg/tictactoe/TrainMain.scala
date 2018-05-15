@@ -13,6 +13,6 @@ object TrainMain extends App with Logging {
   val strategy = TTTWinStrategy3xBuilder
   val clientMain = system.actorOf(UiMainActor.props(strategy.dimensions), "clientMain")
   val trainer = system.actorOf(TrainerActor.props(strategy, clientMain), "trainerActor")
-  trainer ! TrainerActor.StartTraining(10000)
+  trainer ! TrainerActor.StartTraining(60000)
 
 }
