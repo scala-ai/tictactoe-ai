@@ -10,20 +10,17 @@ import akka.actor.Stash
 import de.ai.htwg.tictactoe.aiClient.AiActor.LearningProcessorConfiguration
 import de.ai.htwg.tictactoe.aiClient.AiActor.SaveState
 import de.ai.htwg.tictactoe.aiClient.AiActor.TrainingEpochResult
-import de.ai.htwg.tictactoe.aiClient.AiActor.UpdateTrainingState
 import de.ai.htwg.tictactoe.aiClient.learning.TTTEpochResult
 import de.ai.htwg.tictactoe.aiClient.learning.TTTLearningProcessor
-import de.ai.htwg.tictactoe.aiClient.learning.TTTState
 import de.ai.htwg.tictactoe.aiClient.learning.core.QLearningConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.policy.EpsGreedyConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.policy.PolicyConfiguration
 import de.ai.htwg.tictactoe.clientConnection.messages.GameControllerMessages
 import de.ai.htwg.tictactoe.clientConnection.messages.PlayerReady
-import de.ai.htwg.tictactoe.clientConnection.messages.RegisterGame
-import de.ai.htwg.tictactoe.clientConnection.model.GameField
-import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
 import de.ai.htwg.tictactoe.clientConnection.model.Player
 import de.ai.htwg.tictactoe.clientConnection.util.DelegatedPartialFunction
+import de.ai.htwg.tictactoe.gameLogic.controller.GameFieldController
+import de.ai.htwg.tictactoe.gameLogic.messages.RegisterGame
 import grizzled.slf4j.Logging
 
 
@@ -43,16 +40,20 @@ object AiActor {
       policyProperties: PolicyConfiguration,
       qLearningProperties: QLearningConfiguration,
   )
+
+  private[aiClient] case class StartTrainingAfterGame(learningUnit: TTTLearningProcessor, winner: Option[Player])
+
 }
 
 class AiActor private(watchers: List[ActorRef], properties: LearningProcessorConfiguration, trainingId: String) extends Actor with Stash with Logging {
 
   override def receive: Receive = new PreInitialized
+  private type DelegatedReceive = DelegatedPartialFunction[Any, Unit]
+
 
   private class PreInitialized(
       private var learningUnit: Option[TTTLearningProcessor] = None,
-      private var training: Boolean = true
-  ) extends DelegatedPartialFunction[Any, Unit] {
+  ) extends DelegatedReceive {
     case class InitNet(net: TTTLearningProcessor)
 
     var register: Option[RegisterGame] = None
@@ -72,66 +73,64 @@ class AiActor private(watchers: List[ActorRef], properties: LearningProcessorCon
     }
 
     override def pf: Receive = {
+      case SaveState => learningUnit.foreach {
+        _.persist(trainingId)
+      }
       case InitNet(n) =>
         learningUnit = Some(n)
         probeInit()
-      case r @ RegisterGame(_, _) =>
+
+      case r @ RegisterGame(_, _, _) =>
         register = Some(r)
         probeInit()
-      case UpdateTrainingState(b) => training = b
 
-      case _ => stash()
+      case msg =>
+        info(s"stashing message: $msg")
+        stash()
     }
 
     def probeInit(): Unit = for {
       n <- learningUnit
       r <- register
     } {
-      context.become(new Initialized(n, r.player, r.gameControllerActor, training))
+      context.become(new Playing(n, r.player, r.gameController, r.training))
       unstashAll()
     }
   }
 
-  private class Initialized(
-      private var learningUnit: TTTLearningProcessor,
-      private val currentPlayer: Player,
-      private val gameActor: ActorRef,
-      private var training: Boolean
-  ) extends DelegatedPartialFunction[Any, Unit] {
+  private class Playing(
+      learningUnit: TTTLearningProcessor,
+      currentPlayer: Player,
+      gameController: GameFieldController,
+      training: Boolean,
+  ) extends DelegatedReceive {
+    val aiPlayer = new AiPlayer(learningUnit, currentPlayer, training, self)
+    gameController.subscribe(aiPlayer)
 
-    currentPlayer match {
-      case Player.Circle => gameActor ! GameControllerMessages.RegisterCircle
-      case Player.Cross => gameActor ! GameControllerMessages.RegisterCross
-    }
+    override def pf: PartialFunction[Any, Unit] = {
+      case AiActor.StartTrainingAfterGame(updatedLearningUnit, winner) =>
+        debug("AiActor starts training")
+       val result = winner match {
+        case None => GameControllerMessages.GameDraw
+        case Some(`currentPlayer`) => GameControllerMessages.GameWon
+        case _ /* opponent */ => GameControllerMessages.GameLost
+      }
 
-    override def pf: Receive = {
-      case GameControllerMessages.GameUpdated(_) => trace("game updated") // not interesting
-      case GameControllerMessages.GameFinished(_, _) => trace("game finished") // not interesting
-      case GameControllerMessages.PosAlreadySet(_: GridPosition) => error(s"$currentPlayer: Pos already set")
-      case GameControllerMessages.NotYourTurn(_: GridPosition) => error(s"$currentPlayer: Not your turn")
-      case GameControllerMessages.YourTurn(gf: GameField) => doGameAction(gf, sender())
-      case UpdateTrainingState(b) => training = b
-      case GameControllerMessages.YourResult(_, result) =>
-        debug(s"AiPlayer: Game finished, result: $result")
+        watchers.foreach(_ ! TrainingEpochResult(result))
         val epochResult = result match {
           case GameControllerMessages.GameWon => TTTEpochResult.won
           case GameControllerMessages.GameLost => TTTEpochResult.lost
           case GameControllerMessages.GameDraw => TTTEpochResult.undecided
         }
-        watchers.foreach(_ ! TrainingEpochResult(result))
-        debug(s"AiPlayer: Ready to play")
-        watchers.foreach(_ ! PlayerReady)
-        learningUnit = learningUnit.trainResult(epochResult)
-        context.become(new PreInitialized(Some(learningUnit), training))
-      case SaveState => learningUnit.persist(trainingId)
-    }
 
-    private def doGameAction(gf: GameField, gameControllerActor: ActorRef): Unit = {
-      trace(s"$currentPlayer: It is your turn")
-      // if actor is in training state calculate a training decision, else calculate best action
-      val (action, newLearningUnit) = if (training) learningUnit.getTrainingDecision(TTTState(gf)) else learningUnit.getBestDecision(TTTState(gf))
-      learningUnit = newLearningUnit
-      gameControllerActor ! GameControllerMessages.SetPos(action.coordinate)
+        val trainedLearningUnit = updatedLearningUnit.trainResult(epochResult)
+        debug(s"AiPlayer: Ready to play")
+        watchers.foreach(_ ! PlayerReady(winner))
+        context.become(new PreInitialized(Some(trainedLearningUnit)))
+        unstashAll()
+      case msg =>
+        info(s"stashing message: $msg")
+        stash()
     }
   }
 }

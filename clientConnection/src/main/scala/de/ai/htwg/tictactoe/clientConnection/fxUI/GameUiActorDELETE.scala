@@ -10,8 +10,8 @@ import de.ai.htwg.tictactoe.clientConnection.model.GameField
 import de.ai.htwg.tictactoe.clientConnection.model.Player
 import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
 
-object GameUiActor {
-  def props(name: String, dimensions: Int) = Props(new GameUiActor(name, dimensions))
+object GameUiActorDELETE {
+  def props(name: String, dimensions: Int) = Props(new GameUiActorDELETE(name, dimensions))
 
   case class PrintField(gameField: GameField)
   case object Clear
@@ -19,14 +19,15 @@ object GameUiActor {
   case object Unsubscribe
 }
 
-private class GameUiActor(name: String, dimensions: Int) extends Actor {
+private class GameUiActorDELETE(name: String, dimensions: Int) extends Actor {
   private case class SetStage()
 
   private case class Subscriber(actorRef: ActorRef, msgFactory: GridPosition => Any)
 
-  private val futStage = GameUiStage(name, dimensions, handleMouseEvent)
+  private val futStage = GameUiStage(name, dimensions)
   // the overhead for handling this completely async is a lot more than simply sleeping once.
   private val stage = Await.result(futStage, Duration.Inf)
+  stage.setOnMouseClicked(handleMouseEvent)
 
   // state
   private var listeners: List[Subscriber] = Nil
@@ -59,10 +60,10 @@ private class GameUiActor(name: String, dimensions: Int) extends Actor {
   }
 
   override def receive: Receive = {
-    case GameUiActor.Clear => clear()
-    case GameUiActor.PrintField(f) => printField(f)
-    case GameUiActor.SubscribeToMouseEvents(fac) => listeners = Subscriber(sender(), fac) :: listeners
-    case GameUiActor.Unsubscribe => listeners = listeners.filterNot(_.actorRef == sender())
+    case GameUiActorDELETE.Clear => clear()
+    case GameUiActorDELETE.PrintField(f) => printField(f)
+    case GameUiActorDELETE.SubscribeToMouseEvents(fac) => listeners = Subscriber(sender(), fac) :: listeners
+    case GameUiActorDELETE.Unsubscribe => listeners = listeners.filterNot(_.actorRef == sender())
   }
   override def postStop(): Unit = {
     stage.stop()

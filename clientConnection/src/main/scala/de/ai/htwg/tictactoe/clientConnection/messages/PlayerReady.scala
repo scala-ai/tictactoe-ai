@@ -1,3 +1,5 @@
 package de.ai.htwg.tictactoe.clientConnection.messages
 
-case object PlayerReady
+import de.ai.htwg.tictactoe.clientConnection.model.Player
+
+case class PlayerReady(winner: Option[Player])

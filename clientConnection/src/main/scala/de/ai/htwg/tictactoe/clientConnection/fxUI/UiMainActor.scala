@@ -3,7 +3,6 @@ package de.ai.htwg.tictactoe.clientConnection.fxUI
 import java.util.concurrent.CountDownLatch
 
 import akka.actor.Actor
-import akka.actor.ActorRef
 import akka.actor.Props
 import de.ai.htwg.tictactoe.clientConnection.fxUI.UiMainActor.ReturnGameUI
 import scalafx.application.JFXApp
@@ -18,7 +17,8 @@ object UiMainActor {
   def props(dimensions: Int): Props = Props(new UiMainActor(dimensions))
 
   case class CreateGameUI(name: String)
-  case class ReturnGameUI(gameUiActor: ActorRef)
+
+  case class ReturnGameUI(gameUi: GameUiStage)
 }
 
 class UiMainActor private(dimensions: Int) extends Actor {
@@ -53,8 +53,10 @@ class UiMainActor private(dimensions: Int) extends Actor {
 
 
   private def handleAddStage(name: String): Unit = {
-    val gUI = context.actorOf(GameUiActor.props(name, dimensions), name)
-    sender() ! ReturnGameUI(gUI)
+    import scala.concurrent.ExecutionContext.Implicits.global
+    val futureStage = GameUiStage(name, dimensions)
+    val receiver = sender()
+    futureStage.foreach(stage => receiver.tell(ReturnGameUI(stage), self))
   }
 
 
