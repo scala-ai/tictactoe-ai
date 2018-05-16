@@ -20,7 +20,7 @@ import de.ai.htwg.tictactoe.playerClient.UiPlayer
 import grizzled.slf4j.Logging
 
 object Trainer {
-  val saveFrequency = 1000
+  val saveFrequency = 10000
   val testFrequency = 500
   val runsPerTest = 100
 
@@ -87,10 +87,6 @@ class Trainer(strategyBuilder: TTTWinStrategyBuilder, clientMain: UiMain) extend
       return
     }
 
-    if (remainingEpochs % Trainer.testFrequency == 0 && remainingEpochs != totalEpochs) {
-      runTestGame(Trainer.runsPerTest, TestGameData(remainingEpochs, 0, 0, 0), () => doAllTraining(totalEpochs, remainingEpochs, doAfter))
-      return
-    }
 
     if (remainingEpochs % Trainer.saveFrequency == 0 && remainingEpochs != totalEpochs) {
       aiTrainer.saveState()
@@ -103,8 +99,12 @@ class Trainer(strategyBuilder: TTTWinStrategyBuilder, clientMain: UiMain) extend
       trace(s"training finished message (ready = $readyPlayer)")
       readyPlayer += 1
       if (readyPlayer == 2) {
-        platform.execute {
-          doAllTraining(totalEpochs, remainingEpochs - 1, doAfter)
+        if (remainingEpochs % Trainer.testFrequency == 0 && remainingEpochs != totalEpochs) {
+          runTestGame(Trainer.runsPerTest, TestGameData(remainingEpochs, 0, 0, 0), () => doAllTraining(totalEpochs, remainingEpochs - 1, doAfter))
+        } else {
+          platform.execute {
+            doAllTraining(totalEpochs, remainingEpochs - 1, doAfter)
+          }
         }
       }
     }
