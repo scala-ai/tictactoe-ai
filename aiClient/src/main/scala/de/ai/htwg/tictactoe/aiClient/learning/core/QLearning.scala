@@ -12,19 +12,19 @@ import de.ai.htwg.tictactoe.aiClient.learning.core.transition.TransitionHistory
 import grizzled.slf4j.Logging
 import org.nd4j.linalg.factory.Nd4j
 
-case class QLearning[S <: State, A <: Action, R <: EpochResult](
+case class QLearning[S <: State, A <: Action](
     policy: Policy[S, A],
-    rewardCalculator: RewardCalculator[A, S, R],
+    rewardCalculator: RewardCalculator[A, S],
     neuralNet: NeuralNet,
     transitionHistory: TransitionHistory[A, S],
     transitionFactory: TransitionFactory[A, S],
     actionSpace: ActionSpace[S, A],
     qLearningProperties: QLearningConfiguration
-) extends Learning[S, A, R] with Logging {
+) extends Learning[S, A] with Logging {
   private val alpha = qLearningProperties.alpha
   private val gamma = qLearningProperties.gamma
 
-  override def getTrainingDecision(state: S): (QLearning[S, A, R], A) = {
+  override def getTrainingDecision(state: S): (QLearning[S, A], A) = {
     // We are in state S
     // Let's run our Q function on S to get Q values for all possible actions
     val possibleActions = actionSpace.getPossibleActions(state)
@@ -33,13 +33,13 @@ case class QLearning[S <: State, A <: Action, R <: EpochResult](
     createTransition(action, state)
   }
 
-  override def getBestDecision(state: S): (QLearning[S, A, R], A) = {
+  override def getBestDecision(state: S): (QLearning[S, A], A) = {
     val possibleActions = actionSpace.getPossibleActions(state)
     val action = calcBestAction(state, possibleActions)
     createTransition(action, state)
   }
 
-  private def createTransition(action: A, state: S): (QLearning[S, A, R], A) = {
+  private def createTransition(action: A, state: S): (QLearning[S, A], A) = {
     val reward = rewardCalculator.getImmediateReward(action, state)
     val updatedHistory = transitionHistory.addTransition(transitionFactory(state, action, reward))
     (copy(transitionHistory = updatedHistory), action)
@@ -59,7 +59,7 @@ case class QLearning[S <: State, A <: Action, R <: EpochResult](
     ratedActions.maxBy(_._2)._1
   }
 
-  override def trainHistory(epochResult: R): QLearning[S, A, R] = {
+  override def trainHistory(epochResult: EpochResult): QLearning[S, A] = {
     // last calculated q value (is the next value of actual state)
     // iterate over all transitions in history backwards
     val epochReward = rewardCalculator.getLongTermReward(epochResult)

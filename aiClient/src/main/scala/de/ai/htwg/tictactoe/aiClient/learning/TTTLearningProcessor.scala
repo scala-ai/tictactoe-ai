@@ -14,11 +14,12 @@ import de.ai.htwg.tictactoe.aiClient.learning.core.policy.EpsGreedyConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.policy.ExplorationStep
 import de.ai.htwg.tictactoe.aiClient.learning.core.policy.ExplorationStepConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.policy.PolicyConfiguration
+import de.ai.htwg.tictactoe.aiClient.learning.core.state.EpochResult
 import de.ai.htwg.tictactoe.aiClient.learning.core.transition.TransitionHistoryImpl
 import grizzled.slf4j.Logging
 
 class TTTLearningProcessor(
-    learning: QLearning[TTTState, TTTAction, TTTEpochResult]
+    learning: QLearning[TTTState, TTTAction]
 ) extends Logging {
 
   def getTrainingDecision(state: TTTState): (TTTAction, TTTLearningProcessor) = {
@@ -33,7 +34,7 @@ class TTTLearningProcessor(
     (action, new TTTLearningProcessor(learning = newLearning))
   }
 
-  def trainResult(result: TTTEpochResult): TTTLearningProcessor = new TTTLearningProcessor(learning.trainHistory(result))
+  def trainResult(result: EpochResult): TTTLearningProcessor = new TTTLearningProcessor(learning.trainHistory(result))
 
   def persist(trainingId: String): Unit = {
     val now = LocalDateTime.now.format(DateTimeFormatter.ofPattern("YYYY-MM-dd-HH-mm-ss-SSS"))
@@ -62,7 +63,7 @@ object TTTLearningProcessor {
       policyProperties: PolicyConfiguration,
       qLearningProperties: QLearningConfiguration,
   ): TTTLearningProcessor = new TTTLearningProcessor(
-    QLearning[TTTState, TTTAction, TTTEpochResult](
+    QLearning[TTTState, TTTAction](
       policy = policyProperties match {
         case c: EpsGreedyConfiguration => EpsGreedy[TTTState, TTTAction](c)
         case c: ExplorationStepConfiguration => ExplorationStep[TTTState, TTTAction](c)

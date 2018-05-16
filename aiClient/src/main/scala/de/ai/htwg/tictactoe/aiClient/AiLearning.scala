@@ -1,10 +1,10 @@
 package de.ai.htwg.tictactoe.aiClient
 
 import de.ai.htwg.tictactoe.aiClient.AiLearning.LearningProcessorConfiguration
-import de.ai.htwg.tictactoe.aiClient.learning.TTTEpochResult
 import de.ai.htwg.tictactoe.aiClient.learning.TTTLearningProcessor
 import de.ai.htwg.tictactoe.aiClient.learning.core.QLearningConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.policy.PolicyConfiguration
+import de.ai.htwg.tictactoe.aiClient.learning.core.state.EpochResult
 import de.ai.htwg.tictactoe.clientConnection.model.Player
 import de.ai.htwg.tictactoe.gameLogic.controller.GameFieldController
 
@@ -26,9 +26,9 @@ class AiLearning(properties: LearningProcessorConfiguration, trainingId: String)
 
   def startTrainingAfterGame(callbackAfterGame: Option[Player] => Unit)(updatedLearningUnit: TTTLearningProcessor, winner: Option[Player]): Unit = {
     val epochResult = winner match {
-      case None => TTTEpochResult.undecided
-      case Some(Player.Cross) => TTTEpochResult.won
-      case Some(Player.Circle) => TTTEpochResult.lost
+      case None => EpochResult.Draw
+      case Some(Player.Cross) => EpochResult.Won
+      case Some(Player.Circle) => EpochResult.Lost
     }
 
     learningUnit = updatedLearningUnit.trainResult(epochResult)

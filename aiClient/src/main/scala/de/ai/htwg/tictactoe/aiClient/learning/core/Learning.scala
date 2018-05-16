@@ -4,7 +4,7 @@ import de.ai.htwg.tictactoe.aiClient.learning.core.action.Action
 import de.ai.htwg.tictactoe.aiClient.learning.core.state.EpochResult
 import de.ai.htwg.tictactoe.aiClient.learning.core.state.State
 
-trait Learning[S <: State, A <: Action, R <: EpochResult] {
+trait Learning[S <: State, A <: Action] {
 
   /**
    * This is a decision which is called while training is running. The decided
@@ -17,7 +17,7 @@ trait Learning[S <: State, A <: Action, R <: EpochResult] {
    * @param state current model state
    * @return an updated learning object and the action to do
    */
-  def getTrainingDecision(state: S): (Learning[S, A, R], A)
+  def getTrainingDecision(state: S): (Learning[S, A], A)
 
   /**
    * This is a decision which is called while a productive or test run. The
@@ -29,7 +29,7 @@ trait Learning[S <: State, A <: Action, R <: EpochResult] {
    * @param state current model state
    * @return an updated learning object and the action to do
    */
-  def getBestDecision(state: S): (Learning[S, A, R], A)
+  def getBestDecision(state: S): (Learning[S, A], A)
 
   /**
    * This should be called after end of a training epoch. The learning object
@@ -41,5 +41,5 @@ trait Learning[S <: State, A <: Action, R <: EpochResult] {
    * @param reward epoch reward
    * @return updated and trained learning object
    */
-  def trainHistory(reward: R): Learning[S, A, R]
+  def trainHistory(reward: EpochResult): Learning[S, A]
 }
