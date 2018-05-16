@@ -1,14 +1,6 @@
 package de.ai.htwg.tictactoe.gameLogic.controller
 
-import java.util.concurrent.Executors
-import java.util.concurrent.ThreadFactory
-
 import scala.collection.mutable
-import scala.concurrent.Await
-import scala.concurrent.ExecutionContext
-import scala.concurrent.Future
-import scala.concurrent.Promise
-import scala.concurrent.duration.Duration
 
 import de.ai.htwg.tictactoe.clientConnection.model.GameField
 import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
@@ -34,20 +26,7 @@ class GameFieldController(
     val strategyBuilder: TTTWinStrategyBuilder,
     val startingPlayer: Player,
 ) extends mutable.Publisher[GameFieldController.Updates] with Logging {
-  private val (thread, threadFactory) = {
-    val p = concurrent.Promise[Runnable]()
-    val t = new Thread(() => {
-      Await.result(p.future, Duration(100, "ms")).run()
-    })
-
-    val f: ThreadFactory = r => {
-      p.success(r)
-      t
-    }
-    (t, f)
-  }
-
-  private val executionContext = ExecutionContext.fromExecutor(Executors.newSingleThreadExecutor(threadFactory))
+  private val thread = Thread.currentThread()
   debug("starting Game")
   final override type Pub = GameFieldController
   final override type Sub = mutable.Subscriber[GameFieldController.Updates, Pub]
@@ -58,25 +37,13 @@ class GameFieldController(
   @volatile private var gameField = GameField(startingPlayer, dimensions)
 
   private def isNotCurrentThread: Boolean = Thread.currentThread() != thread
-  private def execute(func: => Unit): Unit = executionContext.execute(() => func)
 
   override def subscribe(sub: Sub, filter: Filter): Unit = {
-    if (isNotCurrentThread) {
-      execute(subscribe(sub, filter))
-      return
-    }
+    if (isNotCurrentThread) throw new IllegalStateException("wrong thread")
 
     val msg = GameFieldController.Result.GameUpdated(gameField)
     super.subscribe(sub, filter)
     if (filter(msg)) sub.notify(this, GameFieldController.Result.GameUpdated(gameField))
-  }
-
-  def setPosThreadSave(pos: GridPosition, player: Player): Future[GameFieldController.Result] = {
-    val p = Promise[GameFieldController.Result]()
-    execute {
-      p.success(setPos(pos, player))
-    }
-    p.future
   }
 
   def setPos(posX: Int, posY: Int, player: Player): GameFieldController.Result = setPos(GridPosition(posX, posY), player)

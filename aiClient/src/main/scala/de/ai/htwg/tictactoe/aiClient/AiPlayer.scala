@@ -1,6 +1,5 @@
 package de.ai.htwg.tictactoe.aiClient
 
-import akka.actor.ActorRef
 import de.ai.htwg.tictactoe.aiClient.learning.TTTLearningProcessor
 import de.ai.htwg.tictactoe.aiClient.learning.TTTState
 import de.ai.htwg.tictactoe.clientConnection.model.GameField
@@ -13,7 +12,7 @@ class AiPlayer[C <: GameFieldController](
     var learningUnit: TTTLearningProcessor,
     currentPlayer: Player,
     training: Boolean,
-    aiActor: ActorRef,
+    callBack: (TTTLearningProcessor, Option[Player]) => Unit,
 ) extends C#Sub with Logging {
   trace(s"AiPlayer starts playing as $currentPlayer")
   def notify(pub: GameFieldController, event: GameFieldController.Updates): Unit = event match {
@@ -21,7 +20,7 @@ class AiPlayer[C <: GameFieldController](
 
       trace("AiPlayer is finished")
       pub.removeSubscription(this)
-      aiActor ! AiActor.StartTrainingAfterGame(learningUnit, winner)
+      callBack(learningUnit, winner)
 
     case GameFieldController.Result.GameUpdated(field) =>
       trace("Ai received update")

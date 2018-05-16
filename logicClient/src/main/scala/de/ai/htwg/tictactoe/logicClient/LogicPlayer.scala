@@ -2,8 +2,6 @@ package de.ai.htwg.tictactoe.logicClient
 
 import scala.util.Random
 
-import akka.actor.ActorRef
-import de.ai.htwg.tictactoe.clientConnection.messages.PlayerGameFinished
 import de.ai.htwg.tictactoe.clientConnection.model.GameField
 import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
 import de.ai.htwg.tictactoe.clientConnection.model.Player
@@ -14,8 +12,8 @@ import grizzled.slf4j.Logging
 class LogicPlayer[C <: GameFieldController](
     currentPlayer: Player,
     random: Random,
-    logicPlayerActor: ActorRef,
     possibleWinActions: List[TTTWinStrategy],
+    callbackAfterGame: Option[Player] => Unit,
 ) extends C#Sub with Logging {
   trace(s"LogicPlayer starts playing as $currentPlayer")
   private var todoList: List[GridPosition] = possibleWinActions(random.nextInt(possibleWinActions.size)).list
@@ -24,7 +22,7 @@ class LogicPlayer[C <: GameFieldController](
   override def notify(pub: GameFieldController, event: GameFieldController.Updates): Unit = event match {
     case GameFieldController.Result.GameFinished(_, winner) =>
       pub.removeSubscription(this)
-      logicPlayerActor ! PlayerGameFinished(winner)
+      callbackAfterGame(winner)
 
     case GameFieldController.Result.GameUpdated(field) =>
       if (field.isCurrentPlayer(currentPlayer)) doGameAction(field, pub)

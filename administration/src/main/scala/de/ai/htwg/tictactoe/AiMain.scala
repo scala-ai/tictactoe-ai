@@ -1,25 +1,53 @@
 package de.ai.htwg.tictactoe
 
-import akka.actor.ActorSystem
-import de.ai.htwg.tictactoe.aiClient.AiActor
-import de.ai.htwg.tictactoe.clientConnection.fxUI.UiMainActor
+import de.ai.htwg.tictactoe.aiClient.AiLearning.LearningProcessorConfiguration
+import de.ai.htwg.tictactoe.aiClient.AiLearning
+import de.ai.htwg.tictactoe.aiClient.AiLearning.LearningProcessorConfiguration
+import de.ai.htwg.tictactoe.aiClient.learning.core.QLearningConfiguration
+import de.ai.htwg.tictactoe.aiClient.learning.core.policy.EpsGreedyConfiguration
+import de.ai.htwg.tictactoe.clientConnection.fxUI.UiMain
 import de.ai.htwg.tictactoe.clientConnection.model.Player
 import de.ai.htwg.tictactoe.clientConnection.model.strategy.TTTWinStrategy3xBuilder
+import de.ai.htwg.tictactoe.clientConnection.util.SingleThreadPlatform
 import de.ai.htwg.tictactoe.gameLogic.controller.GameFieldController
-import de.ai.htwg.tictactoe.gameLogic.messages
-import de.ai.htwg.tictactoe.playerClient.PlayerUiActor
+import de.ai.htwg.tictactoe.playerClient.UiPlayer
 import grizzled.slf4j.Logging
 
 object AiMain extends App with Logging {
   trace("start game against Ai")
-  val system = ActorSystem()
-
+  val platform: SingleThreadPlatform = SingleThreadPlatform()
   val strategy = TTTWinStrategy3xBuilder
-
   val gameName = "game1"
-  val clientMain = system.actorOf(UiMainActor.props(strategy.dimensions), "clientMain")
-  val gameController = new GameFieldController(strategy, Player.Cross)
-  val cross = system.actorOf(PlayerUiActor.props(Player.Cross, clientMain, gameController, gameName))
-  val circle = system.actorOf(AiActor.props(strategy.dimensions, gameName))
-  circle ! messages.RegisterGame(Player.Circle, gameController, training = false)
+  val clientMain = UiMain(strategy.dimensions)
+  val properties = LearningProcessorConfiguration(strategy.dimensions, EpsGreedyConfiguration(), QLearningConfiguration())
+  private val aiTrainer = new AiLearning(properties, gameName)
+
+  platform.execute {
+    playGame()
+  }
+
+  def playGame(): Unit = {
+    val gameController = new GameFieldController(strategy, Player.Cross)
+    var finishedPlayers = 0
+    def handleGameFinish(winner: Option[Player]): Unit = {
+      finishedPlayers += 1
+      if (finishedPlayers >= 2) {
+        info {
+          winner match {
+            case Some(Player.Cross) => s"Human-Player wins"
+            case None => "No winner in this game"
+            case _ /* other player */ => s"AI-Player wins"
+          }
+        }
+      }
+    }
+
+    clientMain.getNewStage(gameName).foreach { gameUi =>
+      val playerUi = new UiPlayer(Player.Cross, gameUi, gameController.getGrid(), platform, handleGameFinish)
+      gameController.subscribe(playerUi)
+      aiTrainer.registerGame(Player.Circle, gameController, training = false, handleGameFinish)
+    }(platform.executionContext)
+  }
+
+
 }

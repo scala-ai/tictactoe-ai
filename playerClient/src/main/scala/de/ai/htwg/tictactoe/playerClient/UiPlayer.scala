@@ -1,19 +1,19 @@
 package de.ai.htwg.tictactoe.playerClient
 
-import akka.actor.ActorRef
 import de.ai.htwg.tictactoe.clientConnection.fxUI.GameUiStage
-import de.ai.htwg.tictactoe.clientConnection.messages.PlayerGameFinished
 import de.ai.htwg.tictactoe.clientConnection.model.GameField
 import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
 import de.ai.htwg.tictactoe.clientConnection.model.Player
+import de.ai.htwg.tictactoe.clientConnection.util.SingleThreadPlatform
 import de.ai.htwg.tictactoe.gameLogic.controller.GameFieldController
 import grizzled.slf4j.Logging
 
 class UiPlayer[C <: GameFieldController](
     currentPlayer: Player,
-    playerUiActor: ActorRef,
     gameUi: GameUiStage,
     var gameField: GameField,
+    platform: SingleThreadPlatform,
+      callBack: Option[Player] => Unit,
 ) extends C#Sub with Logging {
   trace(s"UiPlayer starts playing as $currentPlayer")
   gameUi.show()
@@ -29,7 +29,7 @@ class UiPlayer[C <: GameFieldController](
     case GameFieldController.Result.GameFinished(field, winner) =>
       updateField(field)
       pub.removeSubscription(this)
-      playerUiActor ! PlayerGameFinished(winner)
+      callBack(winner)
 
     case GameFieldController.Result.GameUpdated(field) =>
       trace(s"thread ${Thread.currentThread()}; print field: $field")
@@ -39,7 +39,9 @@ class UiPlayer[C <: GameFieldController](
   }
 
   private def handleMouseEvent(gameController: GameFieldController)(pos: GridPosition): Unit = {
-    gameController.setPosThreadSave(pos, currentPlayer)
+    platform.execute {
+      gameController.setPos(pos, currentPlayer)
+    }
   }
 
   private def doGameAction(field: GameField, gameController: GameFieldController): Unit = {

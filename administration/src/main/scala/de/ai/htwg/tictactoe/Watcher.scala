@@ -7,31 +7,28 @@ import java.time.format.DateTimeFormatter
 
 import scala.collection.mutable.ListBuffer
 
-import akka.actor.Actor
-import akka.actor.Props
-import de.ai.htwg.tictactoe.WatcherActor.EpochResult
 import grizzled.slf4j.Logging
 
 
-object WatcherActor {
-  def props(trainingId: String) = Props(new WatcherActor(trainingId))
+class Watcher(trainingId: String) extends Logging {
 
-  case class EpochResult(epoch: Int, won: Int, lost: Int, draw: Int)
-  case object PrintCSV
-}
-class WatcherActor(trainingId: String) extends Actor with Logging {
+  private val results: ListBuffer[Watcher.EpochResult] = ListBuffer()
 
-  private val results: ListBuffer[EpochResult] = ListBuffer()
-
-  override def receive: Receive = {
-    case r: EpochResult => results += r
-    case WatcherActor.PrintCSV =>
-      val csvString = buildCSV
-      debug("csv:\n" + csvString)
-      writeToFile(csvString)
+  def addEpochResult(r: Watcher.EpochResult): Unit = {
+    results += r
   }
 
-  def buildCSV: String = {
+  def printCSV(): Unit = {
+    results.toList match {
+      case Nil => info("no epoch results recoded")
+      case nonEmpty =>
+        val csvString = buildCSV(nonEmpty)
+        debug("csv:\n" + csvString)
+        writeToFile(csvString)
+    }
+  }
+
+  private def buildCSV(results: List[Watcher.EpochResult]): String = {
     val totalEpochs = results.head.epoch
     "epoch; wins; draws; losses; win percentage\n" +
       results.map(r =>
@@ -39,8 +36,7 @@ class WatcherActor(trainingId: String) extends Actor with Logging {
       ).mkString("\n")
   }
 
-
-  def writeToFile(csvString: String): Unit = {
+  private def writeToFile(csvString: String): Unit = {
     val now = LocalDateTime.now.format(DateTimeFormatter.ofPattern("YYYY-MM-dd-HH-mm-ss-SSS"))
     val fileName = s"results/$trainingId.$now.training.csv"
     debug(s"Save training results to $fileName")
@@ -48,4 +44,8 @@ class WatcherActor(trainingId: String) extends Actor with Logging {
     Files.createDirectories(file.getParent)
     Files.write(file, csvString.getBytes("UTF-8"))
   }
+}
+
+object Watcher {
+  case class EpochResult(epoch: Int, won: Int, lost: Int, draw: Int)
 }
