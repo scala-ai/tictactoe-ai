@@ -5,6 +5,7 @@ import scala.util.Random
 import de.ai.htwg.tictactoe.aiClient.AiLearning
 import de.ai.htwg.tictactoe.aiClient.AiLearning.LearningProcessorConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.QLearningConfiguration
+import de.ai.htwg.tictactoe.aiClient.learning.core.net.NeuralNetConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.policy.EpsGreedyConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.policy.ExplorationStepConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.policy.PolicyConfiguration
@@ -18,6 +19,7 @@ import de.ai.htwg.tictactoe.logicClient.LogicPlayer
 import de.ai.htwg.tictactoe.logicClient.RandomPlayer
 import de.ai.htwg.tictactoe.playerClient.UiPlayer
 import grizzled.slf4j.Logging
+import org.nd4j.linalg.activations.Activation
 
 object Trainer {
   val saveFrequency = 10000
@@ -51,6 +53,12 @@ class Trainer(strategyBuilder: TTTWinStrategyBuilder, clientMain: UiMain) extend
     QLearningConfiguration(
       alpha = 0.03,
       gamma = 0.3
+    ),
+    NeuralNetConfiguration(
+      hiddenLayers = 3,
+      hiddenNodes = 64,
+      inputNodes = strategyBuilder.dimensions * strategyBuilder.dimensions * 2,
+      activationFunction = Activation.RELU
     )
   )
 

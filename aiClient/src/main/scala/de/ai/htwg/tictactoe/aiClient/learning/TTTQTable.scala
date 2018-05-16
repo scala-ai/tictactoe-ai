@@ -3,6 +3,7 @@ package de.ai.htwg.tictactoe.aiClient.learning
 import scala.collection.mutable
 
 import de.ai.htwg.tictactoe.aiClient.learning.core.net.NeuralNet
+import de.ai.htwg.tictactoe.aiClient.learning.core.net.NeuralNetConfiguration
 import grizzled.slf4j.Logging
 import org.nd4j.linalg.api.ndarray.INDArray
 import org.nd4j.linalg.factory.Nd4j
@@ -30,7 +31,7 @@ class TTTQTable private(data: mutable.Map[Int, Double]) extends NeuralNet with L
 }
 
 object TTTQTable extends NeuralNet.Factory {
-  override def apply(dimensions: Int): NeuralNet = new TTTQTable(mutable.Map())
+  override def apply(c: NeuralNetConfiguration): NeuralNet = new TTTQTable(mutable.Map())
 
   override def deserialize(string: String): NeuralNet = {
     val resultMap: mutable.Map[Int, Double] = mutable.Map()

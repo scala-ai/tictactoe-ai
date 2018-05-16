@@ -1,9 +1,9 @@
 package de.ai.htwg.tictactoe
 
-import de.ai.htwg.tictactoe.aiClient.AiLearning.LearningProcessorConfiguration
 import de.ai.htwg.tictactoe.aiClient.AiLearning
 import de.ai.htwg.tictactoe.aiClient.AiLearning.LearningProcessorConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.QLearningConfiguration
+import de.ai.htwg.tictactoe.aiClient.learning.core.net.NeuralNetConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.policy.EpsGreedyConfiguration
 import de.ai.htwg.tictactoe.clientConnection.fxUI.UiMain
 import de.ai.htwg.tictactoe.clientConnection.model.Player
@@ -19,7 +19,7 @@ object AiMain extends App with Logging {
   val strategy = TTTWinStrategy3xBuilder
   val gameName = "game1"
   val clientMain = UiMain(strategy.dimensions)
-  val properties = LearningProcessorConfiguration(strategy.dimensions, EpsGreedyConfiguration(), QLearningConfiguration())
+  val properties = LearningProcessorConfiguration(strategy.dimensions, EpsGreedyConfiguration(), QLearningConfiguration(), NeuralNetConfiguration())
   private val aiTrainer = new AiLearning(properties, gameName)
 
   platform.execute {
@@ -29,6 +29,7 @@ object AiMain extends App with Logging {
   def playGame(): Unit = {
     val gameController = new GameFieldController(strategy, Player.Cross)
     var finishedPlayers = 0
+
     def handleGameFinish(winner: Option[Player]): Unit = {
       finishedPlayers += 1
       if (finishedPlayers >= 2) {

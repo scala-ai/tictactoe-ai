@@ -3,6 +3,7 @@ package de.ai.htwg.tictactoe.aiClient
 import de.ai.htwg.tictactoe.aiClient.AiLearning.LearningProcessorConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.TTTLearningProcessor
 import de.ai.htwg.tictactoe.aiClient.learning.core.QLearningConfiguration
+import de.ai.htwg.tictactoe.aiClient.learning.core.net.NeuralNetConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.policy.PolicyConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.state.EpochResult
 import de.ai.htwg.tictactoe.clientConnection.model.Player
@@ -14,6 +15,7 @@ class AiLearning(properties: LearningProcessorConfiguration, trainingId: String)
     properties.dimensions,
     policyProperties = properties.policyProperties,
     qLearningProperties = properties.qLearningProperties,
+    neuralNetConfiguration = properties.neuralNetProperties
   )
 
   def saveState(): Unit = {
@@ -42,5 +44,6 @@ object AiLearning {
       dimensions: Int,
       policyProperties: PolicyConfiguration,
       qLearningProperties: QLearningConfiguration,
+      neuralNetProperties: NeuralNetConfiguration
   )
 }

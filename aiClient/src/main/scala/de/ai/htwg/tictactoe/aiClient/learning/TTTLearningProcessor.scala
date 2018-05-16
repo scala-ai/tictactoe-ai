@@ -9,6 +9,8 @@ import scala.io.Source
 
 import de.ai.htwg.tictactoe.aiClient.learning.core.QLearning
 import de.ai.htwg.tictactoe.aiClient.learning.core.QLearningConfiguration
+import de.ai.htwg.tictactoe.aiClient.learning.core.net.Dl4JNeuralNet
+import de.ai.htwg.tictactoe.aiClient.learning.core.net.NeuralNetConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.policy.EpsGreedy
 import de.ai.htwg.tictactoe.aiClient.learning.core.policy.EpsGreedyConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.policy.ExplorationStep
@@ -62,6 +64,7 @@ object TTTLearningProcessor {
       dimensions: Int,
       policyProperties: PolicyConfiguration,
       qLearningProperties: QLearningConfiguration,
+      neuralNetConfiguration: NeuralNetConfiguration
   ): TTTLearningProcessor = new TTTLearningProcessor(
     QLearning[TTTState, TTTAction](
       policy = policyProperties match {
@@ -69,7 +72,7 @@ object TTTLearningProcessor {
         case c: ExplorationStepConfiguration => ExplorationStep[TTTState, TTTAction](c)
       },
       rewardCalculator = TTTRewardCalculator(),
-      neuralNet = TTTNeuralNet(dimensions),
+      neuralNet = Dl4JNeuralNet(neuralNetConfiguration),
       transitionHistory = TransitionHistoryImpl[TTTAction, TTTState](),
       transitionFactory = TTTTransition,
       actionSpace = TTTActionSpace(),
