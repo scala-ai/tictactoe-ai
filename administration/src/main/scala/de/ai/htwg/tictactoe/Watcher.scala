@@ -30,10 +30,11 @@ class Watcher(trainingId: String) extends Logging {
 
   private def buildCSV(results: List[Watcher.EpochResult]): String = {
     val totalEpochs = results.head.epoch
-    "epoch; wins; draws; losses; win percentage\n" +
-      results.map(r =>
-        f"${totalEpochs - r.epoch}; ${r.won}; ${r.draw}; ${r.lost}; ${(r.won + r.draw).toDouble / (r.won + r.lost + r.draw)}%2.2f"
-      ).mkString("\n")
+    "epoch; wins; defDraws; offDraw; losses; win percentage\n" +
+      results.map { r =>
+        val totalGames = r.won + r.defDraw + r.offDraw + r.lost
+        f"${totalEpochs - r.epoch}; ${r.won}; ${r.defDraw}; ${r.offDraw}; ${r.lost}; ${(r.won + r.defDraw).toDouble / totalGames}%2.2f"
+      }.mkString("\n")
   }
 
   private def writeToFile(csvString: String): Unit = {
@@ -47,5 +48,5 @@ class Watcher(trainingId: String) extends Logging {
 }
 
 object Watcher {
-  case class EpochResult(epoch: Int, won: Int, lost: Int, draw: Int)
+  case class EpochResult(epoch: Int, won: Int, lost: Int, offDraw: Int, defDraw: Int)
 }

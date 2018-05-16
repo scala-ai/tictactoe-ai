@@ -101,7 +101,7 @@ class Trainer(strategyBuilder: TTTWinStrategyBuilder, clientMain: UiMain) extend
       readyPlayer += 1
       if (readyPlayer == 2) {
         if (remainingEpochs % Trainer.testFrequency == 0 && remainingEpochs != totalEpochs) {
-          runTestGame(Trainer.runsPerTest, TestGameData(remainingEpochs, 0, 0, 0), () => doAllTraining(totalEpochs, remainingEpochs - 1, doAfter))
+          runTestGame(Trainer.runsPerTest, TestGameData(remainingEpochs, 0, 0, 0, 0), () => doAllTraining(totalEpochs, remainingEpochs - 1, doAfter))
         } else {
           platform.execute {
             doAllTraining(totalEpochs, remainingEpochs - 1, doAfter)
@@ -123,12 +123,14 @@ class Trainer(strategyBuilder: TTTWinStrategyBuilder, clientMain: UiMain) extend
       remainingEpochs: Int,
       wonGames: Int,
       lostGames: Int,
-      drawGames: Int,
+      drawGamesOffense: Int,
+      drawGamesDefense: Int,
   )
 
   private def runTestGame(testGameNumber: Int, data: TestGameData, doAfter: () => Unit): Unit = {
     debug(s"Start test run: ${data.remainingEpochs} - $testGameNumber")
     var readyPlayers = 0
+    val startPlayer = if (random.nextBoolean()) Player.Cross else Player.Circle
 
     def handleGameFinish(winner: Option[Player]): Unit = {
       readyPlayers += 1
@@ -136,7 +138,11 @@ class Trainer(strategyBuilder: TTTWinStrategyBuilder, clientMain: UiMain) extend
         val newData = winner match {
           case Some(Player.Cross) => data.copy(wonGames = data.wonGames + 1)
           case Some(Player.Circle) => data.copy(lostGames = data.lostGames + 1)
-          case None => data.copy(drawGames = data.drawGames + 1)
+          case None => if (startPlayer == Player.Cross) {
+            data.copy(drawGamesOffense = data.drawGamesOffense + 1)
+          } else {
+            data.copy(drawGamesDefense = data.drawGamesDefense + 1)
+          }
         }
         platform.execute {
           runTestGame(testGameNumber - 1, newData, doAfter)
@@ -148,14 +154,13 @@ class Trainer(strategyBuilder: TTTWinStrategyBuilder, clientMain: UiMain) extend
       val epochs = data.remainingEpochs
       val wonGames = data.wonGames
       val lostGames = data.lostGames
-      val drawGames = data.drawGames
-      info(f"$epochs: + $wonGames  - $lostGames  o $drawGames => ${(data.wonGames + data.drawGames).toFloat * 100 / (wonGames + lostGames + drawGames)}%.2f%%")
-      watcher.addEpochResult(Watcher.EpochResult(epochs, wonGames, lostGames, drawGames))
+      val drawGames = data.drawGamesOffense + data.drawGamesDefense
+      info(f"$epochs: + $wonGames  - $lostGames  o $drawGames => ${(wonGames + data.drawGamesDefense).toFloat * 100 / (wonGames + lostGames + drawGames)}%.2f%%")
+      watcher.addEpochResult(Watcher.EpochResult(epochs, wonGames, lostGames, data.drawGamesOffense, data.drawGamesDefense))
       platform.execute {
         doAfter()
       }
     } else {
-      val startPlayer = if (random.nextBoolean()) Player.Cross else Player.Circle
       val gameFieldController = new GameFieldController(strategyBuilder, startPlayer)
 
       aiTrainer.registerGame(gameFieldController, training = false, handleGameFinish)
