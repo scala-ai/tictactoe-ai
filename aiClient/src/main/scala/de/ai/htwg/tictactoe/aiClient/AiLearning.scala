@@ -19,16 +19,16 @@ class AiLearning(properties: LearningProcessorConfiguration, trainingId: String)
     learningUnit.persist(trainingId)
   }
 
-  def registerGame(player: Player, gameController: GameFieldController, training: Boolean, callbackAfterGame: Option[Player] => Unit): Unit = {
-    val aiPlayer = new AiPlayer(learningUnit, player, training, startTrainingAfterGame(player, callbackAfterGame))
+  def registerGame(gameController: GameFieldController, training: Boolean, callbackAfterGame: Option[Player] => Unit): Unit = {
+    val aiPlayer = new AiPlayer(learningUnit, Player.Cross, training, startTrainingAfterGame(callbackAfterGame))
     gameController.subscribe(aiPlayer)
   }
 
-  def startTrainingAfterGame(currentPlayer: Player, callbackAfterGame: Option[Player] => Unit)(updatedLearningUnit: TTTLearningProcessor, winner: Option[Player]): Unit = {
+  def startTrainingAfterGame(callbackAfterGame: Option[Player] => Unit)(updatedLearningUnit: TTTLearningProcessor, winner: Option[Player]): Unit = {
     val epochResult = winner match {
       case None => TTTEpochResult.undecided
-      case Some(`currentPlayer`) => TTTEpochResult.won
-      case _ /* opponent */ => TTTEpochResult.lost
+      case Some(Player.Cross) => TTTEpochResult.won
+      case Some(Player.Circle) => TTTEpochResult.lost
     }
 
     learningUnit = updatedLearningUnit.trainResult(epochResult)

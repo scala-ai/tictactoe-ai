@@ -11,6 +11,6 @@ object TrainMain extends App with Logging {
   val strategy = TTTWinStrategy3xBuilder
   val clientMain = UiMain(strategy.dimensions)
   val trainer = new Trainer(strategy, clientMain)
-  trainer.startTraining(60000)
+  trainer.startTraining(10000)
 
 }

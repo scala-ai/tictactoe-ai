@@ -43,9 +43,9 @@ object AiMain extends App with Logging {
     }
 
     clientMain.getNewStage(gameName).foreach { gameUi =>
-      val playerUi = new UiPlayer(Player.Cross, gameUi, gameController.getGrid(), platform, handleGameFinish)
+      val playerUi = new UiPlayer(Player.Circle, gameUi, gameController.getGrid(), platform, handleGameFinish)
       gameController.subscribe(playerUi)
-      aiTrainer.registerGame(Player.Circle, gameController, training = false, handleGameFinish)
+      aiTrainer.registerGame(gameController, training = false, handleGameFinish)
     }(platform.executionContext)
   }
 
