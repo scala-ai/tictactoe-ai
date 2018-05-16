@@ -30,10 +30,11 @@ class AiPlayer[C <: GameFieldController](
   def findGameAction(grid: GameField, gameController: GameFieldController): Unit = {
     trace("AiPlayer: current turn")
     // if actor is in training state calculate a training decision, else calculate best action
+    val state = TTTState(grid, gameController.startingPlayer == currentPlayer)
     val (action, newLearningUnit) = if (training) {
-      learningUnit.getTrainingDecision(TTTState(grid))
+      learningUnit.getTrainingDecision(state)
     } else {
-      learningUnit.getBestDecision(TTTState(grid))
+      learningUnit.getBestDecision(state)
     }
     learningUnit = newLearningUnit
     gameController.setPos(action.coordinate, currentPlayer)

@@ -7,7 +7,8 @@ import org.nd4j.linalg.api.ndarray.INDArray
 import org.nd4j.linalg.factory.Nd4j
 
 case class TTTState(
-    field: GameField
+    field: GameField,
+    isStartingPlayer: Boolean,
 ) extends State {
   override def asVector: INDArray = {
     val values = GameFieldToVectorConverter.convertToVector(field)

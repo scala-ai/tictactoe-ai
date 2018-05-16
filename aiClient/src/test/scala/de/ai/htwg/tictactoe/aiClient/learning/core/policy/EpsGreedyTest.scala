@@ -42,7 +42,7 @@ class EpsGreedyTest extends FreeSpec with Matchers with MockFactory {
           )
         )
 
-        val action = greedy.nextAction(TTTState(gameField), () => fail("should not be called"), possibleActions)
+        val action = greedy.nextAction(TTTState(gameField, isStartingPlayer = true), () => fail("should not be called"), possibleActions)
         action shouldBe TTTAction(GridPosition(1, 1), gameField.dimensions)
       }
       "return a best action if rand = 0.6" in {
@@ -58,7 +58,7 @@ class EpsGreedyTest extends FreeSpec with Matchers with MockFactory {
           )
         )
 
-        val action = greedy.nextAction(TTTState(gameField),
+        val action = greedy.nextAction(TTTState(gameField, isStartingPlayer = true),
           () => TTTAction(GridPosition(0, 0), gameField.dimensions), possibleActions)
         action shouldBe TTTAction(GridPosition(0, 0), gameField.dimensions)
       }
@@ -77,7 +77,7 @@ class EpsGreedyTest extends FreeSpec with Matchers with MockFactory {
           )
         )
 
-        val action = greedy.nextAction(TTTState(gameField),
+        val action = greedy.nextAction(TTTState(gameField, isStartingPlayer = true),
           () => TTTAction(GridPosition(0, 1), gameField.dimensions), possibleActions)
         action shouldBe TTTAction(GridPosition(0, 1), gameField.dimensions)
       }
@@ -97,7 +97,7 @@ class EpsGreedyTest extends FreeSpec with Matchers with MockFactory {
           )
         )
 
-        val action = greedy.nextAction(TTTState(gameField), () => fail("should not be called"), possibleActions)
+        val action = greedy.nextAction(TTTState(gameField, isStartingPlayer = true), () => fail("should not be called"), possibleActions)
         action shouldBe TTTAction(GridPosition(0, 1), gameField.dimensions)
       }
     }

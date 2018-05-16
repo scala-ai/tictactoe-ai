@@ -32,7 +32,7 @@ class TTTStateTest extends FreeSpec with Matchers {
           .setPos(2, 4) // circle
       }
       "for a two-dimensional 5x5 playground" in {
-        val state = TTTState(gameField)
+        val state = TTTState(gameField, isStartingPlayer = true)
         val stateAsVector = state.asVector
         stateAsVector.rank() shouldBe 2
         stateAsVector.rows() shouldBe 5
@@ -46,7 +46,7 @@ class TTTStateTest extends FreeSpec with Matchers {
       "for a 5x5 playground with other player's turn" in {
         // circle player's turn
         val gameFieldCross = gameField.setPos(1, 0)
-        val state = TTTState(gameFieldCross)
+        val state = TTTState(gameFieldCross, isStartingPlayer = true)
         val stateAsVector = state.asVector
         stateAsVector.rank() shouldBe 2
         stateAsVector.rows() shouldBe 5

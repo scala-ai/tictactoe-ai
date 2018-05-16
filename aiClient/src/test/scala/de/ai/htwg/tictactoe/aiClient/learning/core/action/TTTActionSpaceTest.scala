@@ -27,7 +27,7 @@ class TTTActionSpaceTest extends FreeSpec with Matchers {
       }
 
 
-      val ticTacToeState = TTTState(gameField)
+      val ticTacToeState = TTTState(gameField, isStartingPlayer = true)
       val possibleActions = TTTActionSpace().getPossibleActions(ticTacToeState)
       possibleActions.size shouldBe 8
       possibleActions should contain(TTTAction(GridPosition(1, 0), gameField.dimensions))

@@ -36,7 +36,7 @@ class ExplorationStepTest extends FreeSpec with Matchers with MockFactory {
         (mockedRandom.nextInt(_: Int)).expects(3).returns(2)
 
         val mockedStepSupplier = mock[StepSupplier[TTTState]]
-        (mockedStepSupplier.visitsForState _).expects(TTTState(gameField)).returns(1)
+        (mockedStepSupplier.visitsForState _).expects(TTTState(gameField, isStartingPlayer = true)).returns(1)
 
         val greedy = ExplorationStep[TTTState, TTTAction](
           mockedStepSupplier,
@@ -47,7 +47,7 @@ class ExplorationStepTest extends FreeSpec with Matchers with MockFactory {
           )
         )
 
-        val action = greedy.nextAction(TTTState(gameField), () => fail("should not be called"), possibleActions)
+        val action = greedy.nextAction(TTTState(gameField, isStartingPlayer = true), () => fail("should not be called"), possibleActions)
         action shouldBe TTTAction(GridPosition(1, 1), gameField.dimensions)
       }
       "return a best action if rand = 0.6" in {
@@ -55,7 +55,7 @@ class ExplorationStepTest extends FreeSpec with Matchers with MockFactory {
         (mockedRandom.nextFloat _).expects().returns(0.6.toFloat)
 
         val mockedStepSupplier = mock[StepSupplier[TTTState]]
-        (mockedStepSupplier.visitsForState _).expects(TTTState(gameField)).returns(1)
+        (mockedStepSupplier.visitsForState _).expects(TTTState(gameField, isStartingPlayer = true)).returns(1)
 
         val greedy = ExplorationStep[TTTState, TTTAction](
           mockedStepSupplier,
@@ -66,7 +66,7 @@ class ExplorationStepTest extends FreeSpec with Matchers with MockFactory {
           )
         )
 
-        val action = greedy.nextAction(TTTState(gameField),
+        val action = greedy.nextAction(TTTState(gameField, isStartingPlayer = true),
           () => TTTAction(GridPosition(0, 0), gameField.dimensions), possibleActions)
         action shouldBe TTTAction(GridPosition(0, 0), gameField.dimensions)
       }
@@ -77,7 +77,7 @@ class ExplorationStepTest extends FreeSpec with Matchers with MockFactory {
         (mockedRandom.nextFloat _).expects().returns(0.99999.toFloat)
 
         val mockedStepSupplier = mock[StepSupplier[TTTState]]
-        (mockedStepSupplier.visitsForState _).expects(TTTState(gameField)).returns(2)
+        (mockedStepSupplier.visitsForState _).expects(TTTState(gameField, isStartingPlayer = true)).returns(2)
 
         val greedy = ExplorationStep[TTTState, TTTAction](
           mockedStepSupplier,
@@ -88,7 +88,7 @@ class ExplorationStepTest extends FreeSpec with Matchers with MockFactory {
           )
         )
 
-        val action = greedy.nextAction(TTTState(gameField),
+        val action = greedy.nextAction(TTTState(gameField, isStartingPlayer = true),
           () => TTTAction(GridPosition(0, 1), gameField.dimensions), possibleActions)
         action shouldBe TTTAction(GridPosition(0, 1), gameField.dimensions)
       }
@@ -100,7 +100,7 @@ class ExplorationStepTest extends FreeSpec with Matchers with MockFactory {
         (mockedRandom.nextInt(_: Int)).expects(3).returns(1)
 
         val mockedStepSupplier = mock[StepSupplier[TTTState]]
-        (mockedStepSupplier.visitsForState _).expects(TTTState(gameField)).returns(0)
+        (mockedStepSupplier.visitsForState _).expects(TTTState(gameField, isStartingPlayer = true)).returns(0)
 
         val greedy = ExplorationStep[TTTState, TTTAction](
           mockedStepSupplier,
@@ -111,7 +111,7 @@ class ExplorationStepTest extends FreeSpec with Matchers with MockFactory {
           )
         )
 
-        val action = greedy.nextAction(TTTState(gameField), () => fail("should not be called"), possibleActions)
+        val action = greedy.nextAction(TTTState(gameField, isStartingPlayer = true), () => fail("should not be called"), possibleActions)
         action shouldBe TTTAction(GridPosition(0, 1), gameField.dimensions)
       }
     }
