@@ -7,6 +7,7 @@ import de.ai.htwg.tictactoe.aiClient.AiLearning.LearningProcessorConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.QLearningConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.policy.EpsGreedyConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.policy.ExplorationStepConfiguration
+import de.ai.htwg.tictactoe.aiClient.learning.core.policy.PolicyConfiguration
 import de.ai.htwg.tictactoe.clientConnection.fxUI.UiMain
 import de.ai.htwg.tictactoe.clientConnection.model.Player
 import de.ai.htwg.tictactoe.clientConnection.model.strategy.TTTWinStrategy
@@ -18,25 +19,32 @@ import de.ai.htwg.tictactoe.logicClient.RandomPlayer
 import de.ai.htwg.tictactoe.playerClient.UiPlayer
 import grizzled.slf4j.Logging
 
+object Trainer {
+  val saveFrequency = 1000
+  val testFrequency = 500
+  val runsPerTest = 100
+
+  def buildEpsGreedyConfiguration(random: Random): PolicyConfiguration = EpsGreedyConfiguration(
+    minEpsilon = 0.5f,
+    nbEpochVisits = 50000,
+    random = random
+  )
+  def buildExplorationStepConfiguration(random: Random): PolicyConfiguration = ExplorationStepConfiguration(
+    minEpsilon = 0.2f,
+    nbStepVisits = 1000,
+    random = random
+  )
+
+}
 
 class Trainer(strategyBuilder: TTTWinStrategyBuilder, clientMain: UiMain) extends Logging {
   private val random = new Random(1L)
   // unique training id for a whole training execution run
   private val trainingId = Random.alphanumeric.take(6).mkString
 
-  private val epsGreedyConfiguration = EpsGreedyConfiguration(
-    minEpsilon = 0.5f,
-    nbEpochVisits = 50000,
-    random = random
-  )
-  private val explorationStepConfiguration = ExplorationStepConfiguration(
-    minEpsilon = 0.2f,
-    nbStepVisits = 1000,
-    random = random
-  )
   private val properties = LearningProcessorConfiguration(
     strategyBuilder.dimensions,
-    epsGreedyConfiguration,
+    Trainer.buildEpsGreedyConfiguration(random),
     QLearningConfiguration(
       alpha = 0.03,
       gamma = 0.3
@@ -78,24 +86,25 @@ class Trainer(strategyBuilder: TTTWinStrategyBuilder, clientMain: UiMain) extend
       platform.execute(doAfter())
       return
     }
-    var readyPlayer = 0
 
-    def nextTraining(): Unit = doAllTraining(totalEpochs, remainingEpochs - 1, doAfter)
+    if (remainingEpochs % Trainer.testFrequency == 0 && remainingEpochs != totalEpochs) {
+      runTestGame(Trainer.runsPerTest, TestGameData(remainingEpochs, 0, 0, 0), () => doAllTraining(totalEpochs, remainingEpochs, doAfter))
+      return
+    }
+
+    if (remainingEpochs % Trainer.saveFrequency == 0 && remainingEpochs != totalEpochs) {
+      aiTrainer.saveState()
+      watcher.printCSV()
+    }
+
+    var readyPlayer = 0
 
     def handlePlayerReady(): Unit = {
       trace(s"training finished message (ready = $readyPlayer)")
       readyPlayer += 1
       if (readyPlayer == 2) {
-        if (remainingEpochs % 10000 == 0) {
-          aiTrainer.saveState()
-          watcher.printCSV()
-        }
-        if (remainingEpochs % 200 == 0) {
-          runTestGame(100, TestGameData(remainingEpochs, 0, 0, 0), nextTraining _)
-        } else {
-          platform.execute {
-            nextTraining()
-          }
+        platform.execute {
+          doAllTraining(totalEpochs, remainingEpochs - 1, doAfter)
         }
       }
     }
@@ -106,7 +115,6 @@ class Trainer(strategyBuilder: TTTWinStrategyBuilder, clientMain: UiMain) extend
     aiTrainer.registerGame(player, gameFieldController, training = true, _ => handlePlayerReady())
     val randomPlayer = new RandomPlayer(Player.other(player), random, _ => handlePlayerReady())
     gameFieldController.subscribe(randomPlayer)
-
   }
 
 
@@ -181,7 +189,5 @@ class Trainer(strategyBuilder: TTTWinStrategyBuilder, clientMain: UiMain) extend
       gameFieldController.subscribe(playerUi)
       aiTrainer.registerGame(Player.other(player), gameFieldController, training = false, handleGameFinish)
     }(platform.executionContext)
-
   }
-
 }
