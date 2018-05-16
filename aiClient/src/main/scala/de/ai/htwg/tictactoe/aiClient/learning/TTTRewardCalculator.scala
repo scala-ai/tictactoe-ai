@@ -11,5 +11,11 @@ case class TTTRewardCalculator() extends RewardCalculator[TTTAction, TTTState] {
     case EpochResult.Lost => -500
   }
 
-  override def getImmediateReward(action: TTTAction, state: TTTState): Double = 1
+  override def getImmediateReward(action: TTTAction, state: TTTState): Double = {
+    if (state.isStartingPlayer) {
+      1
+    } else {
+      1
+    }
+  }
 }
