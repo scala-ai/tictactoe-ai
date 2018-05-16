@@ -9,6 +9,7 @@ import de.ai.htwg.tictactoe.clientConnection.model.Player
 import de.ai.htwg.tictactoe.gameLogic.controller.GameFieldController
 
 class AiLearning(properties: LearningProcessorConfiguration, trainingId: String) {
+  private val aiPlayerType = Player.Cross
   private var learningUnit = TTTLearningProcessor(
     properties.dimensions,
     policyProperties = properties.policyProperties,
@@ -20,15 +21,15 @@ class AiLearning(properties: LearningProcessorConfiguration, trainingId: String)
   }
 
   def registerGame(gameController: GameFieldController, training: Boolean, callbackAfterGame: Option[Player] => Unit): Unit = {
-    val aiPlayer = new AiPlayer(learningUnit, Player.Cross, training, startTrainingAfterGame(callbackAfterGame))
+    val aiPlayer = new AiPlayer(learningUnit, aiPlayerType, training, startTrainingAfterGame(gameController.startingPlayer == aiPlayerType, callbackAfterGame))
     gameController.subscribe(aiPlayer)
   }
 
-  def startTrainingAfterGame(callbackAfterGame: Option[Player] => Unit)(updatedLearningUnit: TTTLearningProcessor, winner: Option[Player]): Unit = {
+  def startTrainingAfterGame(isStartingPlayer: Boolean, callbackAfterGame: Option[Player] => Unit)(updatedLearningUnit: TTTLearningProcessor, winner: Option[Player]): Unit = {
     val epochResult = winner match {
-      case None => EpochResult.Draw
       case Some(Player.Cross) => EpochResult.Won
       case Some(Player.Circle) => EpochResult.Lost
+      case None => if (isStartingPlayer) EpochResult.DrawOffense else EpochResult.DrawDefense
     }
 
     learningUnit = updatedLearningUnit.trainResult(epochResult)
