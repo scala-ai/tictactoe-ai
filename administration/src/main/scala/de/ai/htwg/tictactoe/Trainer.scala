@@ -39,7 +39,9 @@ object Trainer {
 }
 
 class Trainer(strategyBuilder: TTTWinStrategyBuilder, clientMain: UiMain) extends Logging {
-  private val random = new Random(1928L)
+  private val seed = new Random().nextLong
+  info(s"Chosen seed for this run: $seed")
+  private val random = new Random(seed)
   // unique training id for a whole training execution run
   private val trainingId = Random.alphanumeric.take(6).mkString
 
@@ -54,7 +56,7 @@ class Trainer(strategyBuilder: TTTWinStrategyBuilder, clientMain: UiMain) extend
 
   private val possibleWinActions: List[TTTWinStrategy] = strategyBuilder.listAllWinStrategies
 
-  private val watcher = new Watcher(trainingId)
+  private val watcher = new Watcher(trainingId, seed)
   private val aiTrainer = new AiLearning(properties, trainingId)
   val platform: SingleThreadPlatform = SingleThreadPlatform()
 

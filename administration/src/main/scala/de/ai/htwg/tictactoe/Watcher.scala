@@ -10,7 +10,7 @@ import scala.collection.mutable.ListBuffer
 import grizzled.slf4j.Logging
 
 
-class Watcher(trainingId: String) extends Logging {
+class Watcher(trainingId: String, seed: Long) extends Logging {
 
   private val results: ListBuffer[Watcher.EpochResult] = ListBuffer()
 
@@ -30,7 +30,8 @@ class Watcher(trainingId: String) extends Logging {
 
   private def buildCSV(results: List[Watcher.EpochResult]): String = {
     val totalEpochs = results.head.epoch
-    "epoch; wins; defDraws; offDraw; losses; win percentage\n" +
+    s"seed:; $seed; ; ; ; \n" +
+      "epoch; wins; defDraws; offDraw; losses; win percentage\n" +
       results.map { r =>
         val totalGames = r.won + r.defDraw + r.offDraw + r.lost
         f"${totalEpochs - r.epoch}; ${r.won}; ${r.defDraw}; ${r.offDraw}; ${r.lost}; ${(r.won + r.defDraw).toDouble / totalGames}%2.2f"

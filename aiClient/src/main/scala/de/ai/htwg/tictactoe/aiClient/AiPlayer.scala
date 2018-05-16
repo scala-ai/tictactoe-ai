@@ -15,10 +15,10 @@ class AiPlayer[C <: GameFieldController](
     callBack: (TTTLearningProcessor, Option[Player]) => Unit,
 ) extends C#Sub with Logging {
   trace(s"AiPlayer starts playing as $currentPlayer")
+
   def notify(pub: GameFieldController, event: GameFieldController.Updates): Unit = event match {
     case GameFieldController.Result.GameFinished(_, winner) =>
-
-      trace("AiPlayer is finished")
+      trace("AiPlayer: game is finished")
       pub.removeSubscription(this)
       callBack(learningUnit, winner)
 
