@@ -29,6 +29,7 @@ object Trainer {
     nbEpochVisits = 50000,
     random = random
   )
+
   def buildExplorationStepConfiguration(random: Random): PolicyConfiguration = ExplorationStepConfiguration(
     minEpsilon = 0.2f,
     nbStepVisits = 1000,
@@ -143,7 +144,7 @@ class Trainer(strategyBuilder: TTTWinStrategyBuilder, clientMain: UiMain) extend
       }
     }
 
-    if (testGameNumber < 0) {
+    if (testGameNumber <= 0) {
       val epochs = data.remainingEpochs
       val wonGames = data.wonGames
       val lostGames = data.lostGames
