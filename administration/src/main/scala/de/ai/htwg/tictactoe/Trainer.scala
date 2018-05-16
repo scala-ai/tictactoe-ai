@@ -21,7 +21,7 @@ import grizzled.slf4j.Logging
 
 object Trainer {
   val saveFrequency = 10000
-  val testFrequency = 500
+  val testFrequency = 200
   val runsPerTest = 100
 
   def buildEpsGreedyConfiguration(random: Random): PolicyConfiguration = EpsGreedyConfiguration(
@@ -39,7 +39,7 @@ object Trainer {
 }
 
 class Trainer(strategyBuilder: TTTWinStrategyBuilder, clientMain: UiMain) extends Logging {
-  private val random = new Random(1L)
+  private val random = new Random(1928L)
   // unique training id for a whole training execution run
   private val trainingId = Random.alphanumeric.take(6).mkString
 
