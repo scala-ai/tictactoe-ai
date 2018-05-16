@@ -130,7 +130,7 @@ class Trainer(strategyBuilder: TTTWinStrategyBuilder, clientMain: UiMain) extend
   private def runTestGame(testGameNumber: Int, data: TestGameData, doAfter: () => Unit): Unit = {
     debug(s"Start test run: ${data.remainingEpochs} - $testGameNumber")
     var readyPlayers = 0
-    val startPlayer = if (random.nextBoolean()) Player.Cross else Player.Circle
+    val startPlayer = if (testGameNumber % 2 == 0) Player.Cross else Player.Circle
 
     def handleGameFinish(winner: Option[Player]): Unit = {
       readyPlayers += 1
