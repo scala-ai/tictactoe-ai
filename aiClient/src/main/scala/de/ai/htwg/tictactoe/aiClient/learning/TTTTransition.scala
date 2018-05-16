@@ -7,9 +7,10 @@ case class TTTTransition(
     observation: TTTState,
     action: TTTAction,
     reward: Double,
+    qValue: Double
 ) extends Transition[TTTAction, TTTState]
 
 object TTTTransition extends TransitionFactory[TTTAction, TTTState] {
-  override def apply(state: TTTState, action: TTTAction, reward: Double): TTTTransition =
-    new TTTTransition(state, action, reward)
+  override def apply(state: TTTState, action: TTTAction, reward: Double, qValue: Double): TTTTransition =
+    new TTTTransition(state, action, reward, qValue)
 }

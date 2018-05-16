@@ -8,8 +8,8 @@ import de.ai.htwg.tictactoe.aiClient.learning.TTTState
 import de.ai.htwg.tictactoe.aiClient.learning.core.policy.ExplorationStep.StepSupplier
 import de.ai.htwg.tictactoe.clientConnection.model
 import de.ai.htwg.tictactoe.clientConnection.model.GameField
-import de.ai.htwg.tictactoe.clientConnection.model.Player
 import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
+import de.ai.htwg.tictactoe.clientConnection.model.Player
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers
@@ -47,8 +47,10 @@ class ExplorationStepTest extends FreeSpec with Matchers with MockFactory {
           )
         )
 
-        val action = greedy.nextAction(TTTState(gameField, isStartingPlayer = true), () => fail("should not be called"), possibleActions)
+        val (action, qValue) = greedy.nextAction(TTTState(gameField, isStartingPlayer = true),
+          () => fail("should not be called"), (_, _) => 4, possibleActions)
         action shouldBe TTTAction(GridPosition(1, 1), gameField.dimensions)
+        qValue shouldBe 4
       }
       "return a best action if rand = 0.6" in {
         val mockedRandom = mock[Random]
@@ -66,9 +68,10 @@ class ExplorationStepTest extends FreeSpec with Matchers with MockFactory {
           )
         )
 
-        val action = greedy.nextAction(TTTState(gameField, isStartingPlayer = true),
-          () => TTTAction(GridPosition(0, 0), gameField.dimensions), possibleActions)
+        val (action, qValue) = greedy.nextAction(TTTState(gameField, isStartingPlayer = true),
+          () => (TTTAction(GridPosition(0, 0), gameField.dimensions), 6), (_, _) => fail("should not be called"), possibleActions)
         action shouldBe TTTAction(GridPosition(0, 0), gameField.dimensions)
+        qValue shouldBe 6
       }
     }
     "epoch 2 of 2 should" - {
@@ -88,9 +91,10 @@ class ExplorationStepTest extends FreeSpec with Matchers with MockFactory {
           )
         )
 
-        val action = greedy.nextAction(TTTState(gameField, isStartingPlayer = true),
-          () => TTTAction(GridPosition(0, 1), gameField.dimensions), possibleActions)
+        val (action, qValue) = greedy.nextAction(TTTState(gameField, isStartingPlayer = true),
+          () => (TTTAction(GridPosition(0, 1), gameField.dimensions), 2), (_, _) => fail("should not be called"), possibleActions)
         action shouldBe TTTAction(GridPosition(0, 1), gameField.dimensions)
+        qValue shouldBe 2
       }
     }
     "epoch 0 of 2 should" - {
@@ -111,8 +115,10 @@ class ExplorationStepTest extends FreeSpec with Matchers with MockFactory {
           )
         )
 
-        val action = greedy.nextAction(TTTState(gameField, isStartingPlayer = true), () => fail("should not be called"), possibleActions)
+        val (action, qValue) = greedy.nextAction(TTTState(gameField, isStartingPlayer = true),
+          () => fail("should not be called"), (_, _) => 4, possibleActions)
         action shouldBe TTTAction(GridPosition(0, 1), gameField.dimensions)
+        qValue shouldBe 4
       }
     }
   }

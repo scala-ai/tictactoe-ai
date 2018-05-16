@@ -13,19 +13,20 @@ case class ExplorationStep[S <: State, A <: Action](
   private val minEpsilon = policyProperties.minEpsilon
   private val nbStepVisits = policyProperties.nbStepVisits
 
-  override def nextAction(input: S, bestAction: () => A, possibleActions: List[A]): A = {
+  override def nextAction(input: S, bestAction: () => (A, Double), qValueSupplier: (S, A) => Double, possibleActions: List[A]): (A, Double) = {
     val visits = stepSupplier.visitsForState(input)
     val ep = getEpsilon(visits)
     if (random.nextFloat > ep) {
       // get actual best action
-      val action = bestAction()
-      debug(s"calc actual best action $action (epsilon = $ep, visits = $visits)")
-      action
+      val (action, qValue) = bestAction()
+      debug(s"calc actual best action $action (qValue = $qValue, epsilon = $ep, visits = $visits)")
+      (action, qValue)
     } else {
       // get random action
       val randomAction = possibleActions.toVector(random.nextInt(possibleActions.size))
-      debug(s"use random action $randomAction (epsilon = $ep, visits = $visits)")
-      randomAction
+      val qValue = qValueSupplier(input, randomAction)
+      debug(s"use random action $randomAction (qValue = $qValue, epsilon = $ep, visits = $visits)")
+      (randomAction, qValue)
     }
   }
 

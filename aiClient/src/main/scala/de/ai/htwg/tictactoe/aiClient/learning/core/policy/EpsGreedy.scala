@@ -12,18 +12,19 @@ case class EpsGreedy[S <: State, A <: Action](
   private val minEpsilon = policyProperties.minEpsilon
   private val epsilonNbEpoch = policyProperties.nbEpochVisits
 
-  override def nextAction(input: S, bestAction: () => A, possibleActions: List[A]): A = {
+  override def nextAction(input: S, bestAction: () => (A, Double), qValueSupplier: (S, A) => Double, possibleActions: List[A]): (A, Double) = {
     val ep = getEpsilon
     if (random.nextFloat > ep) {
       // get actual best action
-      val action = bestAction()
-      debug(s"calc actual best action $action (epsilon = $ep)")
-      action
+      val (action, qValue) = bestAction()
+      debug(s"calc actual best action $action (qValue = $qValue, epsilon = $ep)")
+      (action, qValue)
     } else {
       // get random action
       val randomAction = possibleActions.toVector(random.nextInt(possibleActions.size))
-      debug(s"use random action $randomAction (epsilon = $ep)")
-      randomAction
+      val qValue = qValueSupplier(input, randomAction)
+      debug(s"use random action $randomAction (qValue = $qValue, epsilon = $ep)")
+      (randomAction, qValue)
     }
   }
 

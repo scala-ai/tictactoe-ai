@@ -10,6 +10,7 @@ import de.ai.htwg.tictactoe.aiClient.learning.core.state.State
 import de.ai.htwg.tictactoe.aiClient.learning.core.transition.TransitionFactory
 import de.ai.htwg.tictactoe.aiClient.learning.core.transition.TransitionHistory
 import grizzled.slf4j.Logging
+import org.nd4j.linalg.api.ndarray.INDArray
 import org.nd4j.linalg.factory.Nd4j
 
 case class QLearning[S <: State, A <: Action](
@@ -29,34 +30,36 @@ case class QLearning[S <: State, A <: Action](
     // Let's run our Q function on S to get Q values for all possible actions
     val possibleActions = actionSpace.getPossibleActions(state)
     // action depends on a training policy
-    val action = policy.nextAction(state, () => calcBestAction(state, possibleActions), possibleActions)
-    createTransition(action, state)
+    val (action, qValue) = policy.nextAction(state, () => calcBestAction(state, possibleActions), calcQValue, possibleActions)
+    createTransition(action, state, qValue)
   }
 
   override def getBestDecision(state: S): (QLearning[S, A], A) = {
     val possibleActions = actionSpace.getPossibleActions(state)
-    val action = calcBestAction(state, possibleActions)
-    createTransition(action, state)
+    val (action, qValue) = calcBestAction(state, possibleActions)
+    createTransition(action, state, qValue)
   }
 
-  private def createTransition(action: A, state: S): (QLearning[S, A], A) = {
+  private def createTransition(action: A, state: S, qValue: Double): (QLearning[S, A], A) = {
     val reward = rewardCalculator.getImmediateReward(action, state)
-    val updatedHistory = transitionHistory.addTransition(transitionFactory(state, action, reward))
+    val updatedHistory = transitionHistory.addTransition(transitionFactory(state, action, reward, qValue))
     (copy(transitionHistory = updatedHistory), action)
   }
 
-  private def calcBestAction(state: S, possibleActions: List[A]): A = {
+  private def calcBestAction(state: S, possibleActions: List[A]): (A, Double) = {
     debug(s"Request action in state \n${state.asVector}")
     val ratedActions = possibleActions
-      .map(a => {
-        val input = Nd4j.concat(1, state.asVector, a.asVector)
-        val result = neuralNet.calc(input).getDouble(0)
-        debug(s"Action: $a => $result")
-        assert(!result.isNaN)
-        (a, result)
-      })
+      .map(a => (a, calcQValue(state, a)))
     trace(s"Q-Values: $ratedActions")
-    ratedActions.maxBy(_._2)._1
+    ratedActions.maxBy(_._2)
+  }
+
+  private def calcQValue(state: S, action: A): Double = {
+    val input = toInputVector(state, action)
+    val result = neuralNet.calc(input).getDouble(0)
+    debug(s"Action: $action => $result")
+    assert(!result.isNaN)
+    result
   }
 
   override def trainHistory(epochResult: EpochResult): QLearning[S, A] = {
@@ -72,18 +75,13 @@ case class QLearning[S <: State, A <: Action](
         val state = transition.observation
         val action = transition.action
         val reward = transition.reward
-
-        val stateVector = state.asVector
-        val actionVector = action.asVector
-        // calc old q value for this action in this state
-        val input = Nd4j.concat(1, stateVector, actionVector)
-        val oldQVal = neuralNet.calc(input).getDouble(0)
-        assert(!oldQVal.isNaN)
+        val oldQVal = transition.qValue
 
         // new q value Q(s, a)
         val newQVal = (1 - alpha) * oldQVal + alpha * (reward + gamma * futureQVal)
         val y = Nd4j.zeros(1)
         y.putScalar(Array[Int](0, 0), newQVal)
+        val input = toInputVector(state, action)
         neuralNet.train(input, y)
         newQVal
       })
@@ -95,6 +93,10 @@ case class QLearning[S <: State, A <: Action](
       policy = updatedPolicy.incrementEpoch(),
       transitionHistory = transitionHistory.truncate()
     )
+  }
+
+  private def toInputVector(state: S, action: A): INDArray = {
+    Nd4j.concat(1, state.asVector, action.asVector)
   }
 
 }
