@@ -2,6 +2,7 @@ package de.ai.htwg.tictactoe
 
 import de.ai.htwg.tictactoe.clientConnection.fxUI.UiMain
 import de.ai.htwg.tictactoe.clientConnection.model.strategy.TTTWinStrategy3xBuilder
+import de.ai.htwg.tictactoe.clientConnection.util.SingleThreadPlatform
 import grizzled.slf4j.Logging
 
 object TrainMain extends App with Logging {
@@ -10,7 +11,9 @@ object TrainMain extends App with Logging {
   //  val strategy = TTTWinStrategy4xBuilder
   val strategy = TTTWinStrategy3xBuilder
   val clientMain = UiMain(strategy.dimensions)
-  val trainer = new Trainer(strategy, clientMain)
-  trainer.startTraining(60000)
-
+  val platform = SingleThreadPlatform()
+  platform.execute {
+    val trainer = new Trainer(strategy, clientMain, platform)
+    trainer.startTraining(60000)
+  }
 }

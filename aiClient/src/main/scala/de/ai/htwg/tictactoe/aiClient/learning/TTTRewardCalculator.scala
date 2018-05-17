@@ -7,8 +7,8 @@ case class TTTRewardCalculator() extends RewardCalculator[TTTAction, TTTState] {
   override def getLongTermReward(runResult: EpochResult): Double = runResult match {
     case EpochResult.Won => 100
     case EpochResult.DrawDefense => 90
-    case EpochResult.DrawOffense => 90
-    case EpochResult.Lost => -500
+    case EpochResult.DrawOffense => 0
+    case EpochResult.Lost => -300
   }
 
   override def getImmediateReward(action: TTTAction, state: TTTState): Double = {

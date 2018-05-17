@@ -40,7 +40,9 @@ object Trainer {
 
 }
 
-class Trainer(strategyBuilder: TTTWinStrategyBuilder, clientMain: UiMain) extends Logging {
+class Trainer(strategyBuilder: TTTWinStrategyBuilder, clientMain: UiMain, val platform: SingleThreadPlatform) extends Logging {
+  platform.checkCurrentThread()
+
   private val seed = new Random().nextLong
   info(s"Chosen seed for this run: $seed")
   private val random = new Random(seed)
@@ -66,7 +68,6 @@ class Trainer(strategyBuilder: TTTWinStrategyBuilder, clientMain: UiMain) extend
 
   private val watcher = new Watcher(trainingId, seed)
   private val aiTrainer = new AiLearning(properties, trainingId)
-  val platform: SingleThreadPlatform = SingleThreadPlatform()
 
   def startTraining(epochs: Int): Unit = {
     if (epochs < 0) {
@@ -164,8 +165,10 @@ class Trainer(strategyBuilder: TTTWinStrategyBuilder, clientMain: UiMain) extend
       val epochs = data.remainingEpochs
       val wonGames = data.wonGames
       val lostGames = data.lostGames
-      val drawGames = data.drawGamesOffense + data.drawGamesDefense
-      info(f"$epochs: + $wonGames  - $lostGames  o $drawGames => ${(wonGames + data.drawGamesDefense).toFloat * 100 / (wonGames + lostGames + drawGames)}%.2f%%")
+      val drawGamesOff = data.drawGamesOffense
+      val drawGamesDef = data.drawGamesDefense
+      val totalGames = wonGames + lostGames + drawGamesDef + drawGamesOff
+      info(f"$epochs: + $wonGames  - $lostGames  / $drawGamesDef  o $drawGamesOff => ${(wonGames + drawGamesDef).toFloat * 100 / totalGames}%.2f%%")
       watcher.addEpochResult(Watcher.EpochResult(epochs, wonGames, lostGames, data.drawGamesOffense, data.drawGamesDefense))
       platform.execute {
         doAfter()

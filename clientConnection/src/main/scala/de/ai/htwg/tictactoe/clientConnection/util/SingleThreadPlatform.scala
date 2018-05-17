@@ -9,7 +9,13 @@ import scala.concurrent.duration.Duration
 
 class SingleThreadPlatform private(private val thread: Thread, val executionContext: ExecutionContext) {
   def isNotCurrentThread: Boolean = Thread.currentThread() != thread
+
   def isCurrentThread: Boolean = Thread.currentThread() == thread
+
+  def checkCurrentThread(): Unit = {
+    if (isNotCurrentThread) throw new IllegalStateException("Illegal Thread")
+  }
+
   def execute(func: => Unit): Unit = executionContext.execute(() => func)
 }
 
