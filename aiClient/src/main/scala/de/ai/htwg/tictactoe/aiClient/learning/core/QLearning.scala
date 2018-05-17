@@ -69,7 +69,7 @@ case class QLearning[S <: State, A <: Action](
     debug("start training (reward = " + epochReward + ")")
     transitionHistory
       .reverseTransitions()
-      .foldLeft(epochReward / gamma)((futureQVal, transition) => {
+      .foldLeft((epochReward, true))((futureQVal, transition) => {
         trace("train transition " + transition.action)
 
         val state = transition.observation
@@ -78,13 +78,18 @@ case class QLearning[S <: State, A <: Action](
         val oldQVal = transition.qValue
 
         // new q value Q(s, a)
-        val newQVal = (1 - alpha) * oldQVal + alpha * (reward + gamma * futureQVal)
+        val newQVal = if (futureQVal._2) {
+          epochReward
+        } else {
+          val futureMaxQVal = ???
+          (1 - alpha) * oldQVal + alpha * (reward + gamma * futureMaxQVal)
+        }
         val y = Nd4j.zeros(1)
         y.putScalar(Array[Int](0, 0), newQVal)
         val input = toInputVector(state, action)
         neuralNet.train(input, y)
         debug(s"q value update for $action is $oldQVal -> $newQVal")
-        newQVal
+        (newQVal, false)
       })
     val updatedPolicy = transitionHistory
       .reverseTransitions()
