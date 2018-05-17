@@ -1,5 +1,9 @@
 package de.ai.htwg.tictactoe.aiClient.learning
 
+import java.nio.charset.StandardCharsets
+import java.nio.file.Files
+import java.nio.file.Paths
+
 import scala.collection.mutable
 
 import de.ai.htwg.tictactoe.aiClient.learning.core.net.NeuralNet
@@ -25,7 +29,9 @@ class TTTQTable private(data: mutable.Map[Int, Double]) extends NeuralNet with L
 
   override def train(input: INDArray, output: INDArray): Unit = data.put(input.hashCode(), output.getDouble(0))
 
-  override def serialize(path: String): Unit = ??? // data.map((k) => k._1 + ":" + k._2).mkString("\n")
+  // TODO remove replace
+  override def serialize(path: String): Unit = Files.write(Paths.get(path.replace(".zip", ".txt")),
+    data.map((k) => k._1 + ":" + k._2).mkString("\n").getBytes(StandardCharsets.UTF_8))
 
   private def toArray(value: Double): INDArray = Nd4j.valueArrayOf(dimensions, dimensions, value)
 }
