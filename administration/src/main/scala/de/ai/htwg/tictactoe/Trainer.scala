@@ -67,7 +67,7 @@ class Trainer(strategyBuilder: TTTWinStrategyBuilder, clientMain: UiMain, val pl
   private val possibleWinActions: List[TTTWinStrategy] = strategyBuilder.listAllWinStrategies
 
   private val watcher = new Watcher(trainingId, seed, properties)
-  private val aiTrainer = new AiLearning(properties, trainingId)
+  private val aiTrainer = AiLearning(properties, trainingId)
 
   def startTraining(epochs: Int): Unit = {
     if (epochs < 0) {

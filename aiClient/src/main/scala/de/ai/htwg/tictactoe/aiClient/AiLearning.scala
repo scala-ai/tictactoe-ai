@@ -2,7 +2,6 @@ package de.ai.htwg.tictactoe.aiClient
 
 import java.util.concurrent.Executors
 
-import de.ai.htwg.tictactoe.aiClient.AiLearning.LearningProcessorConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.TTTLearningProcessor
 import de.ai.htwg.tictactoe.aiClient.learning.core.QLearningConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.net.NeuralNetConfiguration
@@ -11,15 +10,8 @@ import de.ai.htwg.tictactoe.aiClient.learning.core.state.EpochResult
 import de.ai.htwg.tictactoe.clientConnection.model.Player
 import de.ai.htwg.tictactoe.gameLogic.controller.GameFieldController
 
-class AiLearning(properties: LearningProcessorConfiguration, trainingId: String) {
+class AiLearning(var learningUnit: TTTLearningProcessor, trainingId: String) {
   private val aiPlayerType = Player.Cross
-  private var learningUnit = TTTLearningProcessor(
-    properties.dimensions,
-    policyProperties = properties.policyProperties,
-    qLearningProperties = properties.qLearningProperties,
-    neuralNetConfiguration = properties.neuralNetProperties,
-    Executors.newFixedThreadPool(5)
-  )
 
   def saveState(): Unit = {
     learningUnit.persist(trainingId)
@@ -49,4 +41,14 @@ object AiLearning {
       qLearningProperties: QLearningConfiguration,
       neuralNetProperties: NeuralNetConfiguration
   )
+
+  def apply(properties: LearningProcessorConfiguration, trainingId: String): AiLearning =
+    new AiLearning(
+      TTTLearningProcessor(
+        policyProperties = properties.policyProperties,
+        qLearningProperties = properties.qLearningProperties,
+        neuralNetConfiguration = properties.neuralNetProperties,
+        Executors.newFixedThreadPool(5)
+      ), trainingId
+    )
 }

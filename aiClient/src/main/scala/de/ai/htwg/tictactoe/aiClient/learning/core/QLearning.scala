@@ -69,7 +69,7 @@ case class QLearning[S <: State, A <: Action](
     debug("start training (reward = " + epochReward + ")")
     transitionHistory
       .reverseTransitions()
-      .foldLeft(epochReward)((futureQVal, transition) => {
+      .foldLeft(epochReward / gamma)((futureQVal, transition) => {
         trace("train transition " + transition.action)
 
         val state = transition.observation

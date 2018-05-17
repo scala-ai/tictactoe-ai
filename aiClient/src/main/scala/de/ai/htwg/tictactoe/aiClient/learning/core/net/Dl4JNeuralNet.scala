@@ -1,8 +1,5 @@
 package de.ai.htwg.tictactoe.aiClient.learning.core.net
 
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
-
 import grizzled.slf4j.Logging
 import org.deeplearning4j.nn
 import org.deeplearning4j.nn.api.OptimizationAlgorithm
@@ -31,11 +28,8 @@ class Dl4JNeuralNet private(val model: MultiLayerNetwork) extends NeuralNet with
 
   private def reshapeInput(input: INDArray) = input.reshape(1, input.length())
 
-  override def serialize(): String = {
-    val outputStream = new ByteArrayOutputStream()
-    ModelSerializer.writeModel(model, outputStream, true)
-    outputStream.toString("UTF-8")
-  }
+  override def serialize(path: String): Unit =
+    ModelSerializer.writeModel(model, path, true)
 }
 
 object Dl4JNeuralNet extends NeuralNet.Factory {
@@ -84,10 +78,9 @@ object Dl4JNeuralNet extends NeuralNet.Factory {
     new Dl4JNeuralNet(new MultiLayerNetwork(netConfig.build))
   }
 
-  override def deserialize(string: String): NeuralNet = {
+  override def deserialize(path: String): NeuralNet = {
     Nd4j.getRandom.setSeed(seed)
-    val model: MultiLayerNetwork =
-      ModelSerializer.restoreMultiLayerNetwork(new ByteArrayInputStream(string.getBytes("UTF-8")))
+    val model: MultiLayerNetwork = ModelSerializer.restoreMultiLayerNetwork(path)
     new Dl4JNeuralNet(model)
   }
 }

@@ -1,10 +1,12 @@
 package de.ai.htwg.tictactoe
 
+import java.util.concurrent.Executors
+
+import scala.util.Random
+
 import de.ai.htwg.tictactoe.aiClient.AiLearning
-import de.ai.htwg.tictactoe.aiClient.AiLearning.LearningProcessorConfiguration
+import de.ai.htwg.tictactoe.aiClient.learning.TTTLearningProcessor
 import de.ai.htwg.tictactoe.aiClient.learning.core.QLearningConfiguration
-import de.ai.htwg.tictactoe.aiClient.learning.core.net.NeuralNetConfiguration
-import de.ai.htwg.tictactoe.aiClient.learning.core.policy.EpsGreedyConfiguration
 import de.ai.htwg.tictactoe.clientConnection.fxUI.UiMain
 import de.ai.htwg.tictactoe.clientConnection.model.Player
 import de.ai.htwg.tictactoe.clientConnection.model.strategy.TTTWinStrategy3xBuilder
@@ -13,14 +15,19 @@ import de.ai.htwg.tictactoe.gameLogic.controller.GameFieldController
 import de.ai.htwg.tictactoe.playerClient.UiPlayer
 import grizzled.slf4j.Logging
 
-object AiMain extends App with Logging {
-  trace("start game against Ai")
-  val platform: SingleThreadPlatform = SingleThreadPlatform()
-  val strategy = TTTWinStrategy3xBuilder
-  val gameName = "game1"
-  val clientMain = UiMain(strategy.dimensions)
-  val properties = LearningProcessorConfiguration(strategy.dimensions, EpsGreedyConfiguration(), QLearningConfiguration(), NeuralNetConfiguration())
-  private val aiTrainer = AiLearning(properties, gameName)
+object PlayAgainstNetMain extends App with Logging {
+  private val strategy = TTTWinStrategy3xBuilder
+  private val clientMain = UiMain(strategy.dimensions)
+  private val platform = SingleThreadPlatform()
+  private val gameName = "game1"
+
+  private val aiTrainer = new AiLearning(TTTLearningProcessor.apply(
+    policyProperties = Trainer.buildEpsGreedyConfiguration(new Random(5L)),
+    qLearningProperties = QLearningConfiguration(),
+    neuralNetFileName = "cOvMZd.2018-05-17-20-47-49-149.network.zip",
+    executors = Executors.newFixedThreadPool(5)
+  ), "testTraining")
+
 
   platform.execute {
     playGame()
@@ -40,6 +47,9 @@ object AiMain extends App with Logging {
             case _ /* other player */ => s"AI-Player wins"
           }
         }
+        platform.execute {
+          playGame()
+        }
       }
     }
 
@@ -49,6 +59,4 @@ object AiMain extends App with Logging {
       aiTrainer.registerGame(gameController, training = false, handleGameFinish)
     }(platform.executionContext)
   }
-
-
 }
