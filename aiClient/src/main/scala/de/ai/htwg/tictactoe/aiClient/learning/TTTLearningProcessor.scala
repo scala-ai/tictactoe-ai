@@ -48,10 +48,10 @@ class TTTLearningProcessor(
     Files.write(file, serializedNet.getBytes("UTF-8"))
   }
 
-  def load(): TTTLearningProcessor = {
-    val fileName = s"nets/2018-05-08-16-47-13-499.network"
-    debug(s"Load current neural network from $fileName")
-    val file = Source.fromFile(fileName, "UTF-8")
+  def load(fileName: String): TTTLearningProcessor = {
+    val path = s"nets/$fileName"
+    debug(s"Load current neural network from $path")
+    val file = Source.fromFile(path, "UTF-8")
       .getLines()
       .mkString("#")
     val deserializeNet = TTTQTable.deserialize(file)
