@@ -47,11 +47,13 @@ class GameFieldController(
   }
 
   def setPos(posX: Int, posY: Int, player: Player): GameFieldController.Result = setPos(GridPosition(posX, posY), player)
+
   def setPos(pos: GridPosition, player: Player): GameFieldController.Result = {
     if (isNotCurrentThread) throw new IllegalStateException("wrong thread")
 
     val result = setPosInGrid(gameField, pos, player)
     gameField = result.field
+    debug(s"new game field: \n${gameField.print()}")
     trace(s"player: $player trying to set pos: $pos: $result")
     result match {
       case update: GameFieldController.Updates => publish(update)
@@ -77,6 +79,7 @@ class GameFieldController(
   // only the last person playing can possible win.
   private def checkGameFinished(gf: GameField, lastPlayer: Player, lastPos: GridPosition): Option[Option[Player]] = {
     def checkPos(pos: GridPosition) = gf.gameField.get(pos).contains(lastPlayer)
+
     if (strategy.getOrElse(lastPos, Nil).exists(_.check(checkPos))) {
       // last Player is winner
       Some(Some(lastPlayer))

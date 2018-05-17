@@ -1,7 +1,7 @@
 <configuration>
   <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
-      <pattern>%date{HH:mm:ss.SSS} %-5level %-29logger{29} - %msg%n</pattern>
+      <pattern>%date{HH:mm:ss.SSS} [%thread] %-5level %-29logger{29} - %msg%n</pattern>
     </encoder>
   </appender>
   <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -26,8 +26,9 @@
   <logger name="de.ai.htwg.tictactoe" level="info"/>
   <logger name="de.ai.htwg.tictactoe.aiClient" level="info"/>
   <logger name="de.ai.htwg.tictactoe.logicClient" level="info"/>
-  <logger name="de.ai.htwg.tictactoe.aiClient.learning" level="info"/>
+  <logger name="de.ai.htwg.tictactoe.aiClient.learning.core" level="debug"/>
   <logger name="de.ai.htwg.tictactoe.aiClient.learning.core.policy" level="info"/>
+  <logger name="de.ai.htwg.tictactoe.gameLogic.controller" level="debug"/>
   <root level="info">
     <appender-ref ref="console"/>
     <appender-ref ref="file"/>

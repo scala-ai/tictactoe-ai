@@ -18,4 +18,6 @@ case class TTTState(
   }
 
   override def hash: Int = field.fieldHash
+
+  override def toString: String = field.print()
 }

@@ -47,7 +47,7 @@ case class QLearning[S <: State, A <: Action](
   }
 
   private def calcBestAction(state: S, possibleActions: List[A]): (A, Double) = {
-    debug(s"Request action in state \n${state.asVector}")
+    debug(s"Request action in state \n${state.toString}")
     val ratedActions = possibleActions
       .map(a => (a, calcQValue(state, a)))
     trace(s"Q-Values: $ratedActions")
@@ -83,6 +83,7 @@ case class QLearning[S <: State, A <: Action](
         y.putScalar(Array[Int](0, 0), newQVal)
         val input = toInputVector(state, action)
         neuralNet.train(input, y)
+        debug(s"q value update for $action is $oldQVal -> $newQVal")
         newQVal
       })
     val updatedPolicy = transitionHistory

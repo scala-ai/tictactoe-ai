@@ -44,6 +44,19 @@ case class GameField private[model](
     .map(g => (g._1.x, g._1.y, g._2))
     .toSet
     .hashCode()
+
+  def print(): String =
+    0.until(dimensions).map(y =>
+      0.until(dimensions)
+        .map(x => getPos(GridPosition(x, y)))
+        .map {
+          case None => " - "
+          case Some(Player.Circle) => " o "
+          case Some(Player.Cross) => " x "
+        }
+        .mkString
+    ).mkString("\n")
+
 }
 
 object GameField {
@@ -52,8 +65,11 @@ object GameField {
 
   sealed trait GameState {
     def asRunning: Option[Running] = None
+
     def asFinished: Option[Finished] = None
+
     def isRunning: Boolean = asRunning.isDefined
+
     def isFinished: Boolean = asFinished.isDefined
   }
   case class Running(current: Player) extends GameState {
