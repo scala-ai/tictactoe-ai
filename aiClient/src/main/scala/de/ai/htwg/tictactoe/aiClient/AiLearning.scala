@@ -1,5 +1,7 @@
 package de.ai.htwg.tictactoe.aiClient
 
+import java.util.concurrent.Executors
+
 import de.ai.htwg.tictactoe.aiClient.AiLearning.LearningProcessorConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.TTTLearningProcessor
 import de.ai.htwg.tictactoe.aiClient.learning.core.QLearningConfiguration
@@ -15,7 +17,8 @@ class AiLearning(properties: LearningProcessorConfiguration, trainingId: String)
     properties.dimensions,
     policyProperties = properties.policyProperties,
     qLearningProperties = properties.qLearningProperties,
-    neuralNetConfiguration = properties.neuralNetProperties
+    neuralNetConfiguration = properties.neuralNetProperties,
+    Executors.newFixedThreadPool(5)
   )
 
   def saveState(): Unit = {

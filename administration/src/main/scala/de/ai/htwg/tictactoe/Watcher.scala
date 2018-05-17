@@ -4,33 +4,39 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.concurrent.Executors
 
 import scala.collection.mutable.ListBuffer
 
+import de.ai.htwg.tictactoe.aiClient.AiLearning.LearningProcessorConfiguration
 import grizzled.slf4j.Logging
 
 
-class Watcher(trainingId: String, seed: Long) extends Logging {
+class Watcher(val trainingId: String, val seed: Long, val properties: LearningProcessorConfiguration) extends Logging {
 
   private val results: ListBuffer[Watcher.EpochResult] = ListBuffer()
+  private val executors = Executors.newFixedThreadPool(5)
 
   def addEpochResult(r: Watcher.EpochResult): Unit = {
     results += r
   }
 
   def printCSV(): Unit = {
-    results.toList match {
-      case Nil => info("no epoch results recoded")
-      case nonEmpty =>
-        val csvString = buildCSV(nonEmpty)
-        debug("csv:\n" + csvString)
-        writeToFile(csvString)
-    }
+    val list = results.toList
+    executors.execute(() => {
+      list match {
+        case Nil => info("no epoch results recoded")
+        case nonEmpty =>
+          val csvString = buildCSV(nonEmpty)
+          debug("csv:\n" + csvString)
+          writeToFile(csvString)
+      }
+    })
   }
 
   private def buildCSV(results: List[Watcher.EpochResult]): String = {
     val totalEpochs = results.head.epoch
-    s"seed:; $seed; ; ; ; \n" +
+    s"properties:; $seed; ${properties.dimensions}; ${properties.neuralNetProperties}; ${properties.policyProperties}; ${properties.qLearningProperties}\n" +
       "epoch; wins; defDraws; offDraw; losses; win percentage\n" +
       results.map { r =>
         val totalGames = r.won + r.defDraw + r.offDraw + r.lost

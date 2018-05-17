@@ -4,6 +4,7 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.concurrent.ExecutorService
 
 import scala.io.Source
 
@@ -21,31 +22,34 @@ import de.ai.htwg.tictactoe.aiClient.learning.core.transition.TransitionHistoryI
 import grizzled.slf4j.Logging
 
 class TTTLearningProcessor(
-    learning: QLearning[TTTState, TTTAction]
+    val learning: QLearning[TTTState, TTTAction],
+    val executors: ExecutorService
 ) extends Logging {
 
   def getTrainingDecision(state: TTTState): (TTTAction, TTTLearningProcessor) = {
     trace(s"Ask for training decision")
     val (newLearning, action) = learning.getTrainingDecision(state)
-    (action, new TTTLearningProcessor(learning = newLearning))
+    (action, new TTTLearningProcessor(learning = newLearning, executors))
   }
 
   def getBestDecision(state: TTTState): (TTTAction, TTTLearningProcessor) = {
     trace(s"Ask for best decision")
     val (newLearning, action) = learning.getBestDecision(state)
-    (action, new TTTLearningProcessor(learning = newLearning))
+    (action, new TTTLearningProcessor(learning = newLearning, executors))
   }
 
-  def trainResult(result: EpochResult): TTTLearningProcessor = new TTTLearningProcessor(learning.trainHistory(result))
+  def trainResult(result: EpochResult): TTTLearningProcessor = new TTTLearningProcessor(learning.trainHistory(result), executors)
 
   def persist(trainingId: String): Unit = {
-    val now = LocalDateTime.now.format(DateTimeFormatter.ofPattern("YYYY-MM-dd-HH-mm-ss-SSS"))
-    val fileName = s"nets/$trainingId.$now.network"
-    debug(s"Save current neural network to $fileName")
     val serializedNet = learning.neuralNet.serialize()
-    val file = Paths.get(fileName)
-    Files.createDirectories(file.getParent)
-    Files.write(file, serializedNet.getBytes("UTF-8"))
+    executors.execute(() => {
+      val now = LocalDateTime.now.format(DateTimeFormatter.ofPattern("YYYY-MM-dd-HH-mm-ss-SSS"))
+      val fileName = s"nets/$trainingId.$now.network"
+      debug(s"Save current neural network to $fileName")
+      val file = Paths.get(fileName)
+      Files.createDirectories(file.getParent)
+      Files.write(file, serializedNet.getBytes("UTF-8"))
+    })
   }
 
   def load(fileName: String): TTTLearningProcessor = {
@@ -55,7 +59,7 @@ class TTTLearningProcessor(
       .getLines()
       .mkString("#")
     val deserializeNet = TTTQTable.deserialize(file)
-    new TTTLearningProcessor(learning = learning.copy(neuralNet = deserializeNet))
+    new TTTLearningProcessor(learning = learning.copy(neuralNet = deserializeNet), executors)
   }
 }
 
@@ -64,7 +68,8 @@ object TTTLearningProcessor {
       dimensions: Int,
       policyProperties: PolicyConfiguration,
       qLearningProperties: QLearningConfiguration,
-      neuralNetConfiguration: NeuralNetConfiguration
+      neuralNetConfiguration: NeuralNetConfiguration,
+      executors: ExecutorService
   ): TTTLearningProcessor = new TTTLearningProcessor(
     QLearning[TTTState, TTTAction](
       policy = policyProperties match {
@@ -77,6 +82,7 @@ object TTTLearningProcessor {
       transitionFactory = TTTTransition,
       actionSpace = TTTActionSpace(),
       qLearningProperties = qLearningProperties
-    )
+    ),
+    executors
   )
 }

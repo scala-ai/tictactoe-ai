@@ -10,7 +10,6 @@ import org.deeplearning4j.nn.conf.layers.DenseLayer
 import org.deeplearning4j.nn.conf.layers.OutputLayer
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork
 import org.deeplearning4j.nn.weights.WeightInit
-import org.deeplearning4j.rl4j.util.Constants
 import org.deeplearning4j.util.ModelSerializer
 import org.nd4j.linalg.activations.Activation
 import org.nd4j.linalg.api.ndarray.INDArray
@@ -46,7 +45,7 @@ object Dl4JNeuralNet extends NeuralNet.Factory {
   override def apply(conf: NeuralNetConfiguration): NeuralNet = {
     Nd4j.getRandom.setSeed(seed)
     var netConfig = new nn.conf.NeuralNetConfiguration.Builder()
-      .seed(Constants.NEURAL_NET_SEED)
+      .seed(12345L)
       .updater(Adam.builder()
         .beta1(0.9)
         .beta2(0.999)

@@ -26,9 +26,9 @@
   <logger name="de.ai.htwg.tictactoe" level="info"/>
   <logger name="de.ai.htwg.tictactoe.aiClient" level="info"/>
   <logger name="de.ai.htwg.tictactoe.logicClient" level="info"/>
-  <logger name="de.ai.htwg.tictactoe.aiClient.learning.core" level="debug"/>
+  <logger name="de.ai.htwg.tictactoe.aiClient.learning.core" level="info"/>
   <logger name="de.ai.htwg.tictactoe.aiClient.learning.core.policy" level="info"/>
-  <logger name="de.ai.htwg.tictactoe.gameLogic.controller" level="debug"/>
+  <logger name="de.ai.htwg.tictactoe.gameLogic.controller" level="info"/>
   <root level="info">
     <appender-ref ref="console"/>
     <appender-ref ref="file"/>
