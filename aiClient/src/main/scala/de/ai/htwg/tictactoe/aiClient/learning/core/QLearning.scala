@@ -30,20 +30,17 @@ case class QLearning[S <: State, A <: Action](
     // Let's run our Q function on S to get Q values for all possible actions
     val possibleActions = actionSpace.getPossibleActions(state)
     // action depends on a training policy
-    val (action, qValue) = policy.nextAction(state, () => calcBestAction(state, possibleActions), calcQValue, possibleActions)
-    createTransition(action, state, qValue)
+    val (bestAction, bestQValue) = calcBestAction(state, possibleActions)
+    val (action, qValue) = policy.nextAction(state, () => (bestAction, bestQValue), calcQValue, possibleActions)
+    val reward = rewardCalculator.getImmediateReward(action, state)
+    val updatedHistory = transitionHistory.addTransition(transitionFactory(state, action, reward, qValue, bestQValue))
+    (copy(transitionHistory = updatedHistory), action)
   }
 
   override def getBestDecision(state: S): (QLearning[S, A], A) = {
     val possibleActions = actionSpace.getPossibleActions(state)
-    val (action, qValue) = calcBestAction(state, possibleActions)
-    createTransition(action, state, qValue)
-  }
-
-  private def createTransition(action: A, state: S, qValue: Double): (QLearning[S, A], A) = {
-    val reward = rewardCalculator.getImmediateReward(action, state)
-    val updatedHistory = transitionHistory.addTransition(transitionFactory(state, action, reward, qValue))
-    (copy(transitionHistory = updatedHistory), action)
+    val (action, _) = calcBestAction(state, possibleActions)
+    (copy(), action)
   }
 
   private def calcBestAction(state: S, possibleActions: List[A]): (A, Double) = {
@@ -76,12 +73,12 @@ case class QLearning[S <: State, A <: Action](
         val action = transition.action
         val reward = transition.reward
         val oldQVal = transition.qValue
+        val futureMaxQVal = transition.maxQValue
 
         // new q value Q(s, a)
         val newQVal = if (futureQVal._2) {
-          epochReward
+          Math.max(epochReward, futureMaxQVal)
         } else {
-          val futureMaxQVal = ???
           (1 - alpha) * oldQVal + alpha * (reward + gamma * futureMaxQVal)
         }
         val y = Nd4j.zeros(1)

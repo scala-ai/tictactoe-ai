@@ -8,4 +8,5 @@ trait Transition[A <: Action, S <: State] {
   val action: A
   val reward: Double
   val qValue: Double
+  val maxQValue: Double
 }
