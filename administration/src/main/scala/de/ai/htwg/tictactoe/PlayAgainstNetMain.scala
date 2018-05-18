@@ -34,7 +34,7 @@ object PlayAgainstNetMain extends App with Logging {
   }
 
   def playGame(): Unit = {
-    val gameController = new GameFieldController(strategy, Player.Cross)
+    val gameController = GameFieldController(strategy, Player.Cross)
     var finishedPlayers = 0
 
     def handleGameFinish(winner: Option[Player]): Unit = {

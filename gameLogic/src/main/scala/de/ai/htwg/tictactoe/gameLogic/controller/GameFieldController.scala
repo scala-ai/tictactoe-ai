@@ -20,9 +20,13 @@ object GameFieldController {
     case class NotThisPlayersTurn(field: GameField, wrongPlayer: Player) extends Result
     case class PositionAlreadySelected(field: GameField, pos: GridPosition) extends Result
   }
+
+  def apply(strategyBuilder: TTTWinStrategyBuilder, startingPlayer: Player) =
+    new GameFieldController(strategyBuilder, startingPlayer)
+
 }
 
-class GameFieldController(
+class GameFieldController private(
     val strategyBuilder: TTTWinStrategyBuilder,
     val startingPlayer: Player,
 ) extends mutable.Publisher[GameFieldController.Updates] with Logging {

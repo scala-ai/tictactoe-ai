@@ -122,7 +122,7 @@ class Trainer(strategyBuilder: TTTWinStrategyBuilder, clientMain: UiMain, val pl
     }
 
     val startPlayer = if (random.nextBoolean()) Player.Cross else Player.Circle
-    val gameFieldController = new GameFieldController(strategyBuilder, startPlayer)
+    val gameFieldController = GameFieldController(strategyBuilder, startPlayer)
 
     aiTrainer.registerGame(gameFieldController, training = true, _ => handlePlayerReady())
     val randomPlayer = new RandomPlayer(Player.Circle, random, _ => handlePlayerReady())
@@ -174,7 +174,7 @@ class Trainer(strategyBuilder: TTTWinStrategyBuilder, clientMain: UiMain, val pl
         doAfter()
       }
     } else {
-      val gameFieldController = new GameFieldController(strategyBuilder, startPlayer)
+      val gameFieldController = GameFieldController(strategyBuilder, startPlayer)
 
       aiTrainer.registerGame(gameFieldController, training = false, handleGameFinish)
       val logicPlayer = new LogicPlayer(Player.Circle, random, possibleWinActions, handleGameFinish)
@@ -185,7 +185,7 @@ class Trainer(strategyBuilder: TTTWinStrategyBuilder, clientMain: UiMain, val pl
   def runUiGame(testGameNumber: Int): Unit = {
     var readyPlayers = 0
     val startPlayer = if (random.nextBoolean()) Player.Cross else Player.Circle
-    val gameFieldController = new GameFieldController(strategyBuilder, startPlayer)
+    val gameFieldController = GameFieldController(strategyBuilder, startPlayer)
     val gameName = s"testGame-$testGameNumber"
     info(s"run testGame: $gameName")
 
