@@ -1,7 +1,9 @@
 package de.ai.htwg.tictactoe.clientConnection.util
 
-import java.util.concurrent.Executors
+import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.ThreadFactory
+import java.util.concurrent.ThreadPoolExecutor
+import java.util.concurrent.TimeUnit
 
 import scala.concurrent.Await
 import scala.concurrent.ExecutionContext
@@ -31,7 +33,12 @@ object SingleThreadPlatform {
       thread
     }
 
-    val executionContext = ExecutionContext.fromExecutor(Executors.newSingleThreadExecutor(f))
+    val threadPoolExecutor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue[Runnable], f) {
+      override def afterExecute(r: Runnable, t: Throwable): Unit = {
+        if (t != null) shutdown()
+      }
+    }
+    val executionContext = ExecutionContext.fromExecutor(threadPoolExecutor)
     new SingleThreadPlatform(thread, executionContext)
   }
 }

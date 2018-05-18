@@ -1,5 +1,6 @@
 package de.ai.htwg.tictactoe.gameLogic.controller
 
+import de.ai.htwg.tictactoe.clientConnection.gameController.GameFieldController
 import de.ai.htwg.tictactoe.clientConnection.model.Player
 import de.ai.htwg.tictactoe.clientConnection.model.GameField
 import de.ai.htwg.tictactoe.clientConnection.model.strategy.TTTWinStrategy4xBuilder
@@ -10,7 +11,7 @@ import org.scalatest.Inside
 class GameFieldControllerTest extends FreeSpec with Matchers with Inside {
 
   private def fixture(): GameFieldController = {
-    val cont = new GameFieldController(TTTWinStrategy4xBuilder, Player.Cross)
+    val cont = GameFieldControllerImpl(TTTWinStrategy4xBuilder, Player.Cross)
     cont.setPos(0, 0, Player.Cross)
     cont.setPos(1, 0, Player.Circle)
     cont.setPos(0, 1, Player.Cross)
