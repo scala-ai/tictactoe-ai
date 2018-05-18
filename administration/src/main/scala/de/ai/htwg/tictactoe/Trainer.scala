@@ -100,7 +100,7 @@ class Trainer(strategyBuilder: TTTWinStrategyBuilder, clientMain: UiMain, val pl
     }
 
 
-    if (remainingEpochs % Trainer.saveFrequency == 0 && remainingEpochs != totalEpochs) {
+    if ((totalEpochs - remainingEpochs) % Trainer.saveFrequency == 0 && remainingEpochs != totalEpochs) {
       aiTrainer.saveState()
       watcher.printCSV()
     }
@@ -111,7 +111,7 @@ class Trainer(strategyBuilder: TTTWinStrategyBuilder, clientMain: UiMain, val pl
       trace(s"training finished message (ready = $readyPlayer)")
       readyPlayer += 1
       if (readyPlayer == 2) {
-        if (remainingEpochs % Trainer.testFrequency == 0 && remainingEpochs != totalEpochs) {
+        if ((totalEpochs - remainingEpochs) % Trainer.testFrequency == 0 && remainingEpochs != totalEpochs) {
           runTestGame(Trainer.runsPerTest, TestGameData(remainingEpochs, 0, 0, 0, 0), () => doAllTraining(totalEpochs, remainingEpochs - 1, doAfter))
         } else {
           platform.execute {
