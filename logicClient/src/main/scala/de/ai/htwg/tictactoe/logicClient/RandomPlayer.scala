@@ -2,9 +2,9 @@ package de.ai.htwg.tictactoe.logicClient
 
 import scala.util.Random
 
+import de.ai.htwg.tictactoe.clientConnection.gameController.GameFieldController
 import de.ai.htwg.tictactoe.clientConnection.model.GameField
 import de.ai.htwg.tictactoe.clientConnection.model.Player
-import de.ai.htwg.tictactoe.gameLogic.controller.GameFieldController
 import grizzled.slf4j.Logging
 
 class RandomPlayer[C <: GameFieldController](

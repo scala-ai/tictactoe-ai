@@ -1,5 +1,6 @@
 package de.ai.htwg.tictactoe.gameLogic.controller
 
+import de.ai.htwg.tictactoe.clientConnection.gameController.GameFieldController
 import de.ai.htwg.tictactoe.clientConnection.model.Player
 import de.ai.htwg.tictactoe.clientConnection.model.GameField
 import de.ai.htwg.tictactoe.clientConnection.model.strategy.TTTWinStrategy4xBuilder
