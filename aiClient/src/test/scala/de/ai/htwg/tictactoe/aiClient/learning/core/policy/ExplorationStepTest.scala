@@ -8,6 +8,7 @@ import de.ai.htwg.tictactoe.aiClient.learning.TTTState
 import de.ai.htwg.tictactoe.aiClient.learning.core.policy.ExplorationStep.StepSupplier
 import de.ai.htwg.tictactoe.clientConnection.model
 import de.ai.htwg.tictactoe.clientConnection.model.GameField
+import de.ai.htwg.tictactoe.clientConnection.model.GameFieldDimensions
 import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
 import de.ai.htwg.tictactoe.clientConnection.model.Player
 import org.scalamock.scalatest.MockFactory
@@ -18,7 +19,11 @@ import org.scalatest.Matchers
 class ExplorationStepTest extends FreeSpec with Matchers with MockFactory {
 
   val gameField: GameField = {
-    val gf = model.GameField(Player.Cross, 2)
+    val strat = new GameFieldDimensions {
+      override def dimensions: Int = 2
+    }
+
+    val gf = model.GameField(Player.Cross, strat)
     gf.setPos(GridPosition(0, 1))
   }
 

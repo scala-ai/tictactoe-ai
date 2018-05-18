@@ -1,10 +1,13 @@
 package de.ai.htwg.tictactoe.clientConnection.model
 
+
 case class GameField private[model](
     gameState: GameField.GameState,
-    dimensions: Int,
+    gfDimensions: GameFieldDimensions,
     gameField: Map[GridPosition, Player] = Map.empty,
-) {
+) extends GameFieldDimensions {
+  override val listAllGridPos: List[GridPosition] = gfDimensions.listAllGridPos
+  override val dimensions: Int = gfDimensions.dimensions
 
   def finishGame(winner: Option[Player]): GameField = copy(gameState = GameField.Finished(winner))
 
@@ -30,9 +33,9 @@ case class GameField private[model](
     }
   }
 
-  def getAllEmptyPos: List[GridPosition] = GameField.getAllEmptyPos(dimensions, gameField)
+  def getAllEmptyPos: List[GridPosition] = listAllGridPos.filterNot(gameField.contains)
 
-  def isCompletelyFilled(): Boolean = GameField.isCompletelyFilled(dimensions, gameField)
+  def isCompletelyFilled(): Boolean = gameField.size >= dimensions * dimensions
 
   def finishedUndecided: Boolean = gameState.asFinished.exists(_.winner.isEmpty)
 
@@ -45,23 +48,23 @@ case class GameField private[model](
     .toSet
     .hashCode()
 
-  def print(): String =
-    0.until(dimensions).map(y =>
-      0.until(dimensions)
-        .map(x => getPos(GridPosition(x, y)))
-        .map {
+  def print(): String = {
+    0.until(dimensions).map { y =>
+      0.until(dimensions).map { x =>
+        getPos(GridPosition(x, y)) match {
           case None => " - "
           case Some(Player.Circle) => " o "
           case Some(Player.Cross) => " x "
         }
-        .mkString
-    ).mkString("\n")
+      }.mkString
+    }.mkString("\n")
+  }
 
 }
 
 object GameField {
 
-  def apply(startingPlayer: Player, dimensions: Int): GameField = GameField(Running(startingPlayer), dimensions, Map())
+  def apply(startingPlayer: Player, stratBuilder: GameFieldDimensions): GameField = GameField(Running(startingPlayer), stratBuilder, Map())
 
   sealed trait GameState {
     def asRunning: Option[Running] = None
@@ -78,20 +81,6 @@ object GameField {
   case class Finished(winner: Option[Player]) extends GameState {
     override lazy val asFinished = Some(this)
   }
-
-  def getAllEmptyPos(dimensions: Int, gf: Map[GridPosition, Player]): List[GridPosition] = {
-    val seq: Seq[GridPosition] = for {
-      x <- 0 until dimensions
-      y <- 0 until dimensions
-      gp = GridPosition(x, y)
-      if !gf.contains(gp)
-    } yield {
-      gp
-    }
-    seq.toList
-  }
-
-  def isCompletelyFilled(dimensions: Int, gameField: Map[GridPosition, Player]): Boolean = gameField.size >= dimensions * dimensions
 }
 
 

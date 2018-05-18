@@ -23,7 +23,7 @@ class GameFieldControllerImpl(
   val dimensions: Int = strategyBuilder.dimensions
   val strategy: Map[GridPosition, List[TTTWinStrategy]] = strategyBuilder.allWinStrategyCheckerPerPos
 
-  @volatile private var gameField = GameField(startingPlayer, dimensions)
+  @volatile private var gameField = GameField(startingPlayer, strategyBuilder)
 
   private def isNotCurrentThread: Boolean = Thread.currentThread() != thread
 

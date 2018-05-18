@@ -2,21 +2,13 @@ package de.ai.htwg.tictactoe.clientConnection.model.strategy
 
 import scala.collection.mutable.ListBuffer
 
+import de.ai.htwg.tictactoe.clientConnection.model.GameFieldDimensions
 import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
 
-trait TTTWinStrategyBuilder {
-  def dimensions: Int
+trait TTTWinStrategyBuilder extends GameFieldDimensions {
 
+  override val listAllGridPos: List[GridPosition] = super.listAllGridPos
   def listAllWinStrategies: List[TTTWinStrategy]
-
-  protected def listAllGridPos: List[GridPosition] = {
-    (for {
-      x <- 0 until dimensions
-      y <- 0 until dimensions
-    } yield {
-      GridPosition(x, y)
-    }).toList
-  }
 
   protected def checkDimensions(pos: GridPosition): Boolean = {
     def check(i: Int) = i >= 0 && i < dimensions
