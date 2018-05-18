@@ -16,6 +16,7 @@ import de.ai.htwg.tictactoe.aiClient.learning.core.policy.EpsGreedyConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.policy.ExplorationStep
 import de.ai.htwg.tictactoe.aiClient.learning.core.policy.ExplorationStepConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.policy.PolicyConfiguration
+import de.ai.htwg.tictactoe.aiClient.learning.core.reward.RewardCalculatorConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.state.EpochResult
 import de.ai.htwg.tictactoe.aiClient.learning.core.transition.TransitionHistoryImpl
 import grizzled.slf4j.Logging
@@ -58,12 +59,14 @@ object TTTLearningProcessor {
       policyProperties: PolicyConfiguration,
       qLearningProperties: QLearningConfiguration,
       neuralNetConfiguration: NeuralNetConfiguration,
-      executors: ExecutorService
+      executors: ExecutorService,
+      rewardProperties: RewardCalculatorConfiguration
   ): TTTLearningProcessor = new TTTLearningProcessor(
     createQLearning(
       policyProperties,
       qLearningProperties,
-      Dl4JNeuralNet(neuralNetConfiguration)
+      Dl4JNeuralNet(neuralNetConfiguration),
+      rewardProperties
     ),
     executors
   )
@@ -72,7 +75,8 @@ object TTTLearningProcessor {
       policyProperties: PolicyConfiguration,
       qLearningProperties: QLearningConfiguration,
       neuralNetFileName: String,
-      executors: ExecutorService
+      executors: ExecutorService,
+      rewardProperties: RewardCalculatorConfiguration
   ): TTTLearningProcessor = {
     val path = s"$networkFilesLocation$neuralNetFileName"
     val network = Dl4JNeuralNet.deserialize(path)
@@ -80,7 +84,8 @@ object TTTLearningProcessor {
       createQLearning(
         policyProperties,
         qLearningProperties,
-        network
+        network,
+        rewardProperties
       ),
       executors
     )
@@ -89,14 +94,17 @@ object TTTLearningProcessor {
   private def createQLearning(
       policyProperties: PolicyConfiguration,
       qLearningProperties: QLearningConfiguration,
-      neuralNet: NeuralNet
+      neuralNet: NeuralNet,
+      rewardProperties: RewardCalculatorConfiguration
   ) = {
     QLearning[TTTState, TTTAction](
       policy = policyProperties match {
         case c: EpsGreedyConfiguration => EpsGreedy[TTTState, TTTAction](c)
         case c: ExplorationStepConfiguration => ExplorationStep[TTTState, TTTAction](c)
       },
-      rewardCalculator = TTTRewardCalculator(),
+      rewardCalculator = rewardProperties match {
+        case c: TTTRewardCalculator.Configuration => TTTRewardCalculator(c)
+      },
       neuralNet = neuralNet,
       transitionHistory = TransitionHistoryImpl[TTTAction, TTTState](),
       transitionFactory = TTTTransition,

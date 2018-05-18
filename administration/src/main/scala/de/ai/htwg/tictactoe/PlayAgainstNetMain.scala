@@ -6,6 +6,7 @@ import scala.util.Random
 
 import de.ai.htwg.tictactoe.aiClient.AiLearning
 import de.ai.htwg.tictactoe.aiClient.learning.TTTLearningProcessor
+import de.ai.htwg.tictactoe.aiClient.learning.TTTRewardCalculator
 import de.ai.htwg.tictactoe.aiClient.learning.core.QLearningConfiguration
 import de.ai.htwg.tictactoe.clientConnection.fxUI.UiMain
 import de.ai.htwg.tictactoe.clientConnection.model.Player
@@ -25,7 +26,8 @@ object PlayAgainstNetMain extends App with Logging {
     policyProperties = Trainer.buildEpsGreedyConfiguration(new Random(5L)),
     qLearningProperties = QLearningConfiguration(),
     neuralNetFileName = "cOvMZd.2018-05-17-20-47-49-149.network.zip",
-    executors = Executors.newFixedThreadPool(5)
+    executors = Executors.newFixedThreadPool(5),
+    rewardProperties = TTTRewardCalculator.defaultConfig()
   ), "testTraining")
 
 

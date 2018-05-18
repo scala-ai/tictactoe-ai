@@ -4,6 +4,7 @@ import scala.util.Random
 
 import de.ai.htwg.tictactoe.aiClient.AiLearning
 import de.ai.htwg.tictactoe.aiClient.AiLearning.LearningProcessorConfiguration
+import de.ai.htwg.tictactoe.aiClient.learning.TTTRewardCalculator
 import de.ai.htwg.tictactoe.aiClient.learning.core.QLearningConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.net.NeuralNetConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.policy.EpsGreedyConfiguration
@@ -61,6 +62,9 @@ class Trainer(strategyBuilder: TTTWinStrategyBuilder, clientMain: UiMain, val pl
       hiddenNodes = 64,
       inputNodes = strategyBuilder.dimensions * strategyBuilder.dimensions * 2,
       activationFunction = Activation.RELU
+    ),
+    TTTRewardCalculator.Configuration(
+      5, 2, 0, -10, 0.1, 0.2
     )
   )
 
