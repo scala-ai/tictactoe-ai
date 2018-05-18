@@ -3,15 +3,16 @@ package de.ai.htwg.tictactoe.logicClient
 import scala.util.Random
 
 import de.ai.htwg.tictactoe.clientConnection.gameController.GameFieldController
+import de.ai.htwg.tictactoe.clientConnection.gameController.GameFieldControllerSubscriber
 import de.ai.htwg.tictactoe.clientConnection.model.GameField
 import de.ai.htwg.tictactoe.clientConnection.model.Player
 import grizzled.slf4j.Logging
 
-class RandomPlayer[C <: GameFieldController](
+class RandomPlayer(
     currentPlayer: Player,
     random: Random,
     callbackAfterGame: Option[Player] => Unit,
-) extends C#Sub with Logging {
+) extends GameFieldControllerSubscriber with Logging {
   trace(s"RandomPlayer starts playing as $currentPlayer")
   override def notify(pub: GameFieldController, event: GameFieldController.Updates): Unit = event match {
     case GameFieldController.Result.GameFinished(_, winner) =>
