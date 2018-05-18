@@ -7,6 +7,11 @@ import de.ai.htwg.tictactoe.clientConnection.model.strategy.TTTWinStrategy
 import de.ai.htwg.tictactoe.clientConnection.model.strategy.TTTWinStrategyBuilder
 import grizzled.slf4j.Logging
 
+object GameFieldControllerImpl {
+  def apply(strategyBuilder: TTTWinStrategyBuilder, startingPlayer: Player): GameFieldController =
+    new GameFieldControllerImpl(strategyBuilder, startingPlayer)
+}
+
 class GameFieldControllerImpl(
     val strategyBuilder: TTTWinStrategyBuilder,
     override val startingPlayer: Player,

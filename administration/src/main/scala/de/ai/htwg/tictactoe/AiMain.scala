@@ -9,7 +9,7 @@ import de.ai.htwg.tictactoe.clientConnection.fxUI.UiMain
 import de.ai.htwg.tictactoe.clientConnection.model.Player
 import de.ai.htwg.tictactoe.clientConnection.model.strategy.TTTWinStrategy3xBuilder
 import de.ai.htwg.tictactoe.clientConnection.util.SingleThreadPlatform
-import de.ai.htwg.tictactoe.gameLogic.controller.GameFieldController
+import de.ai.htwg.tictactoe.gameLogic.controller.GameFieldControllerImpl
 import de.ai.htwg.tictactoe.playerClient.UiPlayer
 import grizzled.slf4j.Logging
 
@@ -27,7 +27,7 @@ object AiMain extends App with Logging {
   }
 
   def playGame(): Unit = {
-    val gameController = GameFieldController(strategy, Player.Cross)
+    val gameController = GameFieldControllerImpl(strategy, Player.Cross)
     var finishedPlayers = 0
 
     def handleGameFinish(winner: Option[Player]): Unit = {
