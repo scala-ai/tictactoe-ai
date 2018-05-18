@@ -7,8 +7,8 @@ import de.ai.htwg.tictactoe.aiClient.learning.core.QLearningConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.net.NeuralNetConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.policy.PolicyConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.state.EpochResult
+import de.ai.htwg.tictactoe.clientConnection.gameController.GameFieldController
 import de.ai.htwg.tictactoe.clientConnection.model.Player
-import de.ai.htwg.tictactoe.gameLogic.controller.GameFieldController
 
 class AiLearning(var learningUnit: TTTLearningProcessor, trainingId: String) {
   private val aiPlayerType = Player.Cross

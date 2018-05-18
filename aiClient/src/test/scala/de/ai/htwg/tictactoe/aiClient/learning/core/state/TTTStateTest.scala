@@ -2,6 +2,7 @@ package de.ai.htwg.tictactoe.aiClient.learning.core.state
 
 import de.ai.htwg.tictactoe.aiClient.learning.TTTState
 import de.ai.htwg.tictactoe.clientConnection.model.GameField
+import de.ai.htwg.tictactoe.clientConnection.model.GameFieldDimensions
 import de.ai.htwg.tictactoe.clientConnection.model.Player
 import org.nd4j.linalg.factory.Nd4j
 import org.scalatest.FreeSpec
@@ -10,9 +11,12 @@ import org.scalatest.Matchers
 class TTTStateTest extends FreeSpec with Matchers {
 
   "A state" - {
+    val strat = new GameFieldDimensions {
+      override def dimensions: Int = 5
+    }
     "should return an n-dimensional array" - {
       val gameField = {
-        GameField(Player.Circle, 5)
+        GameField(Player.Circle, strat)
           .setPos(0, 2) // circle
           .setPos(0, 0) // cross
           .setPos(1, 2) // circle

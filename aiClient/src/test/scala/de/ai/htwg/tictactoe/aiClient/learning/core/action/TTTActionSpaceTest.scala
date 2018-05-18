@@ -6,16 +6,23 @@ import de.ai.htwg.tictactoe.aiClient.learning.TTTState
 import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
 import de.ai.htwg.tictactoe.clientConnection.model.Player
 import de.ai.htwg.tictactoe.clientConnection.model.GameField
+import de.ai.htwg.tictactoe.clientConnection.model.GameFieldDimensions
+
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers
 
 class TTTActionSpaceTest extends FreeSpec with Matchers {
 
   "An action space" - {
+
+    val strat = new GameFieldDimensions{
+      override def dimensions: Int = 4
+    }
+
     "should list all empty fields in a given playground as action" in {
 
       val gameField = {
-        GameField(Player.Circle, 4)
+        GameField(Player.Circle, strat)
           .setPos(GridPosition(2, 0)) // circle
           .setPos(GridPosition(0, 0)) // cross
           .setPos(GridPosition(3, 0)) // circle

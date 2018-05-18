@@ -1,7 +1,6 @@
 package de.ai.htwg.tictactoe.gameLogic.controller
 
-import scala.collection.mutable
-
+import de.ai.htwg.tictactoe.clientConnection.gameController.GameFieldController
 import de.ai.htwg.tictactoe.clientConnection.model.GameField
 import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
 import de.ai.htwg.tictactoe.clientConnection.model.Player
@@ -9,32 +8,22 @@ import de.ai.htwg.tictactoe.clientConnection.model.strategy.TTTWinStrategy
 import de.ai.htwg.tictactoe.clientConnection.model.strategy.TTTWinStrategyBuilder
 import grizzled.slf4j.Logging
 
-object GameFieldController {
-  sealed trait Result {
-    val field: GameField
-  }
-  sealed trait Updates extends Result
-  object Result {
-    case class GameUpdated(field: GameField) extends Updates
-    case class GameFinished(field: GameField, winner: Option[Player]) extends Updates
-    case class NotThisPlayersTurn(field: GameField, wrongPlayer: Player) extends Result
-    case class PositionAlreadySelected(field: GameField, pos: GridPosition) extends Result
-  }
+object GameFieldControllerImpl {
+  def apply(strategyBuilder: TTTWinStrategyBuilder, startingPlayer: Player): GameFieldController =
+    new GameFieldControllerImpl(strategyBuilder, startingPlayer)
 }
 
-class GameFieldController(
+class GameFieldControllerImpl(
     val strategyBuilder: TTTWinStrategyBuilder,
-    val startingPlayer: Player,
-) extends mutable.Publisher[GameFieldController.Updates] with Logging {
+    override val startingPlayer: Player,
+) extends GameFieldController with Logging {
   private val thread = Thread.currentThread()
   debug("starting Game")
-  final override type Pub = GameFieldController
-  final override type Sub = mutable.Subscriber[GameFieldController.Updates, Pub]
   private val res = GameFieldController.Result
   val dimensions: Int = strategyBuilder.dimensions
   val strategy: Map[GridPosition, List[TTTWinStrategy]] = strategyBuilder.allWinStrategyCheckerPerPos
 
-  @volatile private var gameField = GameField(startingPlayer, dimensions)
+  @volatile private var gameField = GameField(startingPlayer, strategyBuilder)
 
   private def isNotCurrentThread: Boolean = Thread.currentThread() != thread
 
@@ -46,9 +35,9 @@ class GameFieldController(
     if (filter(msg)) sub.notify(this, GameFieldController.Result.GameUpdated(gameField))
   }
 
-  def setPos(posX: Int, posY: Int, player: Player): GameFieldController.Result = setPos(GridPosition(posX, posY), player)
+  override def setPos(posX: Int, posY: Int, player: Player): GameFieldController.Result = setPos(GridPosition(posX, posY), player)
 
-  def setPos(pos: GridPosition, player: Player): GameFieldController.Result = {
+  override def setPos(pos: GridPosition, player: Player): GameFieldController.Result = {
     if (isNotCurrentThread) throw new IllegalStateException("wrong thread")
 
     val result = setPosInGrid(gameField, pos, player)
@@ -92,5 +81,5 @@ class GameFieldController(
     }
   }
 
-  def getGrid(): GameField = this.synchronized(gameField)
+  override def getGrid(): GameField = this.synchronized(gameField)
 }

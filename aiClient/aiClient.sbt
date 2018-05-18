@@ -16,5 +16,4 @@ lazy val aiClient = TicTacToeBuild.defaultProject(project).settings(
   )
 ).dependsOn(
   TicTacToeBuild.clientConnection,
-  TicTacToeBuild.gameLogic,
 )
