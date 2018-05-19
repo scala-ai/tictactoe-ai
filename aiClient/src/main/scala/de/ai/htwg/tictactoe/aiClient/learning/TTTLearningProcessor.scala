@@ -37,12 +37,11 @@ class TTTLearningProcessor(
 
   def persist(trainingId: String): Unit = {
     val now = LocalDateTime.now.format(DateTimeFormatter.ofPattern("YYYY-MM-dd-HH-mm-ss-SSS"))
-    val fileName = s"nets/$trainingId.$now.network"
+    val fileName = s"nets/$trainingId.$now.network.zip"
     debug(s"Save current neural network to $fileName")
-    val serializedNet = learning.neuralNet.serialize()
     val file = Paths.get(fileName)
     Files.createDirectories(file.getParent)
-    Files.write(file, serializedNet.getBytes("UTF-8"))
+    learning.neuralNet.serialize(fileName)
   }
 
   def load(): TTTLearningProcessor = {

@@ -7,7 +7,7 @@ trait NeuralNet {
 
   def train(input: INDArray, output: INDArray): Unit
 
-  def serialize(): String
+  def serialize(path: String): Unit
 }
 
 object NeuralNet {
@@ -17,6 +17,6 @@ object NeuralNet {
 
     def deserialize(string: String): NeuralNet
 
-    def serialize(neuralNet: NeuralNet): String = neuralNet.serialize()
+    def serialize(path: String, neuralNet: NeuralNet): Unit = neuralNet.serialize(path)
   }
 }

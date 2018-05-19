@@ -1,7 +1,6 @@
 package de.ai.htwg.tictactoe.aiClient.learning
 
 import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
 
 import de.ai.htwg.tictactoe.aiClient.learning.core.net.NeuralNet
 import grizzled.slf4j.Logging
@@ -34,11 +33,8 @@ class TTTNeuralNet private(val model: MultiLayerNetwork) extends NeuralNet with 
 
   private def reshapeInput(input: INDArray) = input.reshape(1, input.length())
 
-  override def serialize(): String = {
-    val outputStream = new ByteArrayOutputStream()
-    ModelSerializer.writeModel(model, outputStream, true)
-    outputStream.toString("UTF-8")
-  }
+  override def serialize(path: String): Unit =
+    ModelSerializer.writeModel(model, path, true)
 }
 
 object TTTNeuralNet extends NeuralNet.Factory {

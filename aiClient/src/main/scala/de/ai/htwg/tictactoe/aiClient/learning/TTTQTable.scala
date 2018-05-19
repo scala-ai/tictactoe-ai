@@ -24,7 +24,7 @@ class TTTQTable private(data: mutable.Map[Int, Double]) extends NeuralNet with L
 
   override def train(input: INDArray, output: INDArray): Unit = data.put(input.hashCode(), output.getDouble(0))
 
-  override def serialize(): String = data.map((k) => k._1 + ":" + k._2).mkString("\n")
+  override def serialize(path: String): Unit = ??? // data.map((k) => k._1 + ":" + k._2).mkString("\n")
 
   private def toArray(value: Double): INDArray = Nd4j.valueArrayOf(dimensions, dimensions, value)
 }
