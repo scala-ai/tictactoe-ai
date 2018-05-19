@@ -32,13 +32,13 @@ object TrainMain extends App with Logging {
       gamma = 0.3
     ),
     NeuralNetConfiguration(
-      hiddenLayers = 3,
+      hiddenLayers = 4,
       hiddenNodes = 64,
       inputNodes = strategy.dimensions * strategy.dimensions * 2,
       activationFunction = Activation.RELU
     ),
     TTTRewardCalculator.RewardConfiguration(
-      5, 2, 0, -10, 0.1, 0.2
+      won = 100, drawDefense = 90, drawOffense = 90, lost = -500, immediateStartingPlayer = 1, immediate = 1
     )
   )
 
