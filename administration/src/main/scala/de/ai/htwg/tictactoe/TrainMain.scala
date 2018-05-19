@@ -21,9 +21,10 @@ object TrainMain extends App with Logging {
   //  val strategy = TTTWinStrategy4xBuilder
   val strategy = TTTWinStrategy3xBuilder
   val seed = -292423813451567322L //new Random().nextLong
+  val testSeed = 127368234235L
   // unique training id for a whole training execution run
-  private val trainingId = Random.alphanumeric.take(6).mkString
-  private val random = new Random(seed)
+  val trainingId = Random.alphanumeric.take(6).mkString
+  val random = new Random(seed)
   val properties = LearningProcessorConfiguration(
     strategy.dimensions,
     buildEpsGreedyConfiguration(random),
@@ -45,7 +46,7 @@ object TrainMain extends App with Logging {
   val clientMain = UiMain(strategy.dimensions)
   val platform = SingleThreadPlatform()
   platform.execute {
-    val trainer = new Trainer(trainingId, seed, random, strategy, properties, clientMain, platform)
+    val trainer = new Trainer(trainingId, seed, testRandom, testSeed, strategy, properties, clientMain, platform)
     trainer.startTraining(60000)
   }
 

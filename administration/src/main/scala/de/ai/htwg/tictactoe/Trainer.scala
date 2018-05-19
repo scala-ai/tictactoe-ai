@@ -25,6 +25,7 @@ class Trainer(
     val trainingId: String,
     val seed: Long,
     val random: Random,
+    val testSeed: Long,
     val strategyBuilder: TTTWinStrategyBuilder,
     val properties: LearningProcessorConfiguration,
     val clientMain: UiMain,
@@ -81,7 +82,7 @@ class Trainer(
       readyPlayer += 1
       if (readyPlayer == 2) {
         if ((totalEpochs - remainingEpochs) % Trainer.testFrequency == 0 && remainingEpochs != totalEpochs) {
-          runTestGame(Trainer.runsPerTest, TestGameData(remainingEpochs, 0, 0, 0, 0), () => doAllTraining(totalEpochs, remainingEpochs - 1, doAfter))
+          runTestGame(new Random(testSeed), Trainer.runsPerTest, TestGameData(remainingEpochs, 0, 0, 0, 0), () => doAllTraining(totalEpochs, remainingEpochs - 1, doAfter))
         } else {
           platform.execute {
             doAllTraining(totalEpochs, remainingEpochs - 1, doAfter)
@@ -107,7 +108,7 @@ class Trainer(
       drawGamesDefense: Int,
   )
 
-  private def runTestGame(testGameNumber: Int, data: TestGameData, doAfter: () => Unit): Unit = {
+  private def runTestGame(testGameRandom: Random, testGameNumber: Int, data: TestGameData, doAfter: () => Unit): Unit = {
     debug(s"Start test run: ${data.remainingEpochs} - $testGameNumber")
     var readyPlayers = 0
     val startPlayer = if (testGameNumber % 2 == 0) Player.Cross else Player.Circle
@@ -125,7 +126,7 @@ class Trainer(
           }
         }
         platform.execute {
-          runTestGame(testGameNumber - 1, newData, doAfter)
+          runTestGame(testGameRandom, testGameNumber - 1, newData, doAfter)
         }
       }
     }
@@ -146,7 +147,7 @@ class Trainer(
       val gameFieldController = GameFieldControllerImpl(strategyBuilder, startPlayer)
 
       aiTrainer.registerGame(gameFieldController, training = false, handleGameFinish)
-      val logicPlayer = new LogicPlayer(Player.Circle, random, possibleWinActions, handleGameFinish)
+      val logicPlayer = new LogicPlayer(Player.Circle, testGameRandom, possibleWinActions, handleGameFinish)
       gameFieldController.subscribe(logicPlayer)
     }
   }
