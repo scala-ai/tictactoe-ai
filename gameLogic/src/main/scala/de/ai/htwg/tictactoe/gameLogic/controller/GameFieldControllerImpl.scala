@@ -27,14 +27,6 @@ class GameFieldControllerImpl(
 
   private def isNotCurrentThread: Boolean = Thread.currentThread() != thread
 
-  override def subscribe(sub: Sub, filter: Filter): Unit = {
-    if (isNotCurrentThread) throw new IllegalStateException("wrong thread")
-
-    val msg = GameFieldController.Result.GameUpdated(gameField)
-    super.subscribe(sub, filter)
-    if (filter(msg)) sub.notify(this, GameFieldController.Result.GameUpdated(gameField))
-  }
-
   override def setPos(posX: Int, posY: Int, player: Player): GameFieldController.Result = setPos(GridPosition(posX, posY), player)
 
   override def setPos(pos: GridPosition, player: Player): GameFieldController.Result = {
@@ -82,4 +74,8 @@ class GameFieldControllerImpl(
   }
 
   override def getGrid(): GameField = this.synchronized(gameField)
+
+  override def startGame(): Unit = {
+    publish(GameFieldController.Result.GameUpdated(gameField))
+  }
 }

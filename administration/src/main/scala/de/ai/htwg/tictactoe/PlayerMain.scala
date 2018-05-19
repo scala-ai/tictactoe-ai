@@ -49,6 +49,7 @@ object PlayerMain extends App with Logging {
       val player2 = new UiPlayer(Player.Circle, pUi2, gameController.getGrid(), platform, handleGameFinish)
       gameController.subscribe(player1)
       gameController.subscribe(player2)
+      gameController.startGame()
     }
   }
 
