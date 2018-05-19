@@ -103,7 +103,7 @@ object TTTLearningProcessor {
         case c: ExplorationStepConfiguration => ExplorationStep[TTTState, TTTAction](c)
       },
       rewardCalculator = rewardProperties match {
-        case c: TTTRewardCalculator.Configuration => TTTRewardCalculator(c)
+        case c: TTTRewardCalculator.RewardConfiguration => TTTRewardCalculator(c)
       },
       neuralNet = neuralNet,
       transitionHistory = TransitionHistoryImpl[TTTAction, TTTState](),

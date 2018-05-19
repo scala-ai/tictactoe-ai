@@ -37,7 +37,7 @@ object TrainMain extends App with Logging {
       inputNodes = strategy.dimensions * strategy.dimensions * 2,
       activationFunction = Activation.RELU
     ),
-    TTTRewardCalculator.Configuration(
+    TTTRewardCalculator.RewardConfiguration(
       5, 2, 0, -10, 0.1, 0.2
     )
   )
