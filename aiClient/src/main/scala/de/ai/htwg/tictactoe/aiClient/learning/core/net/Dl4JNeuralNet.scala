@@ -1,6 +1,9 @@
 package de.ai.htwg.tictactoe.aiClient.learning.core.net
 
+import scala.collection.JavaConverters._
+
 import grizzled.slf4j.Logging
+import org.deeplearning4j.datasets.iterator.impl.ListDataSetIterator
 import org.deeplearning4j.nn
 import org.deeplearning4j.nn.api.OptimizationAlgorithm
 import org.deeplearning4j.nn.conf.layers.DenseLayer
@@ -10,6 +13,7 @@ import org.deeplearning4j.nn.weights.WeightInit
 import org.deeplearning4j.util.ModelSerializer
 import org.nd4j.linalg.activations.Activation
 import org.nd4j.linalg.api.ndarray.INDArray
+import org.nd4j.linalg.dataset.DataSet
 import org.nd4j.linalg.factory.Nd4j
 import org.nd4j.linalg.learning.config.Adam
 import org.nd4j.linalg.lossfunctions.LossFunctions
@@ -19,14 +23,18 @@ class Dl4JNeuralNet private(val model: MultiLayerNetwork) extends NeuralNet with
 
   override def calc(input: INDArray): INDArray = model.output(reshapeInput(input), true)
 
-  override def train(input: INDArray, output: INDArray): Unit = {
-    trace("train network")
+  override def train(input: INDArray, output: INDArray): Unit =
     model.fit(reshapeInput(input), reshapeInput(output))
-    // model.finetune()
-    trace("finished train network")
-  }
+
+  override def train(input: DataSet): Unit =
+    model.fit(reshapeDataSet(input))
+
+  override def train(inputs: List[DataSet]): Unit =
+    model.fit(new ListDataSetIterator[DataSet](inputs.map(reshapeDataSet).asJava, 10))
 
   private def reshapeInput(input: INDArray) = input.reshape(1, input.length())
+
+  private def reshapeDataSet(input: DataSet) = new DataSet(reshapeInput(input.getFeatures), reshapeInput(input.getLabels))
 
   override def serialize(path: String): Unit =
     ModelSerializer.writeModel(model, path, true)

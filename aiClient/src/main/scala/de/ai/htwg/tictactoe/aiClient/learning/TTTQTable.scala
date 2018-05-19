@@ -10,6 +10,7 @@ import de.ai.htwg.tictactoe.aiClient.learning.core.net.NeuralNet
 import de.ai.htwg.tictactoe.aiClient.learning.core.net.NeuralNetConfiguration
 import grizzled.slf4j.Logging
 import org.nd4j.linalg.api.ndarray.INDArray
+import org.nd4j.linalg.dataset.DataSet
 import org.nd4j.linalg.factory.Nd4j
 
 class TTTQTable private(data: mutable.Map[Int, Double]) extends NeuralNet with Logging {
@@ -28,6 +29,10 @@ class TTTQTable private(data: mutable.Map[Int, Double]) extends NeuralNet with L
   }
 
   override def train(input: INDArray, output: INDArray): Unit = data.put(input.hashCode(), output.getDouble(0))
+
+  override def train(input: DataSet): Unit = ???
+
+  override def train(inputs: List[DataSet]): Unit = ???
 
   // TODO remove replace
   override def serialize(path: String): Unit = Files.write(Paths.get(path.replace(".zip", ".txt")),
