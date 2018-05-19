@@ -30,7 +30,7 @@ object PlayAgainstNetMain extends App with Logging {
       random = new Random(5L)
     ),
     qLearningProperties = QLearningConfiguration(),
-    neuralNetFileName = "cOvMZd.2018-05-17-20-47-49-149.network.zip",
+    neuralNetFileName = "1kwyyR.2018-05-19-11-29-29-913.network.zip",
     executors = Executors.newFixedThreadPool(5),
     rewardProperties = TTTRewardCalculator.defaultConfig()
   ), "testTraining")
@@ -41,7 +41,8 @@ object PlayAgainstNetMain extends App with Logging {
   }
 
   def playGame(): Unit = {
-    val gameController = GameFieldControllerImpl(strategy, Player.Cross)
+    val startPlayer = if (Random.nextBoolean) Player.Cross else Player.Circle
+    val gameController = GameFieldControllerImpl(strategy, startPlayer)
     var finishedPlayers = 0
 
     def handleGameFinish(winner: Option[Player]): Unit = {
