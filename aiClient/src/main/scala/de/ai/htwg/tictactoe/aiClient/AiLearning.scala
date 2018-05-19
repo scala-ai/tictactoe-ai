@@ -6,6 +6,7 @@ import de.ai.htwg.tictactoe.aiClient.learning.TTTLearningProcessor
 import de.ai.htwg.tictactoe.aiClient.learning.core.QLearningConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.net.NeuralNetConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.policy.PolicyConfiguration
+import de.ai.htwg.tictactoe.aiClient.learning.core.reward.RewardCalculatorConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.state.EpochResult
 import de.ai.htwg.tictactoe.clientConnection.gameController.GameFieldController
 import de.ai.htwg.tictactoe.clientConnection.model.Player
@@ -39,7 +40,8 @@ object AiLearning {
       dimensions: Int,
       policyProperties: PolicyConfiguration,
       qLearningProperties: QLearningConfiguration,
-      neuralNetProperties: NeuralNetConfiguration
+      neuralNetProperties: NeuralNetConfiguration,
+      rewardProperties: RewardCalculatorConfiguration
   )
 
   def apply(properties: LearningProcessorConfiguration, trainingId: String): AiLearning =
@@ -48,7 +50,8 @@ object AiLearning {
         policyProperties = properties.policyProperties,
         qLearningProperties = properties.qLearningProperties,
         neuralNetConfiguration = properties.neuralNetProperties,
-        Executors.newFixedThreadPool(5)
+        Executors.newFixedThreadPool(5),
+        rewardProperties = properties.rewardProperties
       ), trainingId
     )
 }

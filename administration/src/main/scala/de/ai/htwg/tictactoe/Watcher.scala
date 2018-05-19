@@ -12,7 +12,7 @@ import de.ai.htwg.tictactoe.aiClient.AiLearning.LearningProcessorConfiguration
 import grizzled.slf4j.Logging
 
 
-class Watcher(val trainingId: String, val seed: Long, val properties: LearningProcessorConfiguration) extends Logging {
+class Watcher(val trainingId: String, val seed: Long, val runProps: LearningProcessorConfiguration) extends Logging {
 
   private val results: ListBuffer[Watcher.EpochResult] = ListBuffer()
   private val executors = Executors.newFixedThreadPool(5)
@@ -36,7 +36,7 @@ class Watcher(val trainingId: String, val seed: Long, val properties: LearningPr
 
   private def buildCSV(results: List[Watcher.EpochResult]): String = {
     val totalEpochs = results.head.epoch
-    s"properties:; $seed; ${properties.dimensions}; ${properties.neuralNetProperties}; ${properties.policyProperties}; ${properties.qLearningProperties}\n" +
+    s"$seed; ${runProps.dimensions}; ${runProps.neuralNetProperties}; ${runProps.policyProperties}; ${runProps.qLearningProperties}; ${runProps.rewardProperties}\n" +
       "epoch; wins; defDraws; offDraw; losses; win percentage\n" +
       results.map { r =>
         val totalGames = r.won + r.defDraw + r.offDraw + r.lost

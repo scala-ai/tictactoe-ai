@@ -2,6 +2,7 @@ package de.ai.htwg.tictactoe
 
 import de.ai.htwg.tictactoe.aiClient.AiLearning
 import de.ai.htwg.tictactoe.aiClient.AiLearning.LearningProcessorConfiguration
+import de.ai.htwg.tictactoe.aiClient.learning.TTTRewardCalculator
 import de.ai.htwg.tictactoe.aiClient.learning.core.QLearningConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.net.NeuralNetConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.policy.EpsGreedyConfiguration
@@ -19,7 +20,7 @@ object AiMain extends App with Logging {
   val strategy = TTTWinStrategy3xBuilder
   val gameName = "game1"
   val clientMain = UiMain(strategy.dimensions)
-  val properties = LearningProcessorConfiguration(strategy.dimensions, EpsGreedyConfiguration(), QLearningConfiguration(), NeuralNetConfiguration())
+  val properties = LearningProcessorConfiguration(strategy.dimensions, EpsGreedyConfiguration(), QLearningConfiguration(), NeuralNetConfiguration(), TTTRewardCalculator.defaultConfig())
   private val aiTrainer = AiLearning(properties, gameName)
 
   platform.execute {

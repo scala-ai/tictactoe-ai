@@ -1,21 +1,38 @@
 package de.ai.htwg.tictactoe.aiClient.learning
 
+import de.ai.htwg.tictactoe.aiClient.learning.TTTRewardCalculator.RewardConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.reward.RewardCalculator
+import de.ai.htwg.tictactoe.aiClient.learning.core.reward.RewardCalculatorConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.state.EpochResult
 
-case class TTTRewardCalculator() extends RewardCalculator[TTTAction, TTTState] {
+case class TTTRewardCalculator(config: RewardConfiguration) extends RewardCalculator[TTTAction, TTTState] {
   override def getLongTermReward(runResult: EpochResult): Double = runResult match {
-    case EpochResult.Won => 100
-    case EpochResult.DrawDefense => 90
-    case EpochResult.DrawOffense => 90
-    case EpochResult.Lost => -500
+    case EpochResult.Won => config.won
+    case EpochResult.DrawDefense => config.drawDefense
+    case EpochResult.DrawOffense => config.drawOffense
+    case EpochResult.Lost => config.lost
   }
 
   override def getImmediateReward(action: TTTAction, state: TTTState): Double = {
     if (state.isStartingPlayer) {
-      1
+      config.immediateStartingPlayer
     } else {
-      1
+      config.immediate
     }
   }
+}
+
+object TTTRewardCalculator {
+  def defaultConfig(): TTTRewardCalculator.RewardConfiguration = RewardConfiguration(
+    5, 2, 0, -10, 0.1, 0.2
+  )
+
+  case class RewardConfiguration(
+      won: Double,
+      drawDefense: Double,
+      drawOffense: Double,
+      lost: Double,
+      immediateStartingPlayer: Double,
+      immediate: Double
+  ) extends RewardCalculatorConfiguration
 }

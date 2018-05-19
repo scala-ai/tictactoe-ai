@@ -4,11 +4,6 @@ import scala.util.Random
 
 import de.ai.htwg.tictactoe.aiClient.AiLearning
 import de.ai.htwg.tictactoe.aiClient.AiLearning.LearningProcessorConfiguration
-import de.ai.htwg.tictactoe.aiClient.learning.core.QLearningConfiguration
-import de.ai.htwg.tictactoe.aiClient.learning.core.net.NeuralNetConfiguration
-import de.ai.htwg.tictactoe.aiClient.learning.core.policy.EpsGreedyConfiguration
-import de.ai.htwg.tictactoe.aiClient.learning.core.policy.ExplorationStepConfiguration
-import de.ai.htwg.tictactoe.aiClient.learning.core.policy.PolicyConfiguration
 import de.ai.htwg.tictactoe.clientConnection.fxUI.UiMain
 import de.ai.htwg.tictactoe.clientConnection.model.Player
 import de.ai.htwg.tictactoe.clientConnection.model.strategy.TTTWinStrategy
@@ -19,51 +14,25 @@ import de.ai.htwg.tictactoe.logicClient.LogicPlayer
 import de.ai.htwg.tictactoe.logicClient.RandomPlayer
 import de.ai.htwg.tictactoe.playerClient.UiPlayer
 import grizzled.slf4j.Logging
-import org.nd4j.linalg.activations.Activation
 
 object Trainer {
   val saveFrequency = 10000
   val testFrequency = 200
   val runsPerTest = 100
-
-  def buildEpsGreedyConfiguration(random: Random): PolicyConfiguration = EpsGreedyConfiguration(
-    minEpsilon = 0.5f,
-    nbEpochVisits = 50000,
-    random = random
-  )
-
-  def buildExplorationStepConfiguration(random: Random): PolicyConfiguration = ExplorationStepConfiguration(
-    minEpsilon = 0.2f,
-    nbStepVisits = 1000,
-    random = random
-  )
-
 }
 
-class Trainer(strategyBuilder: TTTWinStrategyBuilder, clientMain: UiMain, val platform: SingleThreadPlatform) extends Logging {
+class Trainer(
+    val trainingId: String,
+    val seed: Long,
+    val random: Random,
+    val strategyBuilder: TTTWinStrategyBuilder,
+    val properties: LearningProcessorConfiguration,
+    val clientMain: UiMain,
+    val platform: SingleThreadPlatform
+) extends Logging {
   platform.checkCurrentThread()
 
-  private val seed = new Random().nextLong
   info(s"Chosen seed for this run: $seed")
-  private val random = new Random(seed)
-  // unique training id for a whole training execution run
-  private val trainingId = Random.alphanumeric.take(6).mkString
-
-  private val properties = LearningProcessorConfiguration(
-    strategyBuilder.dimensions,
-    Trainer.buildEpsGreedyConfiguration(random),
-    QLearningConfiguration(
-      alpha = 0.03,
-      gamma = 0.3
-    ),
-    NeuralNetConfiguration(
-      hiddenLayers = 3,
-      hiddenNodes = 64,
-      inputNodes = strategyBuilder.dimensions * strategyBuilder.dimensions * 2,
-      activationFunction = Activation.RELU
-    )
-  )
-
   private val possibleWinActions: List[TTTWinStrategy] = strategyBuilder.listAllWinStrategies
 
   private val watcher = new Watcher(trainingId, seed, properties)
