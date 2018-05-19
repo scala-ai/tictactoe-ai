@@ -22,6 +22,7 @@ object PlayAgainstNetMain extends App with Logging {
   private val clientMain = UiMain(strategy.dimensions)
   private val platform = SingleThreadPlatform()
   private val gameName = "game1"
+  private val random = new Random(5L)
 
   private val aiTrainer = new AiLearning(TTTLearningProcessor.apply(
     policyProperties = EpsGreedyConfiguration(
@@ -41,7 +42,7 @@ object PlayAgainstNetMain extends App with Logging {
   }
 
   def playGame(): Unit = {
-    val startPlayer = if (Random.nextBoolean) Player.Cross else Player.Circle
+    val startPlayer = if (random.nextBoolean) Player.Cross else Player.Circle
     val gameController = GameFieldControllerImpl(strategy, startPlayer)
     var finishedPlayers = 0
 
