@@ -9,7 +9,9 @@ import scala.concurrent.Await
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.Duration
 
-class SingleThreadPlatform private(private val thread: Thread, val executionContext: ExecutionContext) {
+import grizzled.slf4j.Logging
+
+class SingleThreadPlatform private(private val thread: Thread, val executionContext: ExecutionContext) extends Logging {
   def isNotCurrentThread: Boolean = Thread.currentThread() != thread
 
   def isCurrentThread: Boolean = Thread.currentThread() == thread
@@ -18,7 +20,13 @@ class SingleThreadPlatform private(private val thread: Thread, val executionCont
     if (isNotCurrentThread) throw new IllegalStateException("Illegal Thread")
   }
 
-  def execute(func: => Unit): Unit = executionContext.execute(() => func)
+  def execute(func: => Unit): Unit = executionContext.execute(() =>
+    try{
+      func
+    } catch {
+      case exception: Throwable => error("exception in SingleThreadPlatform:", exception)
+    }
+  )
 }
 
 object SingleThreadPlatform {
