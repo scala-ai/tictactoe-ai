@@ -11,6 +11,7 @@ import de.ai.htwg.tictactoe.aiClient.learning.core.transition.TransitionFactory
 import de.ai.htwg.tictactoe.aiClient.learning.core.transition.TransitionHistory
 import grizzled.slf4j.Logging
 import org.nd4j.linalg.api.ndarray.INDArray
+import org.nd4j.linalg.dataset.DataSet
 import org.nd4j.linalg.factory.Nd4j
 
 case class QLearning[S <: State, A <: Action](
@@ -64,9 +65,9 @@ case class QLearning[S <: State, A <: Action](
     // iterate over all transitions in history backwards
     val epochReward = rewardCalculator.getLongTermReward(epochResult)
     debug("start training (reward = " + epochReward + ")")
-    transitionHistory
+    val trainingDataSet = transitionHistory
       .reverseTransitions()
-      .foldLeft(epochReward)((futureQVal, transition) => {
+      .foldLeft((epochReward, List[DataSet]()))((futureQVal, transition) => {
         trace("train transition " + transition.action)
 
         val state = transition.observation
@@ -76,15 +77,15 @@ case class QLearning[S <: State, A <: Action](
         val maxQVal = transition.maxQValue
 
         // new q value Q(s, a)
-        val newQVal = (1 - alpha) * oldQVal + alpha * (reward + gamma * futureQVal)
+        val newQVal = (1 - alpha) * oldQVal + alpha * (reward + gamma * futureQVal._1)
 
         val y = Nd4j.zeros(1)
         y.putScalar(Array[Int](0, 0), newQVal)
         val input = toInputVector(state, action)
-        neuralNet.train(input, y)
         debug(s"q value update for $action is $oldQVal -> $newQVal")
-        Math.max(newQVal, maxQVal)
-      })
+        (Math.max(newQVal, maxQVal), new DataSet(input, y) :: futureQVal._2)
+      })._2
+    neuralNet.train(trainingDataSet)
     val updatedPolicy = transitionHistory
       .reverseTransitions()
       .foldLeft(policy)((p, s) => p.incrementStep(s.observation))
