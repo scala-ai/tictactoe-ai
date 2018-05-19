@@ -46,7 +46,7 @@ object TrainMain extends App with Logging {
   val clientMain = UiMain(strategy.dimensions)
   val platform = SingleThreadPlatform()
   platform.execute {
-    val trainer = new Trainer(trainingId, seed, testRandom, testSeed, strategy, properties, clientMain, platform)
+    val trainer = new Trainer(trainingId, seed, random, testSeed, strategy, properties, clientMain, platform)
     trainer.startTraining(60000)
   }
 
