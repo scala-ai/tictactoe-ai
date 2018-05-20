@@ -32,6 +32,7 @@ class GameFieldControllerImpl(
   override def setPos(pos: GridPosition, player: Player): GameFieldController.Result = {
     if (isNotCurrentThread) throw new IllegalStateException("wrong thread")
 
+    checkPosition(pos)
     val result = setPosInGrid(gameField, pos, player)
     gameField = result.field
     debug(s"new game field: \n${gameField.print()}")
@@ -41,6 +42,11 @@ class GameFieldControllerImpl(
       case _ => warn(s"player: $player failed $result")
     }
     result
+  }
+
+  private def checkPosition(pos: GridPosition): Unit = {
+    def checkCoord(c: Int): Boolean = c >= 0 && c < dimensions
+    if (!checkCoord(pos.x) && checkCoord(pos.y)) throw new IllegalArgumentException(s"Coordinates needs to be between 0 and $dimensions in $pos")
   }
 
   private def setPosInGrid(gameField: GameField, pos: GridPosition, player: Player): GameFieldController.Result = {
