@@ -24,7 +24,9 @@ class SingleThreadPlatform private(private val thread: Thread, val executionCont
     try{
       func
     } catch {
-      case exception: Throwable => error("exception in SingleThreadPlatform:", exception)
+      case exception: Throwable =>
+        error("exception in SingleThreadPlatform:", exception)
+        throw exception
     }
   )
 }
