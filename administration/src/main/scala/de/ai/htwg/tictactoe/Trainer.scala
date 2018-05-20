@@ -138,7 +138,7 @@ class Trainer(
       val drawGamesOff = data.drawGamesOffense
       val drawGamesDef = data.drawGamesDefense
       val totalGames = wonGames + lostGames + drawGamesDef + drawGamesOff
-      info(f"$epochs: + $wonGames  - $lostGames  / $drawGamesDef  o $drawGamesOff => ${(wonGames + drawGamesDef).toFloat * 100 / totalGames}%.2f%%")
+      info(f"$epochs: + $wonGames  - $lostGames  / $drawGamesDef  o $drawGamesOff => ${(totalGames - lostGames).toFloat * 100 / totalGames}%.2f%%")
       watcher.addEpochResult(Watcher.EpochResult(epochs, wonGames, lostGames, data.drawGamesOffense, data.drawGamesDefense))
       platform.execute {
         doAfter()

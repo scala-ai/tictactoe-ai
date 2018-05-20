@@ -40,7 +40,7 @@ class Watcher(val trainingId: String, val seed: Long, val runProps: LearningProc
       "epoch; wins; defDraws; offDraw; losses; win percentage\n" +
       results.map { r =>
         val totalGames = r.won + r.defDraw + r.offDraw + r.lost
-        f"${totalEpochs - r.epoch}; ${r.won}; ${r.defDraw}; ${r.offDraw}; ${r.lost}; ${(r.won + r.defDraw).toDouble / totalGames}%2.2f"
+        f"${totalEpochs - r.epoch}; ${r.won}; ${r.defDraw}; ${r.offDraw}; ${r.lost}; ${(totalGames - r.lost).toDouble / totalGames}%2.2f"
       }.mkString("\n")
   }
 
