@@ -92,9 +92,9 @@ class Trainer(
       val aiPlayer = aiTrainer.getNewAiPlayer(gameController, training = true)
 
       val opponent = remainingEpochs % 3 match {
-        case 0 => new RandomPlayer(Player.Circle, random)
-        case 1 => new RandomPlayer(Player.Circle, random)
-        case 2 => aiTrainer.getNewAiPlayer(gameController, training = false, playerType = Player.Circle)
+        // do not train against yourself as it will produce worse results.
+        // case 0 => aiTrainer.getNewAiPlayer(gameController, training = false, playerType = Player.Circle)
+        case _ => new RandomPlayer(Player.Circle, random)
       }
 
       gameController.startGame(aiPlayer, opponent)
