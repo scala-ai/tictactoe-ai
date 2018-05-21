@@ -7,6 +7,7 @@ import scala.concurrent.Promise
 import de.ai.htwg.tictactoe.clientConnection.model.GameField
 import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
 import de.ai.htwg.tictactoe.clientConnection.model.Player
+import grizzled.slf4j.Logging
 import scalafx.Includes._
 import scalafx.application.Platform
 import scalafx.beans.property.ReadOnlyDoubleProperty
@@ -49,7 +50,7 @@ object GameUiStage {
 
 }
 
-class GameUiStage private(name: String, dimensions: Int) {
+class GameUiStage private(name: String, dimensions: Int) extends Logging {
 
   private var onMouseClicked: GridPosition => Unit = GameUiStage.onMouseClickedDefault
 
@@ -149,7 +150,13 @@ class GameUiStage private(name: String, dimensions: Int) {
     val y = math.floor((me.y - GameUiStage.borderSize) / cellHeight).toInt
 
     val pos = GridPosition(x, y)
-    onMouseClicked(pos)
+    def checkCoord(c: Int): Boolean = c >= 0 && c < dimensions
+    if (checkCoord(pos.x) && checkCoord(pos.y)){
+      onMouseClicked(pos)
+    } else {
+      trace(s"position outside of gameField: $pos")
+    }
+
   }
 
   private case class UIElemImpl(elem: Node, resize: (Double, Double) => Unit) extends GameUiStage.UIElem {

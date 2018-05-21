@@ -27,19 +27,12 @@ class GameFieldControllerImpl(
 
   private def isNotCurrentThread: Boolean = Thread.currentThread() != thread
 
-  override def subscribe(sub: Sub, filter: Filter): Unit = {
-    if (isNotCurrentThread) throw new IllegalStateException("wrong thread")
-
-    val msg = GameFieldController.Result.GameUpdated(gameField)
-    super.subscribe(sub, filter)
-    if (filter(msg)) sub.notify(this, GameFieldController.Result.GameUpdated(gameField))
-  }
-
   override def setPos(posX: Int, posY: Int, player: Player): GameFieldController.Result = setPos(GridPosition(posX, posY), player)
 
   override def setPos(pos: GridPosition, player: Player): GameFieldController.Result = {
     if (isNotCurrentThread) throw new IllegalStateException("wrong thread")
 
+    checkPosition(pos)
     val result = setPosInGrid(gameField, pos, player)
     gameField = result.field
     debug(s"new game field: \n${gameField.print()}")
@@ -49,6 +42,11 @@ class GameFieldControllerImpl(
       case _ => warn(s"player: $player failed $result")
     }
     result
+  }
+
+  private def checkPosition(pos: GridPosition): Unit = {
+    def checkCoord(c: Int): Boolean = c >= 0 && c < dimensions
+    if (!checkCoord(pos.x) && checkCoord(pos.y)) throw new IllegalArgumentException(s"Coordinates needs to be between 0 and $dimensions in $pos")
   }
 
   private def setPosInGrid(gameField: GameField, pos: GridPosition, player: Player): GameFieldController.Result = {
@@ -82,4 +80,8 @@ class GameFieldControllerImpl(
   }
 
   override def getGrid(): GameField = this.synchronized(gameField)
+
+  override def startGame(): Unit = {
+    publish(GameFieldController.Result.GameUpdated(gameField))
+  }
 }

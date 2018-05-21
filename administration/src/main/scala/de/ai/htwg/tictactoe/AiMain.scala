@@ -36,7 +36,7 @@ object AiMain extends App with Logging {
       if (finishedPlayers >= 2) {
         info {
           winner match {
-            case Some(Player.Cross) => s"Human-Player wins"
+            case Some(Player.Circle) => s"Human-Player wins"
             case None => "No winner in this game"
             case _ /* other player */ => s"AI-Player wins"
           }
@@ -48,6 +48,7 @@ object AiMain extends App with Logging {
       val playerUi = new UiPlayer(Player.Circle, gameUi, gameController.getGrid(), platform, handleGameFinish)
       gameController.subscribe(playerUi)
       aiTrainer.registerGame(gameController, training = false, handleGameFinish)
+      gameController.startGame()
     }(platform.executionContext)
   }
 

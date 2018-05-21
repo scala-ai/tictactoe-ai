@@ -24,8 +24,6 @@ trait GameFieldController extends mutable.Publisher[GameFieldController.Updates]
   final override type Pub = GameFieldController
   final override type Sub = mutable.Subscriber[GameFieldController.Updates, Pub]
 
-  override def subscribe(sub: Sub, filter: Filter): Unit
-
   def setPos(posX: Int, posY: Int, player: Player): GameFieldController.Result =
     setPos(GridPosition(posX, posY), player)
 
@@ -34,4 +32,6 @@ trait GameFieldController extends mutable.Publisher[GameFieldController.Updates]
   def getGrid(): GameField
 
   def startingPlayer: Player
+
+  def startGame(): Unit
 }

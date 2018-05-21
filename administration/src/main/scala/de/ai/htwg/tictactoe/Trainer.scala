@@ -97,6 +97,7 @@ class Trainer(
     aiTrainer.registerGame(gameFieldController, training = true, _ => handlePlayerReady())
     val randomPlayer = new RandomPlayer(Player.Circle, random, _ => handlePlayerReady())
     gameFieldController.subscribe(randomPlayer)
+    gameFieldController.startGame()
   }
 
 
@@ -149,6 +150,7 @@ class Trainer(
       aiTrainer.registerGame(gameFieldController, training = false, handleGameFinish)
       val logicPlayer = new LogicPlayer(Player.Circle, testGameRandom, possibleWinActions, handleGameFinish)
       gameFieldController.subscribe(logicPlayer)
+      gameFieldController.startGame()
     }
   }
 
@@ -177,6 +179,7 @@ class Trainer(
       val playerUi = new UiPlayer(Player.Circle, gameUi, gameFieldController.getGrid(), platform, handleGameFinish)
       gameFieldController.subscribe(playerUi)
       aiTrainer.registerGame(gameFieldController, training = false, handleGameFinish)
+      gameFieldController.startGame()
     }(platform.executionContext)
   }
 }

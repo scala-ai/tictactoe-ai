@@ -21,7 +21,7 @@ object PlayAgainstNetMain extends App with Logging {
   private val strategy = TTTWinStrategy3xBuilder
   private val clientMain = UiMain(strategy.dimensions)
   private val platform = SingleThreadPlatform()
-  private val gameName = "game1"
+  private val gameName = "game"
   private val random = new Random(5L)
 
   private val aiTrainer = new AiLearning(TTTLearningProcessor.apply(
@@ -38,10 +38,10 @@ object PlayAgainstNetMain extends App with Logging {
 
 
   platform.execute {
-    playGame()
+    playGame(0)
   }
 
-  def playGame(): Unit = {
+  def playGame(gameNumber: Int): Unit = {
     val startPlayer = if (random.nextBoolean) Player.Cross else Player.Circle
     val gameController = GameFieldControllerImpl(strategy, startPlayer)
     var finishedPlayers = 0
@@ -51,21 +51,22 @@ object PlayAgainstNetMain extends App with Logging {
       if (finishedPlayers >= 2) {
         info {
           winner match {
-            case Some(Player.Cross) => s"Human-Player wins"
+            case Some(Player.Circle) => s"Human-Player wins"
             case None => "No winner in this game"
             case _ /* other player */ => s"AI-Player wins"
           }
         }
         platform.execute {
-          playGame()
+          playGame(gameNumber + 1)
         }
       }
     }
 
-    clientMain.getNewStage(gameName).foreach { gameUi =>
+    clientMain.getNewStage(gameName + gameNumber).foreach { gameUi =>
       val playerUi = new UiPlayer(Player.Circle, gameUi, gameController.getGrid(), platform, handleGameFinish)
       gameController.subscribe(playerUi)
       aiTrainer.registerGame(gameController, training = false, handleGameFinish)
+      gameController.startGame()
     }(platform.executionContext)
   }
 }
