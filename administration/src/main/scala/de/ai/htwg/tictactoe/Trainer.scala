@@ -76,7 +76,7 @@ class Trainer(
         watcher.printCSV()
       }
 
-      doTrainingGame()
+      doTrainingGame(remainingEpochs)
 
       if ((totalEpochs - remainingEpochs) % Trainer.testFrequency == 0 && remainingEpochs != totalEpochs) {
         runTestGame(new Random(testSeed), Trainer.runsPerTest, remainingEpochs)
@@ -85,14 +85,19 @@ class Trainer(
       trainingLoop(remainingEpochs - 1)
     }
 
-    def doTrainingGame(): Unit = {
+    def doTrainingGame(remainingEpochs: Int): Unit = {
       val startPlayer = if (random.nextBoolean()) Player.Cross else Player.Circle
       val gameController = GameControllerImpl(strategyBuilder, startPlayer)
 
       val aiPlayer = aiTrainer.getNewAiPlayer(gameController, training = true)
-      val randomPlayer = new RandomPlayer(Player.Circle, random)
 
-      gameController.startGame(aiPlayer, randomPlayer)
+      val opponent = remainingEpochs % 3 match {
+        case 0 => new RandomPlayer(Player.Circle, random)
+        case 1 => new RandomPlayer(Player.Circle, random)
+        case 2 => aiTrainer.getNewAiPlayer(gameController, training = false, playerType = Player.Circle)
+      }
+
+      gameController.startGame(aiPlayer, opponent)
     }
 
     trainingLoop(totalEpochs)
