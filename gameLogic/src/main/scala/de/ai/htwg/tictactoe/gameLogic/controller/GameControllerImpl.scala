@@ -30,20 +30,15 @@ class GameControllerImpl(
 
   private def isNotCurrentThread: Boolean = Thread.currentThread() != thread
 
-  override def setPos(posX: Int, posY: Int, player: Player): GameController.Result = setPos(GridPosition(posX, posY), player)
-
-  override def setPos(pos: GridPosition, player: Player): GameController.Result = {
+  def setPos(posX: Int, posY: Int, player: Player): GameController.Result = {
     if (isNotCurrentThread) throw new IllegalStateException("wrong thread")
 
+    val pos = GridPosition(posX, posY)
     checkPosition(pos)
     val result = setPosInGrid(gameField, pos, player)
     gameField = result.field
     debug(s"new game field: \n${gameField.print()}")
     trace(s"player: $player trying to set pos: $pos: $result")
-    result match {
-      case update: GameController.Updates => publish(update)
-      case _ => warn(s"player: $player failed $result")
-    }
     result
   }
 
