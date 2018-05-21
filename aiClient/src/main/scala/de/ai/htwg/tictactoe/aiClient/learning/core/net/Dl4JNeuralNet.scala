@@ -30,7 +30,7 @@ class Dl4JNeuralNet private(val model: MultiLayerNetwork) extends NeuralNet with
     model.fit(reshapeDataSet(input))
 
   override def train(inputs: List[DataSet]): Unit =
-    model.fit(new ListDataSetIterator[DataSet](inputs.map(reshapeDataSet).asJava, 10))
+    model.fit(new ListDataSetIterator[DataSet](inputs.map(reshapeDataSet).asJava, 5))
 
   private def reshapeInput(input: INDArray) = input.reshape(1, input.length())
 

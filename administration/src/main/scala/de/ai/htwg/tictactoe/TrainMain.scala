@@ -30,7 +30,8 @@ object TrainMain extends App with Logging {
     buildEpsGreedyConfiguration(random),
     QLearningConfiguration(
       alpha = 0.03,
-      gamma = 0.3
+      gamma = 0.3,
+      batchSize = 1000
     ),
     NeuralNetConfiguration(
       hiddenLayers = 4,

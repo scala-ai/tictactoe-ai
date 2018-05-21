@@ -1,5 +1,7 @@
 package de.ai.htwg.tictactoe.aiClient.learning.core
 
+import scala.collection.mutable.ListBuffer
+
 import de.ai.htwg.tictactoe.aiClient.learning.core.action.Action
 import de.ai.htwg.tictactoe.aiClient.learning.core.action.ActionSpace
 import de.ai.htwg.tictactoe.aiClient.learning.core.net.NeuralNet
@@ -21,7 +23,8 @@ case class QLearning[S <: State, A <: Action](
     transitionHistory: TransitionHistory[A, S],
     transitionFactory: TransitionFactory[A, S],
     actionSpace: ActionSpace[S, A],
-    qLearningProperties: QLearningConfiguration
+    qLearningProperties: QLearningConfiguration,
+    private val transitionBuffer: ListBuffer[DataSet] = ListBuffer()
 ) extends Learning[S, A] with Logging {
   private val alpha = qLearningProperties.alpha
   private val gamma = qLearningProperties.gamma
@@ -85,7 +88,13 @@ case class QLearning[S <: State, A <: Action](
         debug(s"q value update for $action is $oldQVal -> $newQVal")
         (Math.max(newQVal, maxQVal), new DataSet(input, y) :: futureQVal._2)
       })._2
-    neuralNet.train(trainingDataSet)
+    transitionBuffer ++= trainingDataSet
+    // disable batch training with batch size less than 0
+    if (qLearningProperties.batchSize < 0 || transitionBuffer.size > qLearningProperties.batchSize) {
+      trace(s"train ${transitionBuffer.size} elements")
+      neuralNet.train(transitionBuffer.toList)
+      transitionBuffer.clear()
+    }
     val updatedPolicy = transitionHistory
       .reverseTransitions()
       .foldLeft(policy)((p, s) => p.incrementStep(s.observation))
