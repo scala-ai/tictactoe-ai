@@ -13,7 +13,7 @@ import de.ai.htwg.tictactoe.clientConnection.util.SingleThreadPlatform
 import de.ai.htwg.tictactoe.gameLogic.controller.GameControllerImpl
 import de.ai.htwg.tictactoe.logicClient.LogicPlayer
 import de.ai.htwg.tictactoe.logicClient.RandomPlayer
-import de.ai.htwg.tictactoe.playerClient.UiPlayer
+import de.ai.htwg.tictactoe.playerClient.UiView
 import de.ai.htwg.tictactoe.playerClient.UiPlayerController
 import grizzled.slf4j.Logging
 
@@ -167,7 +167,7 @@ class Trainer(
     }
 
     clientMain.getNewStage(gameName).foreach { gameUi =>
-      val uiView = new UiPlayer(gameUi, gameController.getGrid())
+      val uiView = new UiView(gameUi, gameController.getGrid())
       val uiPlayer = new UiPlayerController(gameUi, Player.Circle)
       gameController.subscribe(uiView)
       val aiPlayer = aiTrainer.getNewAiPlayer(gameController, training = false)

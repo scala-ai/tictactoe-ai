@@ -6,7 +6,7 @@ import de.ai.htwg.tictactoe.clientConnection.gameController.GameControllerSubscr
 import de.ai.htwg.tictactoe.clientConnection.model.GameField
 import grizzled.slf4j.Logging
 
-class UiPlayer(
+class UiView(
     gameUi: GameUiStage,
     var gameField: GameField,
 ) extends GameControllerSubscriber with Logging {

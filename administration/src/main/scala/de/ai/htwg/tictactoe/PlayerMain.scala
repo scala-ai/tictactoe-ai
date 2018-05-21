@@ -9,7 +9,7 @@ import de.ai.htwg.tictactoe.clientConnection.model.Player
 import de.ai.htwg.tictactoe.clientConnection.model.strategy.TTTWinStrategy3xBuilder
 import de.ai.htwg.tictactoe.clientConnection.util.SingleThreadPlatform
 import de.ai.htwg.tictactoe.gameLogic.controller.GameControllerImpl
-import de.ai.htwg.tictactoe.playerClient.UiPlayer
+import de.ai.htwg.tictactoe.playerClient.UiView
 import de.ai.htwg.tictactoe.playerClient.UiPlayerController
 import grizzled.slf4j.Logging
 
@@ -45,7 +45,7 @@ object PlayerMain extends App with Logging {
     } {
       val player1 = new UiPlayerController(gameUi, Player.Cross)
       val player2 = new UiPlayerController(gameUi, Player.Circle)
-      val uiView = new UiPlayer(gameUi, gameController.getGrid())
+      val uiView = new UiView(gameUi, gameController.getGrid())
       gameController.subscribe(uiView)
       gameController.subscribe(CallBackSubscriber(handleGameFinish _))
       gameController.startGame(player1, player2)
