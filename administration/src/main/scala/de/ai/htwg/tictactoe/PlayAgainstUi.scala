@@ -8,6 +8,7 @@ import de.ai.htwg.tictactoe.clientConnection.gameController.GameController
 import de.ai.htwg.tictactoe.clientConnection.gameController.GameControllerPlayer
 import de.ai.htwg.tictactoe.clientConnection.model.Player
 import de.ai.htwg.tictactoe.clientConnection.model.strategy.TTTWinStrategy3xBuilder
+import de.ai.htwg.tictactoe.clientConnection.model.strategy.TTTWinStrategy4xBuilder
 import de.ai.htwg.tictactoe.clientConnection.util.SingleThreadPlatform
 import de.ai.htwg.tictactoe.gameLogic.controller.GameControllerImpl
 import de.ai.htwg.tictactoe.playerClient.UiPlayerController
@@ -15,7 +16,8 @@ import de.ai.htwg.tictactoe.playerClient.UiView
 import grizzled.slf4j.Logging
 
 trait PlayAgainstUi extends App with Logging {
-  val strategy = TTTWinStrategy3xBuilder
+  val strategy3 = TTTWinStrategy3xBuilder
+  val strategy = TTTWinStrategy4xBuilder
   val random = new Random(5L)
   val opponentPlayer = Player.Cross
 

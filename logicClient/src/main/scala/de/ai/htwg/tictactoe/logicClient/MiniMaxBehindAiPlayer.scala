@@ -34,14 +34,23 @@ class MiniMaxBehindAiPlayer(
   }
 
   private def getMaxWidth(options: Int): Int = options match {
-    case x if x <= 5 => 5
-    case 6 => 4
-    case 7 => 3
-    case 8 => 3
+    case x if x <= 8 => 8
+    case 9 => 5
+    case 10 => 4
+    case 11 => 3
+    case 12 => 3
     case _ => 1
   }
 
   override def getMove(field: GameField): GridPosition = {
+    val start = System.currentTimeMillis()
+    val move = getMoveInternally(field)
+    info(s"calculating move took: ${System.currentTimeMillis() - start} ms")
+    move
+  }
+
+
+  private def getMoveInternally(field: GameField): GridPosition = {
     def emptyToZero(minMax: MinMax): MinMax = list => if (list.isEmpty) 0 else minMax(list)
     val maxWidth = getMaxWidth(field.noPosMoves)
     if (maxWidth == 1) {
