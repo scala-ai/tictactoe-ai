@@ -26,7 +26,7 @@ trait TTTWinStrategyBuilder extends GameFieldDimensions {
     map.mapValues(_.result())
   }
 
-  def allWinStrategyCheckerPerPos: Map[GridPosition, List[TTTWinStrategy]] = buildAllWinStrategiesForPos(listAllWinStrategies)
+  lazy val allWinStrategyCheckerPerPos: Map[GridPosition, List[TTTWinStrategy]] = buildAllWinStrategiesForPos(listAllWinStrategies)
 
 }
 
