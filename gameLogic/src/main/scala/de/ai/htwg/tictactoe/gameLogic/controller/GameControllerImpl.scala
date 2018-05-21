@@ -99,6 +99,8 @@ class GameControllerImpl(
           }
 
           val pos = cont.getMove(gameField)
+          if(gameField.getPos(pos).isDefined) throw new IllegalArgumentException(s"Position: $pos is already set")
+
           gameField = gameField.setPos(pos)
           checkGameFinished(gameField, current, pos) match {
             case None =>

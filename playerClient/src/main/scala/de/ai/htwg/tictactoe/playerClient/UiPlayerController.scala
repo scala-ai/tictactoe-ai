@@ -21,6 +21,11 @@ class UiPlayerController(
     gameUi.setOnMouseClicked { pos =>
       promisedPos.trySuccess(pos)
     }
-    Await.result(promisedPos.future, Duration.Inf)
+    val pos = Await.result(promisedPos.future, Duration.Inf)
+    if (field.getPos(pos).isEmpty) {
+      pos
+    } else {
+      getMove(field)
+    }
   }
 }
