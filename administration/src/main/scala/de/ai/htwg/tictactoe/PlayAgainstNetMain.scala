@@ -10,6 +10,7 @@ import de.ai.htwg.tictactoe.aiClient.learning.TTTRewardCalculator
 import de.ai.htwg.tictactoe.aiClient.learning.core.QLearningConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.policy.EpsGreedyConfiguration
 import de.ai.htwg.tictactoe.clientConnection.fxUI.UiMain
+import de.ai.htwg.tictactoe.clientConnection.gameController.CallBackSubscriber
 import de.ai.htwg.tictactoe.clientConnection.model.Player
 import de.ai.htwg.tictactoe.clientConnection.model.strategy.TTTWinStrategy3xBuilder
 import de.ai.htwg.tictactoe.clientConnection.util.SingleThreadPlatform
@@ -44,28 +45,25 @@ object PlayAgainstNetMain extends App with Logging {
   def playGame(gameNumber: Int): Unit = {
     val startPlayer = if (random.nextBoolean) Player.Cross else Player.Circle
     val gameController = GameControllerImpl(strategy, startPlayer)
-    var finishedPlayers = 0
 
     def handleGameFinish(winner: Option[Player]): Unit = {
-      finishedPlayers += 1
-      if (finishedPlayers >= 2) {
-        info {
-          winner match {
-            case Some(Player.Circle) => s"Human-Player wins"
-            case None => "No winner in this game"
-            case _ /* other player */ => s"AI-Player wins"
-          }
+      info {
+        winner match {
+          case Some(Player.Circle) => s"Human-Player wins"
+          case None => "No winner in this game"
+          case _ /* other player */ => s"AI-Player wins"
         }
-        platform.execute {
-          playGame(gameNumber + 1)
-        }
+      }
+      platform.execute {
+        playGame(gameNumber + 1)
       }
     }
 
     clientMain.getNewStage(gameName + gameNumber).foreach { gameUi =>
-      val playerUi = new UiPlayer(Player.Circle, gameUi, gameController.getGrid(), platform, handleGameFinish)
+      val playerUi = new UiPlayer(Player.Circle, gameUi, gameController.getGrid(), platform)
       gameController.subscribe(playerUi)
-      aiTrainer.registerGame(gameController, training = false, handleGameFinish)
+      aiTrainer.registerGame(gameController, training = false)
+      gameController.subscribe(CallBackSubscriber(handleGameFinish _))
       gameController.startGame()
     }(platform.executionContext)
   }

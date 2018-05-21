@@ -8,6 +8,7 @@ import de.ai.htwg.tictactoe.aiClient.learning.core.net.NeuralNetConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.policy.PolicyConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.reward.RewardCalculatorConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.state.EpochResult
+import de.ai.htwg.tictactoe.clientConnection.gameController.CallBackSubscriber
 import de.ai.htwg.tictactoe.clientConnection.gameController.GameController
 import de.ai.htwg.tictactoe.clientConnection.model.Player
 
@@ -18,12 +19,15 @@ class AiLearning(var learningUnit: TTTLearningProcessor, trainingId: String) {
     learningUnit.persist(trainingId)
   }
 
-  def registerGame(gameController: GameController, training: Boolean, callbackAfterGame: Option[Player] => Unit): Unit = {
-    val aiPlayer = new AiPlayer(learningUnit, aiPlayerType, training, startTrainingAfterGame(gameController.startingPlayer == aiPlayerType, callbackAfterGame))
+  def registerGame(gameController: GameController, training: Boolean): Unit = {
+    val aiPlayer = new AiPlayer(learningUnit, aiPlayerType, training)
+    gameController.subscribe(CallBackSubscriber { winner: Option[Player] =>
+      startTrainingAfterGame(gameController.startingPlayer == aiPlayerType)(aiPlayer.learningUnit, winner)
+    })
     gameController.subscribe(aiPlayer)
   }
 
-  def startTrainingAfterGame(isStartingPlayer: Boolean, callbackAfterGame: Option[Player] => Unit)(updatedLearningUnit: TTTLearningProcessor, winner: Option[Player]): Unit = {
+  def startTrainingAfterGame(isStartingPlayer: Boolean)(updatedLearningUnit: TTTLearningProcessor, winner: Option[Player]): Unit = {
     val epochResult = winner match {
       case Some(Player.Cross) => EpochResult.Won
       case Some(Player.Circle) => EpochResult.Lost
@@ -31,7 +35,6 @@ class AiLearning(var learningUnit: TTTLearningProcessor, trainingId: String) {
     }
 
     learningUnit = updatedLearningUnit.trainResult(epochResult)
-    callbackAfterGame(winner)
   }
 
 }

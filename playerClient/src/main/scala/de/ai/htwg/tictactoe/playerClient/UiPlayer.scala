@@ -14,7 +14,6 @@ class UiPlayer(
     gameUi: GameUiStage,
     var gameField: GameField,
     platform: SingleThreadPlatform,
-      callBack: Option[Player] => Unit,
 ) extends GameControllerSubscriber with Logging {
   trace(s"UiPlayer starts playing as $currentPlayer")
   gameUi.show()
@@ -27,10 +26,9 @@ class UiPlayer(
   }
 
   override def notify(pub: GameController, event: GameController.Updates): Unit = event match {
-    case GameController.Result.GameFinished(field, winner) =>
+    case GameController.Result.GameFinished(field, _) =>
       updateField(field)
       pub.removeSubscription(this)
-      callBack(winner)
 
     case GameController.Result.GameUpdated(field) =>
       trace(s"thread ${Thread.currentThread()}; print field: $field")

@@ -5,6 +5,7 @@ import scala.util.Random
 import de.ai.htwg.tictactoe.aiClient.AiLearning
 import de.ai.htwg.tictactoe.aiClient.AiLearning.LearningProcessorConfiguration
 import de.ai.htwg.tictactoe.clientConnection.fxUI.UiMain
+import de.ai.htwg.tictactoe.clientConnection.gameController.CallBackSubscriber
 import de.ai.htwg.tictactoe.clientConnection.model.Player
 import de.ai.htwg.tictactoe.clientConnection.model.strategy.TTTWinStrategy
 import de.ai.htwg.tictactoe.clientConnection.model.strategy.TTTWinStrategyBuilder
@@ -75,29 +76,26 @@ class Trainer(
       watcher.printCSV()
     }
 
-    var readyPlayer = 0
-
     def handlePlayerReady(): Unit = {
-      trace(s"training finished message (ready = $readyPlayer)")
-      readyPlayer += 1
-      if (readyPlayer == 2) {
-        if ((totalEpochs - remainingEpochs) % Trainer.testFrequency == 0 && remainingEpochs != totalEpochs) {
-          runTestGame(new Random(testSeed), Trainer.runsPerTest, TestGameData(remainingEpochs, 0, 0, 0, 0), () => doAllTraining(totalEpochs, remainingEpochs - 1, doAfter))
-        } else {
-          platform.execute {
-            doAllTraining(totalEpochs, remainingEpochs - 1, doAfter)
-          }
+      trace(s"training finished")
+      if ((totalEpochs - remainingEpochs) % Trainer.testFrequency == 0 && remainingEpochs != totalEpochs) {
+        runTestGame(new Random(testSeed), Trainer.runsPerTest, TestGameData(remainingEpochs, 0, 0, 0, 0), () => doAllTraining(totalEpochs, remainingEpochs - 1, doAfter))
+      } else {
+        platform.execute {
+          doAllTraining(totalEpochs, remainingEpochs - 1, doAfter)
         }
       }
     }
 
     val startPlayer = if (random.nextBoolean()) Player.Cross else Player.Circle
-    val gameFieldController = GameControllerImpl(strategyBuilder, startPlayer)
+    val gameController = GameControllerImpl(strategyBuilder, startPlayer)
 
-    aiTrainer.registerGame(gameFieldController, training = true, _ => handlePlayerReady())
-    val randomPlayer = new RandomPlayer(Player.Circle, random, _ => handlePlayerReady())
-    gameFieldController.subscribe(randomPlayer)
-    gameFieldController.startGame()
+    aiTrainer.registerGame(gameController, training = true)
+    val randomPlayer = new RandomPlayer(Player.Circle, random)
+    gameController.subscribe(randomPlayer)
+    gameController.subscribe(CallBackSubscriber(_ => handlePlayerReady()))
+
+    gameController.startGame()
   }
 
 
@@ -111,24 +109,20 @@ class Trainer(
 
   private def runTestGame(testGameRandom: Random, testGameNumber: Int, data: TestGameData, doAfter: () => Unit): Unit = {
     debug(s"Start test run: ${data.remainingEpochs} - $testGameNumber")
-    var readyPlayers = 0
     val startPlayer = if (testGameNumber % 2 == 0) Player.Cross else Player.Circle
 
     def handleGameFinish(winner: Option[Player]): Unit = {
-      readyPlayers += 1
-      if (readyPlayers >= 2) {
-        val newData = winner match {
-          case Some(Player.Cross) => data.copy(wonGames = data.wonGames + 1)
-          case Some(Player.Circle) => data.copy(lostGames = data.lostGames + 1)
-          case None => if (startPlayer == Player.Cross) {
-            data.copy(drawGamesOffense = data.drawGamesOffense + 1)
-          } else {
-            data.copy(drawGamesDefense = data.drawGamesDefense + 1)
-          }
+      val newData = winner match {
+        case Some(Player.Cross) => data.copy(wonGames = data.wonGames + 1)
+        case Some(Player.Circle) => data.copy(lostGames = data.lostGames + 1)
+        case None => if (startPlayer == Player.Cross) {
+          data.copy(drawGamesOffense = data.drawGamesOffense + 1)
+        } else {
+          data.copy(drawGamesDefense = data.drawGamesDefense + 1)
         }
-        platform.execute {
-          runTestGame(testGameRandom, testGameNumber - 1, newData, doAfter)
-        }
+      }
+      platform.execute {
+        runTestGame(testGameRandom, testGameNumber - 1, newData, doAfter)
       }
     }
 
@@ -145,41 +139,40 @@ class Trainer(
         doAfter()
       }
     } else {
-      val gameFieldController = GameControllerImpl(strategyBuilder, startPlayer)
+      val gameController = GameControllerImpl(strategyBuilder, startPlayer)
 
-      aiTrainer.registerGame(gameFieldController, training = false, handleGameFinish)
-      val logicPlayer = new LogicPlayer(Player.Circle, testGameRandom, possibleWinActions, handleGameFinish)
-      gameFieldController.subscribe(logicPlayer)
-      gameFieldController.startGame()
+      aiTrainer.registerGame(gameController, training = false)
+      val logicPlayer = new LogicPlayer(Player.Circle, testGameRandom, possibleWinActions)
+      gameController.subscribe(CallBackSubscriber(handleGameFinish _))
+
+      gameController.subscribe(logicPlayer)
+      gameController.startGame()
     }
   }
 
   def runUiGame(testGameNumber: Int): Unit = {
-    var readyPlayers = 0
     val startPlayer = if (random.nextBoolean()) Player.Cross else Player.Circle
-    val gameFieldController = GameControllerImpl(strategyBuilder, startPlayer)
+    val gameController = GameControllerImpl(strategyBuilder, startPlayer)
     val gameName = s"testGame-$testGameNumber"
     info(s"run testGame: $gameName")
 
     def handleGameFinish(winner: Option[Player]): Unit = {
-      readyPlayers += 1
-      if (readyPlayers >= 2) {
-        info {
-          winner match {
-            case Some(Player.Circle) => s"Human-Player wins"
-            case Some(Player.Cross) => s"AI-Player wins"
-            case None => "No winner in this game"
-          }
+      info {
+        winner match {
+          case Some(Player.Circle) => s"Human-Player wins"
+          case Some(Player.Cross) => s"AI-Player wins"
+          case None => "No winner in this game"
         }
-        runUiGame(testGameNumber + 1)
       }
+      runUiGame(testGameNumber + 1)
     }
 
     clientMain.getNewStage(gameName).foreach { gameUi =>
-      val playerUi = new UiPlayer(Player.Circle, gameUi, gameFieldController.getGrid(), platform, handleGameFinish)
-      gameFieldController.subscribe(playerUi)
-      aiTrainer.registerGame(gameFieldController, training = false, handleGameFinish)
-      gameFieldController.startGame()
+      val playerUi = new UiPlayer(Player.Circle, gameUi, gameController.getGrid(), platform)
+      gameController.subscribe(playerUi)
+      aiTrainer.registerGame(gameController, training = false)
+      gameController.subscribe(CallBackSubscriber(handleGameFinish _))
+      gameController.startGame()
     }(platform.executionContext)
   }
 }

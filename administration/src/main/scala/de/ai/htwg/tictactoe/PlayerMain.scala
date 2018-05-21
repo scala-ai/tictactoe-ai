@@ -4,6 +4,7 @@ import scala.concurrent.ExecutionContext
 
 import akka.actor.ActorSystem
 import de.ai.htwg.tictactoe.clientConnection.fxUI.UiMain
+import de.ai.htwg.tictactoe.clientConnection.gameController.CallBackSubscriber
 import de.ai.htwg.tictactoe.clientConnection.model.Player
 import de.ai.htwg.tictactoe.clientConnection.model.strategy.TTTWinStrategy3xBuilder
 import de.ai.htwg.tictactoe.clientConnection.util.SingleThreadPlatform
@@ -26,16 +27,12 @@ object PlayerMain extends App with Logging {
 
   def playGame(): Unit = {
     val gameController = GameControllerImpl(strategy, Player.Cross)
-    var finishedPlayers = 0
     def handleGameFinish(winner: Option[Player]): Unit = {
-      finishedPlayers += 1
-      if (finishedPlayers >= 2) {
-        info {
-          winner match {
-            case Some(Player.Cross) => s"First-Player wins"
-            case None => "No winner in this game"
-            case _ /* other player */ => s"Second-Player wins"
-          }
+      info {
+        winner match {
+          case Some(Player.Cross) => s"First-Player wins"
+          case None => "No winner in this game"
+          case _ /* other player */ => s"Second-Player wins"
         }
       }
     }
@@ -45,10 +42,11 @@ object PlayerMain extends App with Logging {
       pUi1 <- clientMain.getNewStage(gameName + "player1")
       pUi2 <- clientMain.getNewStage(gameName + "player2")
     } {
-      val player1 = new UiPlayer(Player.Cross, pUi1, gameController.getGrid(), platform, handleGameFinish)
-      val player2 = new UiPlayer(Player.Circle, pUi2, gameController.getGrid(), platform, handleGameFinish)
+      val player1 = new UiPlayer(Player.Cross, pUi1, gameController.getGrid(), platform)
+      val player2 = new UiPlayer(Player.Circle, pUi2, gameController.getGrid(), platform)
       gameController.subscribe(player1)
       gameController.subscribe(player2)
+      gameController.subscribe(CallBackSubscriber(handleGameFinish _))
       gameController.startGame()
     }
   }

@@ -14,16 +14,14 @@ class LogicPlayer(
     currentPlayer: Player,
     random: Random,
     possibleWinActions: List[TTTWinStrategy],
-    callbackAfterGame: Option[Player] => Unit,
 ) extends GameControllerSubscriber with Logging {
   trace(s"LogicPlayer starts playing as $currentPlayer")
   private var todoList: List[GridPosition] = possibleWinActions(random.nextInt(possibleWinActions.size)).list
   trace(s"New game scope: $todoList")
 
   override def notify(pub: GameController, event: GameController.Updates): Unit = event match {
-    case GameController.Result.GameFinished(_, winner) =>
+    case GameController.Result.GameFinished(_, _) =>
       pub.removeSubscription(this)
-      callbackAfterGame(winner)
 
     case GameController.Result.GameUpdated(field) =>
       if (field.isCurrentPlayer(currentPlayer)) doGameAction(field, pub)

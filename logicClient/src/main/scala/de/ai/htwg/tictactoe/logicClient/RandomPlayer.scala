@@ -11,13 +11,11 @@ import grizzled.slf4j.Logging
 class RandomPlayer(
     currentPlayer: Player,
     random: Random,
-    callbackAfterGame: Option[Player] => Unit,
 ) extends GameControllerSubscriber with Logging {
   trace(s"RandomPlayer starts playing as $currentPlayer")
   override def notify(pub: GameController, event: GameController.Updates): Unit = event match {
-    case GameController.Result.GameFinished(_, winner) =>
+    case GameController.Result.GameFinished(_, _) =>
       pub.removeSubscription(this)
-      callbackAfterGame(winner)
 
     case GameController.Result.GameUpdated(field) =>
       trace("random received update")
