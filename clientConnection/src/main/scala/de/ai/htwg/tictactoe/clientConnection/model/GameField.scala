@@ -4,7 +4,8 @@ package de.ai.htwg.tictactoe.clientConnection.model
 case class GameField private[model](
     gameState: GameField.GameState,
     gfDimensions: GameFieldDimensions,
-    gameField: Map[GridPosition, Player] = Map.empty,
+    gameField: Map[GridPosition, Player],
+    noPosMoves: Int,
 ) extends GameFieldDimensions {
   override val listAllGridPos: List[GridPosition] = gfDimensions.listAllGridPos
   override val dimensions: Int = gfDimensions.dimensions
@@ -27,6 +28,7 @@ case class GameField private[model](
       case GameField.Running(player) =>
         val updatedGameField = this.gameField + (pos -> player)
         copy(
+          noPosMoves = noPosMoves - 1,
           gameField = updatedGameField,
           gameState = GameField.Running(Player.other(player)),
         )
@@ -35,7 +37,7 @@ case class GameField private[model](
 
   def getAllEmptyPos: List[GridPosition] = listAllGridPos.filterNot(gameField.contains)
 
-  def isCompletelyFilled(): Boolean = gameField.size >= dimensions * dimensions
+  def isCompletelyFilled(): Boolean = noPosMoves == 0
 
   def finishedUndecided: Boolean = gameState.asFinished.exists(_.winner.isEmpty)
 
@@ -64,7 +66,8 @@ case class GameField private[model](
 
 object GameField {
 
-  def apply(startingPlayer: Player, stratBuilder: GameFieldDimensions): GameField = GameField(Running(startingPlayer), stratBuilder, Map())
+  def apply(startingPlayer: Player, stratBuilder: GameFieldDimensions): GameField = GameField(Running(startingPlayer), stratBuilder, Map(),
+    stratBuilder.dimensions * stratBuilder.dimensions)
 
   sealed trait GameState {
     def asRunning: Option[Running] = None
