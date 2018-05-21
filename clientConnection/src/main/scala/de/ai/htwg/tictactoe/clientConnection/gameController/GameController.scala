@@ -18,6 +18,8 @@ object GameController {
     case class NotThisPlayersTurn(field: GameField, wrongPlayer: Player) extends Result
     case class PositionAlreadySelected(field: GameField, pos: GridPosition) extends Result
   }
+
+  type OptWinner = Option[Player]
 }
 
 trait GameController extends mutable.Publisher[GameController.Updates] with Logging {
@@ -28,5 +30,5 @@ trait GameController extends mutable.Publisher[GameController.Updates] with Logg
 
   def startingPlayer: Player
 
-  def startGame(cross: GameControllerPlayer, circle: GameControllerPlayer): Unit
+  def startGame(cross: GameControllerPlayer, circle: GameControllerPlayer): GameController.OptWinner
 }

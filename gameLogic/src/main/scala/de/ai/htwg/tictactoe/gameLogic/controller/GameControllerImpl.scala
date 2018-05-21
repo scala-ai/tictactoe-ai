@@ -83,7 +83,7 @@ class GameControllerImpl(
     if (cont.currentPlayer != player) throw new IllegalArgumentException(s"wrong controller for player $player")
   }
 
-  override def startGame(cross: GameControllerPlayer, circle: GameControllerPlayer): Unit = {
+  override def startGame(cross: GameControllerPlayer, circle: GameControllerPlayer): GameController.OptWinner = {
     checkGameControllerPlayer(cross, Player.Cross)
     checkGameControllerPlayer(circle, Player.Circle)
 
