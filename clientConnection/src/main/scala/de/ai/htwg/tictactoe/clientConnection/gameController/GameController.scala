@@ -7,7 +7,7 @@ import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
 import de.ai.htwg.tictactoe.clientConnection.model.Player
 import grizzled.slf4j.Logging
 
-object GameFieldController {
+object GameController {
   sealed trait Result {
     val field: GameField
   }
@@ -20,14 +20,14 @@ object GameFieldController {
   }
 }
 
-trait GameFieldController extends mutable.Publisher[GameFieldController.Updates] with Logging {
-  final override type Pub = GameFieldController
-  final override type Sub = mutable.Subscriber[GameFieldController.Updates, Pub]
+trait GameController extends mutable.Publisher[GameController.Updates] with Logging {
+  final override type Pub = GameController
+  final override type Sub = mutable.Subscriber[GameController.Updates, Pub]
 
-  def setPos(posX: Int, posY: Int, player: Player): GameFieldController.Result =
+  def setPos(posX: Int, posY: Int, player: Player): GameController.Result =
     setPos(GridPosition(posX, posY), player)
 
-  def setPos(pos: GridPosition, player: Player): GameFieldController.Result
+  def setPos(pos: GridPosition, player: Player): GameController.Result
 
   def getGrid(): GameField
 

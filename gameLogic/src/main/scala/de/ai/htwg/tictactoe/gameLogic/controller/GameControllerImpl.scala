@@ -1,6 +1,6 @@
 package de.ai.htwg.tictactoe.gameLogic.controller
 
-import de.ai.htwg.tictactoe.clientConnection.gameController.GameFieldController
+import de.ai.htwg.tictactoe.clientConnection.gameController.GameController
 import de.ai.htwg.tictactoe.clientConnection.model.GameField
 import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
 import de.ai.htwg.tictactoe.clientConnection.model.Player
@@ -8,18 +8,18 @@ import de.ai.htwg.tictactoe.clientConnection.model.strategy.TTTWinStrategy
 import de.ai.htwg.tictactoe.clientConnection.model.strategy.TTTWinStrategyBuilder
 import grizzled.slf4j.Logging
 
-object GameFieldControllerImpl {
-  def apply(strategyBuilder: TTTWinStrategyBuilder, startingPlayer: Player): GameFieldController =
-    new GameFieldControllerImpl(strategyBuilder, startingPlayer)
+object GameControllerImpl {
+  def apply(strategyBuilder: TTTWinStrategyBuilder, startingPlayer: Player): GameController =
+    new GameControllerImpl(strategyBuilder, startingPlayer)
 }
 
-class GameFieldControllerImpl(
+class GameControllerImpl(
     val strategyBuilder: TTTWinStrategyBuilder,
     override val startingPlayer: Player,
-) extends GameFieldController with Logging {
+) extends GameController with Logging {
   private val thread = Thread.currentThread()
   debug("starting Game")
-  private val res = GameFieldController.Result
+  private val res = GameController.Result
   val dimensions: Int = strategyBuilder.dimensions
   val strategy: Map[GridPosition, List[TTTWinStrategy]] = strategyBuilder.allWinStrategyCheckerPerPos
 
@@ -27,9 +27,9 @@ class GameFieldControllerImpl(
 
   private def isNotCurrentThread: Boolean = Thread.currentThread() != thread
 
-  override def setPos(posX: Int, posY: Int, player: Player): GameFieldController.Result = setPos(GridPosition(posX, posY), player)
+  override def setPos(posX: Int, posY: Int, player: Player): GameController.Result = setPos(GridPosition(posX, posY), player)
 
-  override def setPos(pos: GridPosition, player: Player): GameFieldController.Result = {
+  override def setPos(pos: GridPosition, player: Player): GameController.Result = {
     if (isNotCurrentThread) throw new IllegalStateException("wrong thread")
 
     checkPosition(pos)
@@ -38,7 +38,7 @@ class GameFieldControllerImpl(
     debug(s"new game field: \n${gameField.print()}")
     trace(s"player: $player trying to set pos: $pos: $result")
     result match {
-      case update: GameFieldController.Updates => publish(update)
+      case update: GameController.Updates => publish(update)
       case _ => warn(s"player: $player failed $result")
     }
     result
@@ -49,7 +49,7 @@ class GameFieldControllerImpl(
     if (!checkCoord(pos.x) && checkCoord(pos.y)) throw new IllegalArgumentException(s"Coordinates needs to be between 0 and $dimensions in $pos")
   }
 
-  private def setPosInGrid(gameField: GameField, pos: GridPosition, player: Player): GameFieldController.Result = {
+  private def setPosInGrid(gameField: GameField, pos: GridPosition, player: Player): GameController.Result = {
     gameField.gameState match {
       case GameField.Finished(winner) => res.GameFinished(gameField, winner) // error already finished
       case GameField.Running(p) if p != player => res.NotThisPlayersTurn(gameField, p) // error wrong player
@@ -82,6 +82,6 @@ class GameFieldControllerImpl(
   override def getGrid(): GameField = this.synchronized(gameField)
 
   override def startGame(): Unit = {
-    publish(GameFieldController.Result.GameUpdated(gameField))
+    publish(GameController.Result.GameUpdated(gameField))
   }
 }

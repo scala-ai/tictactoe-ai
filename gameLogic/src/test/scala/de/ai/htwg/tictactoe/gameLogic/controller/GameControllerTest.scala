@@ -1,6 +1,6 @@
 package de.ai.htwg.tictactoe.gameLogic.controller
 
-import de.ai.htwg.tictactoe.clientConnection.gameController.GameFieldController
+import de.ai.htwg.tictactoe.clientConnection.gameController.GameController
 import de.ai.htwg.tictactoe.clientConnection.model.Player
 import de.ai.htwg.tictactoe.clientConnection.model.GameField
 import de.ai.htwg.tictactoe.clientConnection.model.strategy.TTTWinStrategy4xBuilder
@@ -8,10 +8,10 @@ import org.scalatest.FreeSpec
 import org.scalatest.Matchers
 import org.scalatest.Inside
 
-class GameFieldControllerTest extends FreeSpec with Matchers with Inside {
+class GameControllerTest extends FreeSpec with Matchers with Inside {
 
-  private def fixture(): GameFieldController = {
-    val cont = GameFieldControllerImpl(TTTWinStrategy4xBuilder, Player.Cross)
+  private def fixture(): GameController = {
+    val cont = GameControllerImpl(TTTWinStrategy4xBuilder, Player.Cross)
     cont.startGame()
     cont.setPos(0, 0, Player.Cross)
     cont.setPos(1, 0, Player.Circle)
@@ -26,7 +26,7 @@ class GameFieldControllerTest extends FreeSpec with Matchers with Inside {
 
     "Player ONE winning" in {
       val controller = fixture()
-      inside(controller.setPos(0, 3, Player.Cross)) { case GameFieldController.Result.GameFinished(f, winner @ Some(Player.Cross)) =>
+      inside(controller.setPos(0, 3, Player.Cross)) { case GameController.Result.GameFinished(f, winner @ Some(Player.Cross)) =>
         f.isCurrentPlayer(Player.Cross) shouldBe false
         f.isCurrentPlayer(Player.Circle) shouldBe false
         f.gameState should matchPattern { case GameField.Finished(`winner`) => }
@@ -36,13 +36,13 @@ class GameFieldControllerTest extends FreeSpec with Matchers with Inside {
 
     "Player TWO winning" in {
       val controller = fixture()
-      inside(controller.setPos(2, 0, Player.Cross)) { case GameFieldController.Result.GameUpdated(f) =>
+      inside(controller.setPos(2, 0, Player.Cross)) { case GameController.Result.GameUpdated(f) =>
         f.isCurrentPlayer(Player.Cross) shouldBe false
         f.isCurrentPlayer(Player.Circle) shouldBe true
         f.gameState should matchPattern { case GameField.Running(Player.Circle) => }
       }
 
-      inside(controller.setPos(1, 3, Player.Circle)) { case GameFieldController.Result.GameFinished(f, winner @ Some(Player.Circle)) =>
+      inside(controller.setPos(1, 3, Player.Circle)) { case GameController.Result.GameFinished(f, winner @ Some(Player.Circle)) =>
         f.isCurrentPlayer(Player.Cross) shouldBe false
         f.isCurrentPlayer(Player.Circle) shouldBe false
         f.gameState should matchPattern { case GameField.Finished(`winner`) => }

@@ -1,8 +1,8 @@
 package de.ai.htwg.tictactoe.playerClient
 
 import de.ai.htwg.tictactoe.clientConnection.fxUI.GameUiStage
-import de.ai.htwg.tictactoe.clientConnection.gameController.GameFieldController
-import de.ai.htwg.tictactoe.clientConnection.gameController.GameFieldControllerSubscriber
+import de.ai.htwg.tictactoe.clientConnection.gameController.GameController
+import de.ai.htwg.tictactoe.clientConnection.gameController.GameControllerSubscriber
 import de.ai.htwg.tictactoe.clientConnection.model.GameField
 import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
 import de.ai.htwg.tictactoe.clientConnection.model.Player
@@ -15,7 +15,7 @@ class UiPlayer(
     var gameField: GameField,
     platform: SingleThreadPlatform,
       callBack: Option[Player] => Unit,
-) extends GameFieldControllerSubscriber with Logging {
+) extends GameControllerSubscriber with Logging {
   trace(s"UiPlayer starts playing as $currentPlayer")
   gameUi.show()
 
@@ -26,26 +26,26 @@ class UiPlayer(
     }
   }
 
-  override def notify(pub: GameFieldController, event: GameFieldController.Updates): Unit = event match {
-    case GameFieldController.Result.GameFinished(field, winner) =>
+  override def notify(pub: GameController, event: GameController.Updates): Unit = event match {
+    case GameController.Result.GameFinished(field, winner) =>
       updateField(field)
       pub.removeSubscription(this)
       callBack(winner)
 
-    case GameFieldController.Result.GameUpdated(field) =>
+    case GameController.Result.GameUpdated(field) =>
       trace(s"thread ${Thread.currentThread()}; print field: $field")
       updateField(field)
       if (field.isCurrentPlayer(currentPlayer)) doGameAction(field, pub)
 
   }
 
-  private def handleMouseEvent(gameController: GameFieldController)(pos: GridPosition): Unit = {
+  private def handleMouseEvent(gameController: GameController)(pos: GridPosition): Unit = {
     platform.execute {
       gameController.setPos(pos, currentPlayer)
     }
   }
 
-  private def doGameAction(field: GameField, gameController: GameFieldController): Unit = {
+  private def doGameAction(field: GameField, gameController: GameController): Unit = {
     trace("UiPlayer: current turn")
     gameUi.setOnMouseClicked(handleMouseEvent(gameController))
     info("Your turn")

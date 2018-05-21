@@ -8,7 +8,7 @@ import de.ai.htwg.tictactoe.aiClient.learning.core.net.NeuralNetConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.policy.PolicyConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.reward.RewardCalculatorConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.state.EpochResult
-import de.ai.htwg.tictactoe.clientConnection.gameController.GameFieldController
+import de.ai.htwg.tictactoe.clientConnection.gameController.GameController
 import de.ai.htwg.tictactoe.clientConnection.model.Player
 
 class AiLearning(var learningUnit: TTTLearningProcessor, trainingId: String) {
@@ -18,7 +18,7 @@ class AiLearning(var learningUnit: TTTLearningProcessor, trainingId: String) {
     learningUnit.persist(trainingId)
   }
 
-  def registerGame(gameController: GameFieldController, training: Boolean, callbackAfterGame: Option[Player] => Unit): Unit = {
+  def registerGame(gameController: GameController, training: Boolean, callbackAfterGame: Option[Player] => Unit): Unit = {
     val aiPlayer = new AiPlayer(learningUnit, aiPlayerType, training, startTrainingAfterGame(gameController.startingPlayer == aiPlayerType, callbackAfterGame))
     gameController.subscribe(aiPlayer)
   }

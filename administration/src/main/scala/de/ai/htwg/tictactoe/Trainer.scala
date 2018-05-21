@@ -9,7 +9,7 @@ import de.ai.htwg.tictactoe.clientConnection.model.Player
 import de.ai.htwg.tictactoe.clientConnection.model.strategy.TTTWinStrategy
 import de.ai.htwg.tictactoe.clientConnection.model.strategy.TTTWinStrategyBuilder
 import de.ai.htwg.tictactoe.clientConnection.util.SingleThreadPlatform
-import de.ai.htwg.tictactoe.gameLogic.controller.GameFieldControllerImpl
+import de.ai.htwg.tictactoe.gameLogic.controller.GameControllerImpl
 import de.ai.htwg.tictactoe.logicClient.LogicPlayer
 import de.ai.htwg.tictactoe.logicClient.RandomPlayer
 import de.ai.htwg.tictactoe.playerClient.UiPlayer
@@ -92,7 +92,7 @@ class Trainer(
     }
 
     val startPlayer = if (random.nextBoolean()) Player.Cross else Player.Circle
-    val gameFieldController = GameFieldControllerImpl(strategyBuilder, startPlayer)
+    val gameFieldController = GameControllerImpl(strategyBuilder, startPlayer)
 
     aiTrainer.registerGame(gameFieldController, training = true, _ => handlePlayerReady())
     val randomPlayer = new RandomPlayer(Player.Circle, random, _ => handlePlayerReady())
@@ -145,7 +145,7 @@ class Trainer(
         doAfter()
       }
     } else {
-      val gameFieldController = GameFieldControllerImpl(strategyBuilder, startPlayer)
+      val gameFieldController = GameControllerImpl(strategyBuilder, startPlayer)
 
       aiTrainer.registerGame(gameFieldController, training = false, handleGameFinish)
       val logicPlayer = new LogicPlayer(Player.Circle, testGameRandom, possibleWinActions, handleGameFinish)
@@ -157,7 +157,7 @@ class Trainer(
   def runUiGame(testGameNumber: Int): Unit = {
     var readyPlayers = 0
     val startPlayer = if (random.nextBoolean()) Player.Cross else Player.Circle
-    val gameFieldController = GameFieldControllerImpl(strategyBuilder, startPlayer)
+    val gameFieldController = GameControllerImpl(strategyBuilder, startPlayer)
     val gameName = s"testGame-$testGameNumber"
     info(s"run testGame: $gameName")
 

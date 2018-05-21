@@ -13,7 +13,7 @@ import de.ai.htwg.tictactoe.clientConnection.fxUI.UiMain
 import de.ai.htwg.tictactoe.clientConnection.model.Player
 import de.ai.htwg.tictactoe.clientConnection.model.strategy.TTTWinStrategy3xBuilder
 import de.ai.htwg.tictactoe.clientConnection.util.SingleThreadPlatform
-import de.ai.htwg.tictactoe.gameLogic.controller.GameFieldControllerImpl
+import de.ai.htwg.tictactoe.gameLogic.controller.GameControllerImpl
 import de.ai.htwg.tictactoe.playerClient.UiPlayer
 import grizzled.slf4j.Logging
 
@@ -31,7 +31,7 @@ object PlayAgainstNetMain extends App with Logging {
       random = new Random(5L)
     ),
     qLearningProperties = QLearningConfiguration(),
-    neuralNetFileName = "1kwyyR.2018-05-19-11-29-29-913.network.zip",
+    neuralNetFileName = "Vs8Syg.2018-05-19-18-57-44-372.network.zip",
     executors = Executors.newFixedThreadPool(5),
     rewardProperties = TTTRewardCalculator.defaultConfig()
   ), "testTraining")
@@ -43,7 +43,7 @@ object PlayAgainstNetMain extends App with Logging {
 
   def playGame(gameNumber: Int): Unit = {
     val startPlayer = if (random.nextBoolean) Player.Cross else Player.Circle
-    val gameController = GameFieldControllerImpl(strategy, startPlayer)
+    val gameController = GameControllerImpl(strategy, startPlayer)
     var finishedPlayers = 0
 
     def handleGameFinish(winner: Option[Player]): Unit = {
