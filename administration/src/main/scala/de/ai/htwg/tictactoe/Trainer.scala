@@ -49,10 +49,8 @@ class Trainer(
     }
     val start = System.currentTimeMillis()
     info(s"Start training $trainingId with $epochs epochs")
-    doAllTraining(epochs, epochs, () => doAfterTraining(start))
-  }
+    doAllTraining(epochs)
 
-  def doAfterTraining(start: Long): Unit = {
     aiTrainer.saveState()
     watcher.printCSV()
     info {
@@ -65,30 +63,39 @@ class Trainer(
     runUiGame()
   }
 
-  private def doAllTraining(totalEpochs: Int, remainingEpochs: Int, doAfter: () => Unit): Unit = {
-    debug(s"Train epoch $remainingEpochs")
-    if (remainingEpochs < 0) {
-      platform.execute(doAfter())
-      return
+
+  private def doAllTraining(totalEpochs: Int): Unit = {
+
+    @tailrec def trainingLoop(remainingEpochs: Int): Unit = {
+      if (remainingEpochs < 0) return
+
+      debug(s"Train epoch $remainingEpochs")
+
+      if ((totalEpochs - remainingEpochs) % Trainer.saveFrequency == 0 && remainingEpochs != totalEpochs) {
+        aiTrainer.saveState()
+        watcher.printCSV()
+      }
+
+      doTrainingGame()
+
+      if ((totalEpochs - remainingEpochs) % Trainer.testFrequency == 0 && remainingEpochs != totalEpochs) {
+        runTestGame(new Random(testSeed), Trainer.runsPerTest, remainingEpochs)
+      }
+
+      trainingLoop(remainingEpochs - 1)
     }
 
-    if ((totalEpochs - remainingEpochs) % Trainer.saveFrequency == 0 && remainingEpochs != totalEpochs) {
-      aiTrainer.saveState()
-      watcher.printCSV()
-    }
-    val startPlayer = if (random.nextBoolean()) Player.Cross else Player.Circle
-    val gameController = GameControllerImpl(strategyBuilder, startPlayer)
+    def doTrainingGame(): Unit = {
+      val startPlayer = if (random.nextBoolean()) Player.Cross else Player.Circle
+      val gameController = GameControllerImpl(strategyBuilder, startPlayer)
 
-    val aiPlayer = aiTrainer.getNewAiPlayer(gameController, training = true)
-    val randomPlayer = new RandomPlayer(Player.Circle, random)
+      val aiPlayer = aiTrainer.getNewAiPlayer(gameController, training = true)
+      val randomPlayer = new RandomPlayer(Player.Circle, random)
 
-    gameController.startGame(aiPlayer, randomPlayer)
-    trace(s"training finished")
-    if ((totalEpochs - remainingEpochs) % Trainer.testFrequency == 0 && remainingEpochs != totalEpochs) {
-      runTestGame(new Random(testSeed), Trainer.runsPerTest, remainingEpochs, () => doAllTraining(totalEpochs, remainingEpochs - 1, doAfter))
-    } else {
-      doAllTraining(totalEpochs, remainingEpochs - 1, doAfter)
+      gameController.startGame(aiPlayer, randomPlayer)
     }
+
+    trainingLoop(totalEpochs)
   }
 
 
@@ -100,7 +107,7 @@ class Trainer(
       drawGamesDefense: Int,
   )
 
-  private def runTestGame(testGameRandom: Random, noOfTestGames: Int, remainingEpochs: Int, doAfter: () => Unit): Unit = {
+  private def runTestGame(testGameRandom: Random, noOfTestGames: Int, remainingEpochs: Int): Unit = {
 
     @tailrec def loop(testGameNumber: Int, data: TestGameData): TestGameData = {
       if (testGameNumber > 0) {
@@ -139,9 +146,6 @@ class Trainer(
     val totalGames = wonGames + lostGames + drawGamesDef + drawGamesOff
     info(f"$epochs: + $wonGames  - $lostGames  / $drawGamesDef  o $drawGamesOff => ${(totalGames - lostGames).toFloat * 100 / totalGames}%.2f%%")
     watcher.addEpochResult(Watcher.EpochResult(epochs, wonGames, lostGames, data.drawGamesOffense, data.drawGamesDefense))
-    platform.execute {
-      doAfter()
-    }
   }
 
   def runUiGame(): Unit = {
