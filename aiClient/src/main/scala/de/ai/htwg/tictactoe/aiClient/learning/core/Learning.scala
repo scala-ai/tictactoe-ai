@@ -31,6 +31,8 @@ trait Learning[S <: State, A <: Action] {
    */
   def getBestDecision(state: S): (Learning[S, A], A)
 
+  def getMinimaxDecision(state: S, nextState: (S, A) => S): (Learning[S, A], A)
+
   /**
    * This should be called after end of a training epoch. The learning object
    * trains internal all transitions which are processed in this epoch and

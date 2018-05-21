@@ -34,7 +34,13 @@ class TTTLearningProcessor(
 
   def getBestDecision(state: TTTState): (TTTAction, TTTLearningProcessor) = {
     trace(s"Ask for best decision")
-    val (newLearning, action) = learning.getBestDecision(state)
+    // val (newLearning, action) = learning.getBestDecision(state)
+    val (newLearning, action) = learning.getMinimaxDecision(state,
+      (state, action) => TTTState(
+        state.field.setPos(action.coordinate.x, action.coordinate.y),
+        !state.isStartingPlayer
+      )
+    )
     (action, new TTTLearningProcessor(learning = newLearning, executors))
   }
 

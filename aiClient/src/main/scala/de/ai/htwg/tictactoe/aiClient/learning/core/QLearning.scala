@@ -47,6 +47,24 @@ case class QLearning[S <: State, A <: Action](
     (copy(), action)
   }
 
+  override def getMinimaxDecision(state: S, nextState: (S, A) => S): (QLearning[S, A], A) = {
+    val possibleActions = actionSpace.getPossibleActions(state)
+    // get min of reachable max action of opposite players next game state
+    val (action, _) = possibleActions
+      .map(a => (a, nextState(state, a)))
+      .map(x => {
+        val nextStateOppositeActions = actionSpace.getPossibleActions(x._2)
+        if (nextStateOppositeActions.isEmpty) {
+          // game is finished
+          (x._1, calcQValue(x._2, x._1))
+        } else {
+          calcBestAction(x._2, nextStateOppositeActions)
+        }
+      })
+      .minBy(_._2)
+    (copy(), action)
+  }
+
   private def calcBestAction(state: S, possibleActions: List[A]): (A, Double) = {
     debug(s"Request action in state \n${state.toString}")
     val ratedActions = possibleActions
