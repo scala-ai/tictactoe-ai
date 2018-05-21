@@ -19,12 +19,12 @@ class AiLearning(var learningUnit: TTTLearningProcessor, trainingId: String) {
     learningUnit.persist(trainingId)
   }
 
-  def registerGame(gameController: GameController, training: Boolean): Unit = {
-    val aiPlayer = new AiPlayer(learningUnit, aiPlayerType, training)
+  def getNewAiPlayer(gameController: GameController, training: Boolean): AiPlayer = {
+    val aiPlayer = new AiPlayer(learningUnit, aiPlayerType, gameController.startingPlayer == aiPlayerType, training)
     gameController.subscribe(CallBackSubscriber { winner: Option[Player] =>
       startTrainingAfterGame(gameController.startingPlayer == aiPlayerType)(aiPlayer.learningUnit, winner)
     })
-    gameController.subscribe(aiPlayer)
+    aiPlayer
   }
 
   def startTrainingAfterGame(isStartingPlayer: Boolean)(updatedLearningUnit: TTTLearningProcessor, winner: Option[Player]): Unit = {

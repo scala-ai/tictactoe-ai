@@ -12,7 +12,6 @@ class GameControllerTest extends FreeSpec with Matchers with Inside {
 
   private def fixture(): GameController = {
     val cont = GameControllerImpl(TTTWinStrategy4xBuilder, Player.Cross)
-    cont.startGame()
     cont.setPos(0, 0, Player.Cross)
     cont.setPos(1, 0, Player.Circle)
     cont.setPos(0, 1, Player.Cross)

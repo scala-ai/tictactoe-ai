@@ -2,29 +2,21 @@ package de.ai.htwg.tictactoe.logicClient
 
 import scala.util.Random
 
-import de.ai.htwg.tictactoe.clientConnection.gameController.GameController
-import de.ai.htwg.tictactoe.clientConnection.gameController.GameControllerSubscriber
+import de.ai.htwg.tictactoe.clientConnection.gameController.GameControllerPlayer
 import de.ai.htwg.tictactoe.clientConnection.model.GameField
+import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
 import de.ai.htwg.tictactoe.clientConnection.model.Player
 import grizzled.slf4j.Logging
 
 class RandomPlayer(
-    currentPlayer: Player,
+    override val currentPlayer: Player,
     random: Random,
-) extends GameControllerSubscriber with Logging {
+) extends GameControllerPlayer with Logging {
   trace(s"RandomPlayer starts playing as $currentPlayer")
-  override def notify(pub: GameController, event: GameController.Updates): Unit = event match {
-    case GameController.Result.GameFinished(_, _) =>
-      pub.removeSubscription(this)
 
-    case GameController.Result.GameUpdated(field) =>
-      trace("random received update")
-      if (field.isCurrentPlayer(currentPlayer)) doGameAction(field, pub)
-  }
-
-  private def doGameAction(gf: GameField, gameController: GameController): Unit = {
+  override def getMove(gf: GameField): GridPosition = {
     trace("RandomPlayer: current turn")
     val possibleActions = gf.getAllEmptyPos
-    gameController.setPos(possibleActions(random.nextInt(possibleActions.size)), currentPlayer)
+    possibleActions(random.nextInt(possibleActions.size))
   }
 }

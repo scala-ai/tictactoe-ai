@@ -10,6 +10,7 @@ import de.ai.htwg.tictactoe.clientConnection.model.strategy.TTTWinStrategy3xBuil
 import de.ai.htwg.tictactoe.clientConnection.util.SingleThreadPlatform
 import de.ai.htwg.tictactoe.gameLogic.controller.GameControllerImpl
 import de.ai.htwg.tictactoe.playerClient.UiPlayer
+import de.ai.htwg.tictactoe.playerClient.UiPlayerController
 import grizzled.slf4j.Logging
 
 object PlayerMain extends App with Logging {
@@ -37,17 +38,17 @@ object PlayerMain extends App with Logging {
       }
     }
 
+
     implicit val executionContext: ExecutionContext = platform.executionContext
     for {
-      pUi1 <- clientMain.getNewStage(gameName + "player1")
-      pUi2 <- clientMain.getNewStage(gameName + "player2")
+      gameUi <- clientMain.getNewStage(gameName)
     } {
-      val player1 = new UiPlayer(Player.Cross, pUi1, gameController.getGrid(), platform)
-      val player2 = new UiPlayer(Player.Circle, pUi2, gameController.getGrid(), platform)
-      gameController.subscribe(player1)
-      gameController.subscribe(player2)
+      val player1 = new UiPlayerController(gameUi, Player.Cross)
+      val player2 = new UiPlayerController(gameUi, Player.Circle)
+      val uiView = new UiPlayer(gameUi, gameController.getGrid())
+      gameController.subscribe(uiView)
       gameController.subscribe(CallBackSubscriber(handleGameFinish _))
-      gameController.startGame()
+      gameController.startGame(player1, player2)
     }
   }
 

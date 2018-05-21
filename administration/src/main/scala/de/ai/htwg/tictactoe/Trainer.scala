@@ -14,6 +14,7 @@ import de.ai.htwg.tictactoe.gameLogic.controller.GameControllerImpl
 import de.ai.htwg.tictactoe.logicClient.LogicPlayer
 import de.ai.htwg.tictactoe.logicClient.RandomPlayer
 import de.ai.htwg.tictactoe.playerClient.UiPlayer
+import de.ai.htwg.tictactoe.playerClient.UiPlayerController
 import grizzled.slf4j.Logging
 
 object Trainer {
@@ -90,12 +91,11 @@ class Trainer(
     val startPlayer = if (random.nextBoolean()) Player.Cross else Player.Circle
     val gameController = GameControllerImpl(strategyBuilder, startPlayer)
 
-    aiTrainer.registerGame(gameController, training = true)
+    val aiPlayer = aiTrainer.getNewAiPlayer(gameController, training = true)
     val randomPlayer = new RandomPlayer(Player.Circle, random)
-    gameController.subscribe(randomPlayer)
     gameController.subscribe(CallBackSubscriber(_ => handlePlayerReady()))
 
-    gameController.startGame()
+    gameController.startGame(aiPlayer, randomPlayer)
   }
 
 
@@ -141,12 +141,11 @@ class Trainer(
     } else {
       val gameController = GameControllerImpl(strategyBuilder, startPlayer)
 
-      aiTrainer.registerGame(gameController, training = false)
+      val aiPlayer = aiTrainer.getNewAiPlayer(gameController, training = false)
       val logicPlayer = new LogicPlayer(Player.Circle, testGameRandom, possibleWinActions)
       gameController.subscribe(CallBackSubscriber(handleGameFinish _))
 
-      gameController.subscribe(logicPlayer)
-      gameController.startGame()
+      gameController.startGame(aiPlayer, logicPlayer)
     }
   }
 
@@ -168,11 +167,12 @@ class Trainer(
     }
 
     clientMain.getNewStage(gameName).foreach { gameUi =>
-      val playerUi = new UiPlayer(Player.Circle, gameUi, gameController.getGrid(), platform)
-      gameController.subscribe(playerUi)
-      aiTrainer.registerGame(gameController, training = false)
+      val uiView = new UiPlayer(gameUi, gameController.getGrid())
+      val uiPlayer = new UiPlayerController(gameUi, Player.Circle)
+      gameController.subscribe(uiView)
+      val aiPlayer = aiTrainer.getNewAiPlayer(gameController, training = false)
       gameController.subscribe(CallBackSubscriber(handleGameFinish _))
-      gameController.startGame()
+      gameController.startGame(aiPlayer, uiPlayer)
     }(platform.executionContext)
   }
 }

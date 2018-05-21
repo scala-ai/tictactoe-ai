@@ -33,5 +33,5 @@ trait GameController extends mutable.Publisher[GameController.Updates] with Logg
 
   def startingPlayer: Player
 
-  def startGame(): Unit
+  def startGame(cross: GameControllerPlayer, circle: GameControllerPlayer): Unit
 }

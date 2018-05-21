@@ -1,6 +1,9 @@
 package de.ai.htwg.tictactoe.gameLogic.controller
 
+import scala.annotation.tailrec
+
 import de.ai.htwg.tictactoe.clientConnection.gameController.GameController
+import de.ai.htwg.tictactoe.clientConnection.gameController.GameControllerPlayer
 import de.ai.htwg.tictactoe.clientConnection.model.GameField
 import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
 import de.ai.htwg.tictactoe.clientConnection.model.Player
@@ -81,7 +84,40 @@ class GameControllerImpl(
 
   override def getGrid(): GameField = this.synchronized(gameField)
 
-  override def startGame(): Unit = {
+  private def checkGameControllerPlayer(cont: GameControllerPlayer, player: Player): Unit = {
+    if (cont.currentPlayer != player) throw new IllegalArgumentException(s"wrong controller for player $player")
+  }
+
+  override def startGame(cross: GameControllerPlayer, circle: GameControllerPlayer): Unit = {
+    checkGameControllerPlayer(cross, Player.Cross)
+    checkGameControllerPlayer(circle, Player.Circle)
+
     publish(GameController.Result.GameUpdated(gameField))
+
+    @tailrec def move(): Option[Player] = {
+      gameField.gameState match {
+        case GameField.Finished(winner) => winner
+        case GameField.Running(current) =>
+          val cont = current match {
+            case Player.Circle => circle
+            case Player.Cross => cross
+          }
+
+          val pos = cont.getMove(gameField)
+          gameField = gameField.setPos(pos)
+          checkGameFinished(gameField, current, pos) match {
+            case None =>
+              publish(res.GameUpdated(gameField)) // game Still running
+              move()
+
+            case Some(optWinner) =>
+              gameField = gameField.finishGame(optWinner)
+              publish(res.GameFinished(gameField, optWinner))
+              optWinner
+          }
+
+      }
+    }
+    move()
   }
 }

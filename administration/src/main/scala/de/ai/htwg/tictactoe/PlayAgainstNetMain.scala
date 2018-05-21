@@ -16,6 +16,7 @@ import de.ai.htwg.tictactoe.clientConnection.model.strategy.TTTWinStrategy3xBuil
 import de.ai.htwg.tictactoe.clientConnection.util.SingleThreadPlatform
 import de.ai.htwg.tictactoe.gameLogic.controller.GameControllerImpl
 import de.ai.htwg.tictactoe.playerClient.UiPlayer
+import de.ai.htwg.tictactoe.playerClient.UiPlayerController
 import grizzled.slf4j.Logging
 
 object PlayAgainstNetMain extends App with Logging {
@@ -60,11 +61,12 @@ object PlayAgainstNetMain extends App with Logging {
     }
 
     clientMain.getNewStage(gameName + gameNumber).foreach { gameUi =>
-      val playerUi = new UiPlayer(Player.Circle, gameUi, gameController.getGrid(), platform)
-      gameController.subscribe(playerUi)
-      aiTrainer.registerGame(gameController, training = false)
+      val uiPlayer = new UiPlayerController(gameUi, Player.Circle)
+      val uiView = new UiPlayer(gameUi, gameController.getGrid())
+      gameController.subscribe(uiView)
+      val aiPlayer = aiTrainer.getNewAiPlayer(gameController, training = false)
       gameController.subscribe(CallBackSubscriber(handleGameFinish _))
-      gameController.startGame()
+      gameController.startGame(aiPlayer, uiPlayer)
     }(platform.executionContext)
   }
 }
