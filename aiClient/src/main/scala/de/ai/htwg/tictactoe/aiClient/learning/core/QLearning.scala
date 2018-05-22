@@ -47,12 +47,24 @@ case class QLearning[S <: State, A <: Action](
     (copy(), action)
   }
 
+  def getXBestDecision(x: Int, state: S): (QLearning[S, A], List[A]) = {
+    val possibleActions = actionSpace.getPossibleActions(state)
+    val allRated = calcRatedActions(state, possibleActions).sortBy(-_._2) // minus for reverse (descending) sort
+    val bestActions = allRated.drop(allRated.size - x).map(_._1)
+    (copy(), bestActions)
+  }
+
   private def calcBestAction(state: S, possibleActions: List[A]): (A, Double) = {
+    calcRatedActions(state, possibleActions).maxBy(_._2)
+  }
+
+  private def calcRatedActions(state: S, possibleActions: List[A]): List[(A, Double)] = {
     debug(s"Request action in state \n${state.toString}")
-    val ratedActions = possibleActions
-      .map(a => (a, calcQValue(state, a)))
+    val ratedActions = possibleActions.map { a =>
+      a -> calcQValue(state, a)
+    }
     trace(s"Q-Values: $ratedActions")
-    ratedActions.maxBy(_._2)
+    ratedActions
   }
 
   private def calcQValue(state: S, action: A): Double = {

@@ -38,6 +38,13 @@ class TTTLearningProcessor(
     (action, new TTTLearningProcessor(learning = newLearning, executors))
   }
 
+  def getXBestDecisions(x: Int, state: TTTState): (List[TTTAction], TTTLearningProcessor) = {
+    trace(s"Ask for $x best decision")
+
+    val (newLearning, actions) = learning.getXBestDecision(x, state)
+    (actions, new TTTLearningProcessor(learning = newLearning, executors))
+  }
+
   def trainResult(result: EpochResult): TTTLearningProcessor = new TTTLearningProcessor(learning.trainHistory(result), executors)
 
   def persist(trainingId: String): Unit = {
