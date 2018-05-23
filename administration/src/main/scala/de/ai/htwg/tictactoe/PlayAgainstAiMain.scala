@@ -14,6 +14,7 @@ import de.ai.htwg.tictactoe.clientConnection.gameController.GameControllerPlayer
 import de.ai.htwg.tictactoe.clientConnection.model.Player
 import de.ai.htwg.tictactoe.logicClient.MiniMaxWidthPlayer
 import de.ai.htwg.tictactoe.logicClient.MiniMaxDepthPlayer
+import de.ai.htwg.tictactoe.logicClient.MiniMaxWidthDepthPlayer
 import de.ai.htwg.tictactoe.logicClient.RandomPlayer
 
 object AiTrainerBuilder {
@@ -62,6 +63,18 @@ object PlayAgainstNetMiniMaxDepthMain extends PlayAgainstUi {
   override def buildOpponent(gameController: GameController): GameControllerPlayer = {
     val ai = aiTrainer.getNewAiPlayer(gameController, training = false)
     new MiniMaxDepthPlayer(Player.Cross, strategy, ai, maxDepth = 3)
+  }
+
+  start()
+}
+
+object PlayAgainstNetMiniMaxWidthDepthMain extends PlayAgainstUi {
+
+  private lazy val aiTrainer = AiTrainerBuilder.build()
+
+  override def buildOpponent(gameController: GameController): GameControllerPlayer = {
+    val ai = aiTrainer.getNewAiPlayer(gameController, training = false)
+    new MiniMaxWidthDepthPlayer(Player.Cross, strategy, ai, maxDepth = 4)
   }
 
   start()
