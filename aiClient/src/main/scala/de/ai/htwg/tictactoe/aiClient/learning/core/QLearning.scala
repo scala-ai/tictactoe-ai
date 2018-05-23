@@ -58,7 +58,7 @@ case class QLearning[S <: State, A <: Action](
     calcRatedActions(state, possibleActions).maxBy(_._2)
   }
 
-  private def calcRatedActions(state: S, possibleActions: List[A]): List[(A, Double)] = {
+  def calcRatedActions(state: S, possibleActions: List[A]): List[(A, Double)] = {
     debug(s"Request action in state \n${state.toString}")
     val ratedActions = possibleActions.map { a =>
       a -> calcQValue(state, a)

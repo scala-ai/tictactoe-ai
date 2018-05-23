@@ -6,6 +6,7 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.ExecutorService
 
+import de.ai.htwg.tictactoe.aiClient.learning.TTTRewardCalculator.RewardConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.QLearning
 import de.ai.htwg.tictactoe.aiClient.learning.core.QLearningConfiguration
 import de.ai.htwg.tictactoe.aiClient.learning.core.net.Dl4JNeuralNet
@@ -23,29 +24,61 @@ import grizzled.slf4j.Logging
 
 class TTTLearningProcessor(
     val learning: QLearning[TTTState, TTTAction],
-    val executors: ExecutorService
+    val executors: ExecutorService,
+    val ratingConfig: RewardConfiguration,
 ) extends Logging {
+
+  private def updateLearning(learning: QLearning[TTTState, TTTAction]): TTTLearningProcessor = {
+    new TTTLearningProcessor(learning, executors, ratingConfig)
+  }
 
   def getTrainingDecision(state: TTTState): (TTTAction, TTTLearningProcessor) = {
     trace(s"Ask for training decision")
     val (newLearning, action) = learning.getTrainingDecision(state)
-    (action, new TTTLearningProcessor(learning = newLearning, executors))
+    (action, updateLearning(learning = newLearning))
   }
 
   def getBestDecision(state: TTTState): (TTTAction, TTTLearningProcessor) = {
     trace(s"Ask for best decision")
     val (newLearning, action) = learning.getBestDecision(state)
-    (action, new TTTLearningProcessor(learning = newLearning, executors))
+    (action, updateLearning(learning = newLearning))
   }
 
   def getXBestDecisions(x: Int, state: TTTState): (List[TTTAction], TTTLearningProcessor) = {
     trace(s"Ask for $x best decision")
 
     val (newLearning, actions) = learning.getXBestDecision(x, state)
-    (actions, new TTTLearningProcessor(learning = newLearning, executors))
+    (actions, updateLearning(learning = newLearning))
   }
 
-  def trainResult(result: EpochResult): TTTLearningProcessor = new TTTLearningProcessor(learning.trainHistory(result), executors)
+  def getRatedDecisions(state: TTTState, possibleActions: List[TTTAction]): List[(TTTAction, Double)] = {
+    val ratings = List(ratingConfig.won, ratingConfig.drawDefense, ratingConfig.drawOffense, ratingConfig.lost)
+    val immediates = List(ratingConfig.immediate, ratingConfig.immediateStartingPlayer)
+    val maxTurns = state.field.dimensions * state.field.dimensions
+    val max = 1.1 * (ratings.max + {
+      val maxI = immediates.max
+      if (maxI < 0) 0 else maxI * maxTurns
+    })
+
+    val min = 1.1 * (ratings.min + {
+      val minI = immediates.min
+      if (minI > 0) 0 else minI * maxTurns
+    })
+
+    def normalize(rating: Double): Double = {
+      if (rating >= 0) {
+        rating / max * 100
+      } else {
+        rating / min * -100
+      }
+    }
+
+    learning.calcRatedActions(state, possibleActions).map {
+      case (a, rating) => a -> normalize(rating)
+    }
+  }
+
+  def trainResult(result: EpochResult): TTTLearningProcessor = updateLearning(learning.trainHistory(result))
 
   def persist(trainingId: String): Unit = {
     executors.execute(() => {
@@ -73,9 +106,10 @@ object TTTLearningProcessor {
       policyProperties,
       qLearningProperties,
       Dl4JNeuralNet(neuralNetConfiguration),
-      rewardProperties
+      rewardProperties,
     ),
-    executors
+    executors,
+    rewardProperties.asInstanceOf[TTTRewardCalculator.RewardConfiguration],
   )
 
   def apply(
@@ -92,9 +126,10 @@ object TTTLearningProcessor {
         policyProperties,
         qLearningProperties,
         network,
-        rewardProperties
+        rewardProperties,
       ),
-      executors
+      executors,
+      rewardProperties.asInstanceOf[TTTRewardCalculator.RewardConfiguration],
     )
   }
 
