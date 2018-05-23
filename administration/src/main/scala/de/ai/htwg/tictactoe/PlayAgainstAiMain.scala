@@ -17,6 +17,10 @@ import de.ai.htwg.tictactoe.logicClient.MiniMaxDepthPlayer
 import de.ai.htwg.tictactoe.logicClient.RandomPlayer
 
 object AiTrainerBuilder {
+  val network3 = "Vs8Syg.2018-05-19-18-57-44-372.network.zip"
+  val network4 = "ufML8a.2018-05-21-10-59-08-912.network.zip"
+  val networkName = network4
+
   def build(): AiLearning = {
     new AiLearning(TTTLearningProcessor.apply(
       policyProperties = EpsGreedyConfiguration(
@@ -25,7 +29,7 @@ object AiTrainerBuilder {
         random = new Random(5L)
       ),
       qLearningProperties = QLearningConfiguration(),
-      neuralNetFileName = "Vs8Syg.2018-05-19-18-57-44-372.network.zip",
+      neuralNetFileName = networkName,
       executors = Executors.newFixedThreadPool(5),
       rewardProperties = TTTRewardCalculator.defaultConfig()
     ), "testTraining")
