@@ -17,7 +17,8 @@ import grizzled.slf4j.Logging
 
 trait PlayAgainstUi extends App with Logging {
   val strategy3 = TTTWinStrategy3xBuilder
-  val strategy = TTTWinStrategy4xBuilder
+  val strategy4 = TTTWinStrategy4xBuilder
+  val strategy = strategy3
   val random = new Random(5L)
   val opponentPlayer = Player.Cross
 
