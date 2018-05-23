@@ -8,7 +8,7 @@ import de.ai.htwg.tictactoe.clientConnection.model.Player
 import de.ai.htwg.tictactoe.clientConnection.model.strategy.TTTWinStrategyBuilder
 import grizzled.slf4j.Logging
 
-class MiniMaxBehindAiPlayer(
+class MiniMaxWidthPlayer(
     override val currentPlayer: Player,
     strategy: TTTWinStrategyBuilder,
     cont: GameControllerMultiPlayer,
