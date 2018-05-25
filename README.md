@@ -49,6 +49,24 @@ Now, just run the training! After the training has finished, you can play agains
 
 For easier debugging, you should know, that the AI Player is always Cross and you are always Circle.
 
+## Display learning charts
+
+Every training has a unique ID and logs every test epoch into a CSV file. You could find all files under: ```/results```.
+
+These files contain the current configuration and the statistic data of every test epoch. You can use this CSV file to display any learning chart.
+
+F.e. the default training run:
+
+![Learning in test runs](project/assets/training-test-results.png)
+
+## Deterministic training
+
+Every training has a seed. With the same seed, the whole training is deterministic. Every test epoch is also instantiated with a test seed. You could change the seed in the ```TrainMain``` configuration under
+```
+val seed = -292423813451567322L
+val testSeed = 127368234235L
+```
+
 ## Play against already trained
 
 If you had run a training, your trained network is persisted under ```/nets```. Here you can find multiple instances of your training run after some training epochs.
@@ -78,21 +96,3 @@ Now just run one of these application entry points:
 another possibility is to play against a minimax logic player without using your trained network:
 
 - **PlayAgainstMiniMax** - play against a logic player (could)
-
-## Display learning charts
-
-Every training has a unique ID and logs every test epoch into a CSV file. You could find all files under: ```/results```.
-
-These files contain the current configuration and the statistic data of every test epoch. You can use this CSV file to display any learning chart.
-
-F.e. the default training run:
-
-![Learning in test runs](project/assets/training-test-results.png)
-
-## Deterministic training
-
-Every training has a seed. With the same seed, the whole training is deterministic. Every test epoch is also instantiated with a test seed. You could change the seed in the ```TrainMain``` configuration under
-```
-val seed = -292423813451567322L
-val testSeed = 127368234235L
-```
