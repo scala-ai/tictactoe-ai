@@ -4,6 +4,8 @@ A project written in scala, which uses reinforcement learning to train an AI pla
 
 There are two different dimensions: The normal 3x3 tictactoe and the advanced 4x4.
 
+![Learning in test runs](project/assets/tictactoe3x3.JPG) ![Learning in test runs](project/assets/tictactoe4x4.JPG)
+
 ## Start a training 
 
 All trainings has as entry point the file 
@@ -44,8 +46,6 @@ trainer.startTraining(60000)
 ```
 
 Now, just run the training! After the training has finished, you can play against your trained AI with the started UI.
-
-![Learning in test runs](project/assets/tictactoe3x3.JPG) ![Learning in test runs](project/assets/tictactoe4x4.JPG)
 
 For easier debugging, you should know, that the AI Player is always Cross and you are always Circle.
 
