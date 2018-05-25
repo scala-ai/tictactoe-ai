@@ -45,11 +45,11 @@ trainer.startTraining(60000)
 
 Now, just run the training! After the training has finished, you can play against your trained AI with the started UI.
 
-![Learning in test runs](project/assets/tictactoe-3x3.jpg)
+![Learning in test runs](project/assets/tictactoe-3x3.JPG)
 
 For easier debugging, you should know, that the AI Player is always Cross and you are always Circle.
 
-![Learning in test runs](project/assets/tictactoe-4x4.jpg)
+![Learning in test runs](project/assets/tictactoe-4x4.JPG)
 
 ## Play against already trained
 
