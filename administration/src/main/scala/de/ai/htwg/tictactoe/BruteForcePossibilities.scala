@@ -5,14 +5,20 @@ import scala.collection.mutable.ListBuffer
 
 import de.ai.htwg.tictactoe.clientConnection.model.GridPosition
 import de.ai.htwg.tictactoe.clientConnection.model.Player
+import de.ai.htwg.tictactoe.clientConnection.model.strategy.TTTWinStrategy3xBuilder
 import de.ai.htwg.tictactoe.clientConnection.model.strategy.TTTWinStrategy4xBuilder
+import de.ai.htwg.tictactoe.clientConnection.model.strategy.TTTWinStrategyBuilder
 
-object BruteForcePossibilities extends App {
+object BruteForcePossibilities4x4 extends BruteForcePossibilities(TTTWinStrategy4xBuilder)
+object BruteForcePossibilities3x3 extends BruteForcePossibilities(TTTWinStrategy3xBuilder)
+
+
+abstract class BruteForcePossibilities(stratBuilder: TTTWinStrategyBuilder) extends App {
   val start = System.currentTimeMillis()
 
-  val allStrats = TTTWinStrategy4xBuilder.listAllWinStrategies
-  val dim = 4
-  val dimSq = 16
+  val allStrats = stratBuilder.listAllWinStrategies
+  val dim = stratBuilder.dimensions
+  val dimSq = dim * dim
 
 
   val allGridPos = Array.ofDim[GridPosition](dimSq)
@@ -96,31 +102,25 @@ object BruteForcePossibilities extends App {
   var noNotFinished = 0
   var illegalEndStates = 0
 
-  var IllegalStates = 0L
-  var movesToReachEnd = 0L
-
-  val noWinsInStep = Array.ofDim[Int](dimSq)
-  val noLossInStep = Array.ofDim[Int](dimSq)
-  val noDrawInStep = Array.ofDim[Int](dimSq)
-  val noRunningInStep = Array.ofDim[Int](dimSq)
+  val noWinsInStep = Array.ofDim[Int](dimSq + 1)
+  val noLossInStep = Array.ofDim[Int](dimSq + 1)
+  val noDrawInStep = Array.ofDim[Int](dimSq + 1)
+  val noRunningInStep = Array.ofDim[Int](dimSq + 1)
 
   def collectData(): Unit = {
-    val step = (noCircle + noCross) - 1
+    val step = noCircle + noCross
     noTotal += 1
     if (noTotal % 100000 == 0) println("#total: " + noTotal)
     checkBoardState() match {
       case 1 =>
         noWinsInStep(step) = noWinsInStep(step) + 1
         noWins += 1
-        calcIllegalStates()
       case 2 =>
         noLossInStep(step) = noLossInStep(step) + 1
         noLoss += 1
-        calcIllegalStates()
       case 3 =>
         noDrawInStep(step) = noDrawInStep(step) + 1
         noDraw += 1
-        calcIllegalStates()
       case 4 =>
         noRunningInStep(step) = noRunningInStep(step) + 1
         noNotFinished += 1
@@ -129,14 +129,6 @@ object BruteForcePossibilities extends App {
     }
   }
 
-  def calcIllegalStates(): Unit = {
-    val remaining = dimSq - noCircle - noCross
-
-    val posToReachState = allFactrial(noCircle) * allFactrial(noCross)
-
-    movesToReachEnd += posToReachState
-    IllegalStates += allFactrial(remaining) // * posToReachState
-  }
 
   // 1 cross win
   // 2 circle win
@@ -145,8 +137,8 @@ object BruteForcePossibilities extends App {
   // 5 illegal
   def checkBoardState(): Int = {
     // cross fängt an, darf also 1 mehr sein
-    // es müssen mindestens 4 gesetzt sein um zu gewinnen
-    if (noCross < dim) return 5
+    // es müssen mindestens dim gesetzt sein um zu gewinnen
+    //    if (noCross < dim) return 4
 
     if (noCross == noCircle) {
       // circle kann gewonnen haben, wenn gesamt 16 kann auch untendschieden sein
@@ -171,7 +163,13 @@ object BruteForcePossibilities extends App {
         case 1 => /* legal win */
           return 1
         case 0 => /* legal noWin */
-          return 4
+          if (noCross + noCircle == dimSq) {
+            // untendschieden
+            return 3
+          } else {
+            return 4
+            // no end state
+          }
         // no end state
         case 2 => /* illegal */
           return 5
@@ -222,14 +220,18 @@ object BruteForcePossibilities extends App {
   println(" noDraw = " + noDraw)
   println(" illegalEndStates = " + illegalEndStates)
 
-  println(" movesToReachEnd = " + movesToReachEnd)
+  println("##################################################")
+  println("step; noWins; noLoss; noDraw; noRunning; ")
+  for {
+    step <- 0 to dimSq
+  } yield {
+    val noWins = noWinsInStep(step)
+    val noLoss = noLossInStep(step)
+    val noDraw = noDrawInStep(step)
+    val noRunning = noRunningInStep(step)
 
-  println(" noWinsInStep = " + noWinsInStep.mkString(", "))
-  println(" noLossInStep = " + noLossInStep.mkString(", "))
-  println(" noDrawInStep = " + noDrawInStep.mkString(", "))
-  println(" noRunningInStep = " + noRunningInStep.mkString(", "))
+    println(s"$step; $noWins; $noLoss; $noDraw; $noRunning; ")
+  }
 
-
-  println(" IllegalStates = " + IllegalStates)
 
 }
