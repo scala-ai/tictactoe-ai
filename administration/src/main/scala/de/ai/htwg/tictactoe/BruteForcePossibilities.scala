@@ -11,14 +11,17 @@ object BruteForcePossibilities extends App {
   val start = System.currentTimeMillis()
 
   val allStrats = TTTWinStrategy4xBuilder.listAllWinStrategies
+  val dim = 4
+  val dimSq = 16
 
-  val allGridPos = Array.ofDim[GridPosition](16)
+
+  val allGridPos = Array.ofDim[GridPosition](dimSq)
 
   for {
-    x <- 0 until 4
-    y <- 0 until 4
+    x <- 0 until dim
+    y <- 0 until dim
   } yield {
-    allGridPos(x * 4 + y) = GridPosition(x, y)
+    allGridPos(x * dim + y) = GridPosition(x, y)
   }
 
 
@@ -90,46 +93,66 @@ object BruteForcePossibilities extends App {
   var noWins = 0
   var noLoss = 0
   var noDraw = 0
+  var noNotFinished = 0
   var illegalEndStates = 0
 
   var IllegalStates = 0L
+  var movesToReachEnd = 0L
+
+  val noWinsInStep = Array.ofDim[Int](dimSq)
+  val noLossInStep = Array.ofDim[Int](dimSq)
+  val noDrawInStep = Array.ofDim[Int](dimSq)
+  val noRunningInStep = Array.ofDim[Int](dimSq)
 
   def collectData(): Unit = {
+    val step = (noCircle + noCross) - 1
     noTotal += 1
     if (noTotal % 100000 == 0) println("#total: " + noTotal)
     checkBoardState() match {
       case 1 =>
+        noWinsInStep(step) = noWinsInStep(step) + 1
         noWins += 1
         calcIllegalStates()
       case 2 =>
+        noLossInStep(step) = noLossInStep(step) + 1
         noLoss += 1
         calcIllegalStates()
       case 3 =>
+        noDrawInStep(step) = noDrawInStep(step) + 1
         noDraw += 1
+        calcIllegalStates()
       case 4 =>
+        noRunningInStep(step) = noRunningInStep(step) + 1
+        noNotFinished += 1
+      case 5 =>
         illegalEndStates += 1
     }
   }
 
   def calcIllegalStates(): Unit = {
-    val remaining = 16 - noCircle - noCross
-    IllegalStates += allFactrial(remaining)
+    val remaining = dimSq - noCircle - noCross
+
+    val posToReachState = allFactrial(noCircle) * allFactrial(noCross)
+
+    movesToReachEnd += posToReachState
+    IllegalStates += allFactrial(remaining) // * posToReachState
   }
 
   // 1 cross win
   // 2 circle win
   // 3 draw
-  // 4 no end or illegal
+  // 4 no end
+  // 5 illegal
   def checkBoardState(): Int = {
     // cross fängt an, darf also 1 mehr sein
     // es müssen mindestens 4 gesetzt sein um zu gewinnen
-    if (noCross < 4) return 4
+    if (noCross < dim) return 5
 
     if (noCross == noCircle) {
       // circle kann gewonnen haben, wenn gesamt 16 kann auch untendschieden sein
       checkBoardWon(Player.Circle) match {
         case 0 => /* legal noWin */
-          if (noCross + noCircle == 16) {
+          if (noCross + noCircle == dimSq) {
             // untendschieden
             return 3
           } else {
@@ -138,7 +161,7 @@ object BruteForcePossibilities extends App {
           }
 
         case 1 => /* legal win */ return 2
-        case 2 => /* illegal */ return 4
+        case 2 => /* illegal */ return 5
       }
 
 
@@ -151,10 +174,10 @@ object BruteForcePossibilities extends App {
           return 4
         // no end state
         case 2 => /* illegal */
-          return 4
+          return 5
       }
     } else {
-      return 4
+      return 5
     }
 
   }
@@ -186,7 +209,7 @@ object BruteForcePossibilities extends App {
     if (list.isEmpty) 2 else 1
   }
 
-  rek(15)
+  rek(dimSq - 1)
 
 
   val time = System.currentTimeMillis() - start
@@ -198,6 +221,14 @@ object BruteForcePossibilities extends App {
   println(" noLoss = " + noLoss)
   println(" noDraw = " + noDraw)
   println(" illegalEndStates = " + illegalEndStates)
+
+  println(" movesToReachEnd = " + movesToReachEnd)
+
+  println(" noWinsInStep = " + noWinsInStep.mkString(", "))
+  println(" noLossInStep = " + noLossInStep.mkString(", "))
+  println(" noDrawInStep = " + noDrawInStep.mkString(", "))
+  println(" noRunningInStep = " + noRunningInStep.mkString(", "))
+
 
   println(" IllegalStates = " + IllegalStates)
 
