@@ -102,10 +102,11 @@ abstract class BruteForcePossibilities(stratBuilder: TTTWinStrategyBuilder) exte
   var noNotFinished = 0
   var illegalEndStates = 0
 
-  val noWinsInStep = Array.ofDim[Int](dimSq + 1)
-  val noLossInStep = Array.ofDim[Int](dimSq + 1)
-  val noDrawInStep = Array.ofDim[Int](dimSq + 1)
-  val noRunningInStep = Array.ofDim[Int](dimSq + 1)
+  val noWinsInStep = Array.ofDim[Long](dimSq + 1)
+  val noLossInStep = Array.ofDim[Long](dimSq + 1)
+  val noDrawInStep = Array.ofDim[Long](dimSq + 1)
+  val noRunningInStep = Array.ofDim[Long](dimSq + 1)
+  val legalPreSteps = Array.ofDim[Long](dimSq + 1)
 
   def collectData(): Unit = {
     val step = noCircle + noCross
@@ -138,14 +139,20 @@ abstract class BruteForcePossibilities(stratBuilder: TTTWinStrategyBuilder) exte
   def checkBoardState(): Int = {
     // cross fängt an, darf also 1 mehr sein
     // es müssen mindestens dim gesetzt sein um zu gewinnen
-    //    if (noCross < dim) return 4
+    if (noCross < dim) {
+      if (noCross == noCircle || noCross == noCircle + 1) {
+        return 4
+      } else {
+        return 5
+      }
+    }
 
     if (noCross == noCircle) {
       // circle kann gewonnen haben, wenn gesamt 16 kann auch untendschieden sein
       checkBoardWon(Player.Circle) match {
         case 0 => /* legal noWin */
           if (noCross + noCircle == dimSq) {
-            // untendschieden
+            // draw
             return 3
           } else {
             return 4
@@ -164,7 +171,7 @@ abstract class BruteForcePossibilities(stratBuilder: TTTWinStrategyBuilder) exte
           return 1
         case 0 => /* legal noWin */
           if (noCross + noCircle == dimSq) {
-            // untendschieden
+            // draw
             return 3
           } else {
             return 4
@@ -194,17 +201,39 @@ abstract class BruteForcePossibilities(stratBuilder: TTTWinStrategyBuilder) exte
         builder += winStrat.list
       }
     }
-    val result = builder.result()
-    if (result.isEmpty) return 0
-    if (result.size == 1) return 1
 
-    // if more than one winning result => there must be at least 1 pos that is set in all of them.
-    var list = result.head
-    result.tail.foreach { next =>
-      list = list.intersect(next)
+    val step = noCircle + noCross
+
+
+    val result = builder.result()
+    if (result.isEmpty) {
+      val preStates = player match {
+        case Player.Circle => noCircle
+        case Player.Cross => noCross
+      }
+      if (noCross + noCircle == dimSq) {
+        legalPreSteps(step) = legalPreSteps(step) + preStates
+      }
+
+      return 0
+    }
+    //    result.size == 1
+    if (result.tail.isEmpty) {
+      legalPreSteps(step) = legalPreSteps(step) + dim
+      return 1
     }
 
-    if (list.isEmpty) 2 else 1
+    // if more than one winning result => there must be at least 1 pos that is set in all of them.
+    var appreadInAll = result.head
+    result.tail.foreach { next =>
+      appreadInAll = appreadInAll.intersect(next)
+    }
+
+    if (appreadInAll.isEmpty) return 2
+
+    legalPreSteps(step) = legalPreSteps(step) + appreadInAll.size
+
+    return 1
   }
 
   rek(dimSq - 1)
@@ -221,17 +250,33 @@ abstract class BruteForcePossibilities(stratBuilder: TTTWinStrategyBuilder) exte
   println(" illegalEndStates = " + illegalEndStates)
 
   println("##################################################")
-  println("step; noWins; noLoss; noDraw; noRunning; ")
-  for {
-    step <- 0 to dimSq
-  } yield {
+  println("step; nextSteps; noWins; noLoss; noDraw; noFinish; noRunning; noTotal; legalPreSteps; stepsToNextState;; " +
+    "stepsToEnd; legalNextSteps; PosNextSteps; TotalStepsToEnd;; " +
+    "posStepsAll; ")
+
+
+  def printCSVln(step: Int, posStepAll: Long, stepsToNextState: Long, posNextSteps: Long, totalStepsToEndLast: Long): Unit = {
+    val nextSteps = dimSq - step
     val noWins = noWinsInStep(step)
     val noLoss = noLossInStep(step)
     val noDraw = noDrawInStep(step)
+    val noFinish = noWins + noLoss + noDraw
     val noRunning = noRunningInStep(step)
+    val total = noFinish + noRunning
 
-    println(s"$step; $noWins; $noLoss; $noDraw; $noRunning; ")
+    val legalPre = legalPreSteps(step)
+    val stepsToEnd = (posNextSteps * legalPre) / stepsToNextState
+    val legalNextSteps = posNextSteps - stepsToEnd
+    val totalStepsToEnd = totalStepsToEndLast + stepsToEnd
+
+    println(s"$step; $nextSteps; $noWins; $noLoss; $noDraw; $noFinish; $noRunning; $total; $legalPre; $stepsToNextState;; " +
+      s"$stepsToEnd; $legalNextSteps; $posNextSteps; $totalStepsToEnd;; " +
+      s"$posStepAll; ")
+
+    if (nextSteps > 0) printCSVln(step + 1, posStepAll * nextSteps, noRunning * nextSteps, legalNextSteps * nextSteps, totalStepsToEnd)
   }
 
+
+  printCSVln(0, 1, 1, 1, 0)
 
 }
